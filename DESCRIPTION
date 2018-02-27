@@ -10,4 +10,9 @@ Authors@R: as.person(c(
 Description: Some day, more details about what the package does will go here.
 License: MIT + file LICENSE
 Imports: Rcpp (>= 0.12.15)
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo, sitmo
+SystemRequirements: C++11, GNU make
+RoxygenNote: 6.0.1
+Suggests:
+    knitr
+VignetteBuilder: knitr
