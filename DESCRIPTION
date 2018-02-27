@@ -1,0 +1,13 @@
+Package: ReplicateTimeseries
+Type: Package
+Title: Simulate and bootstrap time series.
+Version: 0.0.0.9000
+Date: 2018-02-26
+Authors@R: as.person(c(
+    "Joseph S Phillips <jsphillips2@wisc.edu> [aut, cre]", 
+    "Lucas A Nell <lucas@lucasnell.com> [aut, cre]"
+  ))
+Description: Some day, more details about what the package does will go here.
+License: MIT + file LICENSE
+Imports: Rcpp (>= 0.12.15)
+LinkingTo: Rcpp, RcppArmadillo
