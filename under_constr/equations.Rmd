@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 $$
 \begin{equation}
 \begin{split}
-& N_{j,t} = N_{j,t-1}\text{e}^{\rho_j(E_t)}\text{e}^{\sum_{(i=1)}^n-\alpha_i N_{i,t-1}}\text{e}^{\epsilon_j,t-1}
+& N_{j,t} = N_{j,t-1}\text{e}^{\rho_j(E_t)}\text{e}^{\sum_{i=1}^n-\alpha_i N_{i,t-1}}\text{e}^{\varepsilon_{j,t-1}}
 \end{split}
 \end{equation}
 $$
@@ -22,7 +22,7 @@ Alternatively....
 $$
 \begin{equation}
 \begin{split}
-& N_{j,t} = N_{j,t-1}\text{e}^{\rho_j(E_t)-\sum_{(i=1)}^n\alpha_i N_{i,t-1}+\epsilon_j,t-1}
+& N_{j,t} = N_{j,t-1}\text{e}^{\rho_j(E_t)-\sum_{(i=1)}^n\alpha_i N_{i,t-1}+\varepsilon_{j,t-1}}
 \end{split}
 \end{equation}
 $$

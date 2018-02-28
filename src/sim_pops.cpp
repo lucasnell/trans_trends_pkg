@@ -36,7 +36,7 @@ arma::mat sim_pops(const uint& n_gen, const arma::rowvec& N0, const arma::rowvec
     
     for (uint t = 0; t < n_gen; t++) {
         rnd_row(rnd, rnorm_distr, engine);
-        N.row(t+1) = N.row(t) % arma::exp(r - (alpha % N.row(t)) + rnd);
+        N.row(t+1) = N.row(t) % arma::exp(r - arma::accu(alpha % N.row(t)) + rnd);
     }
     
     return N;
