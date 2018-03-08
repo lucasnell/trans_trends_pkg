@@ -5,6 +5,14 @@ sim_pop_ar <- function(X, N0, b0, b1, rho, sigma, seed) {
     .Call(`_ReplicateTimeseries_sim_pop_ar`, X, N0, b0, b1, rho, sigma, seed)
 }
 
+sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma) {
+    .Call(`_ReplicateTimeseries_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma)
+}
+
+melt_cube <- function(C) {
+    .Call(`_ReplicateTimeseries_melt_cube`, C)
+}
+
 sim_pops <- function(n_gen, N0, r, alpha, sigma, seed) {
     .Call(`_ReplicateTimeseries_sim_pops`, n_gen, N0, r, alpha, sigma, seed)
 }

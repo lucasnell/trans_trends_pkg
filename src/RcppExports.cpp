@@ -25,6 +25,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sim_pops_ar
+arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat, const arma::mat& b0_mat, const arma::mat& b1_mat, const arma::mat& rho_mat, const arma::cube& vcv_cube, const double& obs_sigma);
+RcppExport SEXP _ReplicateTimeseries_sim_pops_ar(SEXP XSEXP, SEXP N0_matSEXP, SEXP b0_matSEXP, SEXP b1_matSEXP, SEXP rho_matSEXP, SEXP vcv_cubeSEXP, SEXP obs_sigmaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type N0_mat(N0_matSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type b0_mat(b0_matSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type b1_mat(b1_matSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type rho_mat(rho_matSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type vcv_cube(vcv_cubeSEXP);
+    Rcpp::traits::input_parameter< const double& >::type obs_sigma(obs_sigmaSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_pops_ar(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma));
+    return rcpp_result_gen;
+END_RCPP
+}
+// melt_cube
+DataFrame melt_cube(arma::cube C);
+RcppExport SEXP _ReplicateTimeseries_melt_cube(SEXP CSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cube >::type C(CSEXP);
+    rcpp_result_gen = Rcpp::wrap(melt_cube(C));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sim_pops
 arma::mat sim_pops(const uint& n_gen, const arma::rowvec& N0, const arma::rowvec& r, const arma::rowvec& alpha, const double& sigma, const uint& seed);
 RcppExport SEXP _ReplicateTimeseries_sim_pops(SEXP n_genSEXP, SEXP N0SEXP, SEXP rSEXP, SEXP alphaSEXP, SEXP sigmaSEXP, SEXP seedSEXP) {
@@ -44,6 +72,8 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ReplicateTimeseries_sim_pop_ar", (DL_FUNC) &_ReplicateTimeseries_sim_pop_ar, 7},
+    {"_ReplicateTimeseries_sim_pops_ar", (DL_FUNC) &_ReplicateTimeseries_sim_pops_ar, 7},
+    {"_ReplicateTimeseries_melt_cube", (DL_FUNC) &_ReplicateTimeseries_melt_cube, 1},
     {"_ReplicateTimeseries_sim_pops", (DL_FUNC) &_ReplicateTimeseries_sim_pops, 6},
     {NULL, NULL, 0}
 };
