@@ -126,7 +126,7 @@ arma::cube make_chol_decomp(const arma::cube& vcv_cube) {
  and slices associated with a given location.
  All other input matrices should have rows associated with a given species and
  columns associated with a given location.
- `obs_sigma` is standard deviation of observation error.
+ `obs_sigma` contains the standard deviations of observation error for each species.
  The output array will have rows associated with a given time point,
  columns associated with a given species, and 
  slices associated with a given location.
@@ -135,7 +135,7 @@ arma::cube make_chol_decomp(const arma::cube& vcv_cube) {
 arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat,
                        const arma::mat& b0_mat, const arma::mat& b1_mat,
                        const arma::mat& rho_mat, const arma::cube& vcv_cube,
-                       const double& obs_sigma) {
+                       const arma::vec& obs_sigma) {
     
     check_dims(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube);
     
@@ -167,7 +167,7 @@ arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat,
             for (uint sp = 0; sp < n_spp; sp++) {
                 Ns(t+1,sp) = N_t1(b0s(sp), b1s(sp), rhos(sp), Xs(t), Xs(t+1), Ns(t,sp));
                 rnd(sp) = rnorm_distr(engine);
-                obs_rnd(sp) = rnorm_distr(engine) * obs_sigma;
+                obs_rnd(sp) = rnorm_distr(engine) * obs_sigma(sp);
             }
             // Generate variance and covariance:
             rnd = cd_loc * rnd;

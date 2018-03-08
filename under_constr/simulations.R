@@ -26,7 +26,7 @@ rho_mat_ <- matrix(0.2, 5, 10)
 vcv_ <- ape::vcv(ape::rcoal(5))
 dimnames(vcv_) <- NULL
 vcv_cube_ <- replicate(10, vcv_)
-obs_sigma_ <- 0.5
+obs_sigma_ <- 1:5
 
 
 cube <- sim_pops_ar(X = X_,

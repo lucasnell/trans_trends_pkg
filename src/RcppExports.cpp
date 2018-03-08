@@ -26,7 +26,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_pops_ar
-arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat, const arma::mat& b0_mat, const arma::mat& b1_mat, const arma::mat& rho_mat, const arma::cube& vcv_cube, const double& obs_sigma);
+arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat, const arma::mat& b0_mat, const arma::mat& b1_mat, const arma::mat& rho_mat, const arma::cube& vcv_cube, const arma::vec& obs_sigma);
 RcppExport SEXP _ReplicateTimeseries_sim_pops_ar(SEXP XSEXP, SEXP N0_matSEXP, SEXP b0_matSEXP, SEXP b1_matSEXP, SEXP rho_matSEXP, SEXP vcv_cubeSEXP, SEXP obs_sigmaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -37,7 +37,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type b1_mat(b1_matSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type rho_mat(rho_matSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type vcv_cube(vcv_cubeSEXP);
-    Rcpp::traits::input_parameter< const double& >::type obs_sigma(obs_sigmaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type obs_sigma(obs_sigmaSEXP);
     rcpp_result_gen = Rcpp::wrap(sim_pops_ar(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma));
     return rcpp_result_gen;
 END_RCPP
