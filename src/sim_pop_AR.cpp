@@ -135,25 +135,45 @@ arma::cube make_chol_decomp(const arma::cube& vcv_cube) {
 arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat,
                        const arma::mat& b0_mat, const arma::mat& b1_mat,
                        const arma::mat& rho_mat, const arma::cube& vcv_cube,
-                       const arma::vec& obs_sigma) {
+                       const arma::vec& obs_sigma, const uint& n_cores = 1) {
     
     check_dims(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube);
     
-    // Random number generator
-    uint seed = static_cast<uint>(runif(1, 0, 2147483647)[0]);
-    sitmo::prng_engine engine(seed);
-    // Random normal distribution
-    std::normal_distribution<double> rnorm_distr(0.0, 1.0);
+    // For random number generator
+    const std::vector<uint> seeds(as<std::vector<uint>>(runif(n_cores, 0, 2147483647)));
     // For turning ~N(0,1) to multivariate with given covariance matrix
     const arma::cube chol_decomp(make_chol_decomp(vcv_cube));
 
-    uint n_time = X.n_rows;
-    uint n_locs = X.n_cols;
-    uint n_spp = N0_mat.n_rows;
+    const uint n_time(X.n_rows);
+    const uint n_locs(X.n_cols);
+    const uint n_spp(N0_mat.n_rows);
     
     arma::cube N(n_time, n_spp, n_locs);
     N.tube(arma::span(0), arma::span()) = N0_mat;
     
+    #ifdef _OPENMP
+    #pragma omp parallel default(shared) num_threads(n_cores) if(n_cores > 1)
+    {
+    #endif
+    
+    uint active_seed;
+    
+    // Write the active seed per core or just write one of the seeds.
+    #ifdef _OPENMP
+    uint active_thread = omp_get_thread_num();
+    active_seed = seeds[active_thread];
+    #else
+    active_seed = seeds[0];
+    #endif
+    
+    sitmo::prng_engine engine(active_seed);
+    // Random normal distribution:
+    std::normal_distribution<double> rnorm_distr(0.0, 1.0);
+    
+    // Parallelize the Loop
+    #ifdef _OPENMP
+    #pragma omp for schedule(static)
+    #endif
     for (uint loc = 0; loc < n_locs; loc++) {
         const arma::mat& cd_loc(chol_decomp.slice(loc));
         const arma::vec& b0s(b0_mat.col(loc));
@@ -175,6 +195,11 @@ arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat,
             Ns.row(t+1) += obs_rnd.t();
         }
     }
+    
+    #ifdef _OPENMP
+    }
+    #endif
+
     
     return N;
 }

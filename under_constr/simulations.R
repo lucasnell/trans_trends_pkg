@@ -17,17 +17,17 @@ plot(ar_N, type = 'l', ylab = 'N')
 
 
 # 100 time points, 10 locations, 5 species
+n_time = 100; n_locs = 10; n_spp = 5
 set.seed(1)
-X_ <- matrix(rnorm(1000), 100, 10)
-N0_mat_ <- matrix(log(100), 5, 10)
-b0_mat_ <- matrix(log(100), 5, 10)
-b1_mat_ <- matrix(0.5, 5, 10)
-rho_mat_ <- matrix(0.2, 5, 10)
-vcv_ <- ape::vcv(ape::rcoal(5))
+X_ <- matrix(rnorm(n_time * n_locs), n_time, n_locs)
+N0_mat_ <- matrix(log(100), n_spp, n_locs)
+b0_mat_ <- matrix(log(100), n_spp, n_locs)
+b1_mat_ <- matrix(0.5, n_spp, n_locs)
+rho_mat_ <- matrix(0.2, n_spp, n_locs)
+vcv_ <- ape::vcv(ape::rcoal(n_spp))
 dimnames(vcv_) <- NULL
-vcv_cube_ <- replicate(10, vcv_)
-obs_sigma_ <- 1:5
-
+vcv_cube_ <- replicate(n_locs, vcv_)
+obs_sigma_ <- runif(n_spp)
 
 cube <- sim_pops_ar(X = X_,
                     N0_mat = N0_mat_,

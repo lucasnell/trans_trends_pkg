@@ -5,8 +5,8 @@ sim_pop_ar <- function(X, N0, b0, b1, rho, sigma, seed) {
     .Call(`_ReplicateTimeseries_sim_pop_ar`, X, N0, b0, b1, rho, sigma, seed)
 }
 
-sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma) {
-    .Call(`_ReplicateTimeseries_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma)
+sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores = 1L) {
+    .Call(`_ReplicateTimeseries_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores)
 }
 
 melt_cube <- function(C) {
