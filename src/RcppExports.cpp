@@ -55,7 +55,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_pops
-arma::mat sim_pops(const uint& n_gen, const arma::rowvec& N0, const arma::rowvec& r, const arma::rowvec& alpha, const double& sigma, const uint& seed);
+arma::mat sim_pops(const uint& n_gen, const arma::rowvec& N0, const arma::rowvec& r, const arma::mat& alpha, const double& sigma, const uint& seed);
 RcppExport SEXP _ReplicateTimeseries_sim_pops(SEXP n_genSEXP, SEXP N0SEXP, SEXP rSEXP, SEXP alphaSEXP, SEXP sigmaSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -63,7 +63,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const uint& >::type n_gen(n_genSEXP);
     Rcpp::traits::input_parameter< const arma::rowvec& >::type N0(N0SEXP);
     Rcpp::traits::input_parameter< const arma::rowvec& >::type r(rSEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< const uint& >::type seed(seedSEXP);
     rcpp_result_gen = Rcpp::wrap(sim_pops(n_gen, N0, r, alpha, sigma, seed));

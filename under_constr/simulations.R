@@ -2,11 +2,18 @@
 # devtools::load_all()
 
 # source(".Rprofile")
-z <- sim_pops(n_gen = 100, N0 = rep(100, 10), r = rep(0.5, 10), alpha = rep(1e-3, 10),
+
+# Constructing alpha matrix
+aM <- matrix(runif(100, 0, 2e-3), 10, 10)
+z <- sim_pops(n_gen = 100, N0 = rep(100, 10), r = rep(0.5, 10),
+              alpha = aM,
               sigma = 0.01, seed = 496)
 # Should max out at r / alpha
 matplot(z, type = 'l')
-max(z)
+max(z); min(rowSums(aM))
+
+which(rowSums(aM) == min(rowSums(aM)))
+0.5 / min(diag(aM))
 
 # log(N) for one population using an AR process
 ar_N <- sim_pop_ar(X = 0.1 * 1:100, N0 = 5, b0 = 5, b1 = 0.5, rho = 0.2, 
@@ -55,4 +62,8 @@ cube_df %>%
     theme_classic() +
     geom_line() +
     facet_wrap(~ loc, nrow = 2)
+
+
+
+
 
