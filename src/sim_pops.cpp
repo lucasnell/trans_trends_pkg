@@ -11,6 +11,8 @@
 using namespace Rcpp;
 
 
+
+// Draw from normal distribution and fill row
 inline void rnd_row(arma::rowvec& rnd_vec,
                     std::normal_distribution<double>& distr,
                     sitmo::prng_engine& eng) {
@@ -42,3 +44,4 @@ arma::mat sim_pops(const uint& n_gen, const arma::rowvec& N0, const arma::rowvec
     return N;
     
 }
+
