@@ -4,22 +4,22 @@ model{
 #===============
 
 #Means
-mean_b0 ~ dnorm(0, 0.001)
-mean_b1 ~ dnorm(0, 0.001)
-mean_rho ~ dnorm(0, 0.001)
+mean_b0 ~ dnorm(0, 0.01)
+mean_b1 ~ dnorm(0, 0.01)
+mean_rho ~ dnorm(0, 0.25)
 
 #Standard Deviations
-sigma_b0 ~ dnorm(1, 0.001)T(0,)
-sigma_b1 ~ dnorm(1, 0.001)T(0,)
-sigma_rho ~ dnorm(1, 0.001)T(0,)
-sigma_e ~ dnorm(1, 0.001)T(0,)
-sigma_obs ~ dnorm(1, 0.001)T(0,)
+sigma_b0 ~ dnorm(0, 0.01)T(0,)
+sigma_b1 ~ dnorm(0, 0.01)T(0,)
+sigma_rho ~ dnorm(0, 0.5)T(0,)
+sigma_eps ~ dnorm(0, 0.01)T(0,)
+sigma_obs ~ dnorm(0, 0.01)T(0,)
 
 #Taus
 tau_b0 = pow(sigma_b0, -2)
 tau_b1 = pow(sigma_b1, -2)
-tau_rho = pow(sigma_b1, -2)
-tau_e = pow(sigma_e, -2)
+tau_rho = pow(sigma_rho, -2)
+tau_e = pow(sigma_eps, -2)
 tau_obs = pow(sigma_obs, -2)
 
 
@@ -28,7 +28,7 @@ tau_obs = pow(sigma_obs, -2)
 #Variation by Species
 #===============
 
-for(s in 1:nspecies){
+for(s in 1:n_spp){
 
 #Intercepts and slopes
 b0[s] ~ dnorm(mean_b0, tau_b0)
@@ -48,14 +48,14 @@ rho[s] = exp(rho_logit[s])/(1 + exp(rho_logit[s]))
 
 #Loop over sites, species, and time
 
-for(l in 1:nsites){
+for(l in 1:n_loc){
 
-  for(s in 1:nspecies){
+  for(s in 1:n_spp){
 
 #Initial population size
 n[l,s,1] ~ dnorm(n_init[l,s], 0.5*abs(n_init[l,s]))
   
-    for(t in 2:ntimes){
+    for(t in 2:n_time){
     
 #Environmental Stochasticity
 e[l,s,t] ~ dnorm(0, tau_e)
@@ -65,7 +65,7 @@ n[l,s,t] = b0[s] + b1[s]*x[l,t] + rho[s]*(n[l,s,t-1] - b0[s] - b1[s]*x[l,t-1]) +
 
     } #t
     
-    for(t in 1:ntimes){
+    for(t in 1:n_time){
     
 #Observation process
 n_obs[l,s,t] ~ dnorm(n[l,s,t], tau_obs)
