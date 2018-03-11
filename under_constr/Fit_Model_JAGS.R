@@ -30,7 +30,9 @@ data_list = list(
 # Define dimensions in environment
 n_loc = data_list$n_loc
 n_spp = data_list$n_spp
-n_time = data_list$n_spp
+n_time = data_list$n_time
+
+
 
 
 
@@ -47,16 +49,16 @@ params = c("mean_b0","mean_b1","mean_rho","sigma_b0","sigma_b1","sigma_rho","sig
 inits = function(){
     list(mean_b0 = runif(1,-10,10),
          mean_b1 = runif(1,-1,1),
-         mean_rho = runif(1,-10,10),
+         mean_rho = runif(1,-3,3),
          sigma_b0 = runif(1,0,1),
          sigma_b1 = runif(1,0,1),
-         sigma_rho = runif(1,0,1),
+         sigma_rho = runif(1,0,3),
          sigma_eps = runif(1,0,1))
 }
 
 # MCMC specifiations
 n.ad = 100 # number of iterations for adaptation
-n.it = 4000 # number of iterations for Markov Chain
+n.it = 2000 # number of iterations for Markov Chain
 n.burn = n.it/2 # number steps to omit for burnin
 n.thin = 20 # thinning interval
 n.chain = 4 # number of independent chains
@@ -69,7 +71,7 @@ output = jags.basic(data=data_list, model="under_constr/rep_time_model.txt",
 
 
 # Parameters to check convergence
-conv_pars = c("mean_b0","mean_b1","sigma_b0","sigma_b1","rho[4]")
+conv_pars = c("mean_b0","mean_b1","mean_rho","sigma_b0","sigma_b1","sigma_rho","sigma_eps")
 output_conv = output[,conv_pars]
 gelman.diag(output_conv)
 
