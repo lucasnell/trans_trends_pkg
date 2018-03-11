@@ -7,7 +7,7 @@ library(tidyverse)
 library(coda)
 library(jagsUI)
 
-#simulations.R
+#Generate_Data_JP.R
 
 
 
@@ -25,37 +25,38 @@ data_list = list(
     # Environmental variables
     x = X_ %>% aperm(c(2,1)),
     # Count dimensions
-    nsites = dim(cube)[3],nspecies = dim(cube)[2],ntimes = dim(cube)[1])
+    n_loc = dim(cube)[3],n_spp = dim(cube)[2],n_time = dim(cube)[1])
 
 # Define dimensions in environment
-nsites = data_list$nsites
-nspecies = data_list$nspecies
-ntimes = data_list$nspecies
+n_loc = data_list$n_loc
+n_spp = data_list$n_spp
+n_time = data_list$n_spp
 
 
 
 #==================================================
 #Fit Model
 #==================================================
-# Fix observation error to 0.1
-data_list$sigma_obs = 0.1
+# Fix parameters
+data_list$sigma_obs = 1e-10
 
 # Parameters to monitor
-params = c("mean_b0","mean_b1","mean_rho","sigma_b0","sigma_b1","sigma_rho","sigma_e","b0","b1","rho","e","n")
+params = c("mean_b0","mean_b1","mean_rho","sigma_b0","sigma_b1","sigma_rho","sigma_eps","b0","b1","rho","eps","n")
 
 # Initial values
 inits = function(){
     list(mean_b0 = runif(1,-10,10),
          mean_b1 = runif(1,-1,1),
          mean_rho = runif(1,-10,10),
-         sigma_b0 = runif(1,0,10),
+         sigma_b0 = runif(1,0,1),
          sigma_b1 = runif(1,0,1),
-         sigma_rho = runif(1,0,1))
+         sigma_rho = runif(1,0,1),
+         sigma_eps = runif(1,0,1))
 }
 
 # MCMC specifiations
 n.ad = 100 # number of iterations for adaptation
-n.it = 5000 # number of iterations for Markov Chain
+n.it = 4000 # number of iterations for Markov Chain
 n.burn = n.it/2 # number steps to omit for burnin
 n.thin = 20 # thinning interval
 n.chain = 4 # number of independent chains
@@ -68,7 +69,7 @@ output = jags.basic(data=data_list, model="under_constr/rep_time_model.txt",
 
 
 # Parameters to check convergence
-conv_pars = c("mean_b0","mean_b1","mean_rho","sigma_b0","sigma_b1","sigma_rho","sigma_e")
+conv_pars = c("mean_b0","mean_b1","sigma_b0","sigma_b1","rho[4]")
 output_conv = output[,conv_pars]
 gelman.diag(output_conv)
 
@@ -108,12 +109,31 @@ samples_long = samples %>%
 #==================================================
 
 # by species
+
+# b1
+b1s = data.frame(species=1:n_spp,value=b1_mat_[,1])
+samples_long %>% 
+    filter(var=="b1") %>%
+    rename(species=v1) %>%
+    ggplot(aes(value, color=factor(species)))+
+    geom_density()+
+    geom_vline(xintercept = b1s$value)+
+    theme_classic()
+
+# b0
+b0s = data.frame(species=1:n_spp,value=b0_mat_[,1])
+samples_long %>% 
+    filter(var=="b0") %>%
+    rename(species=v1) %>%
+    ggplot(aes(value, color=factor(species)))+
+    geom_vline(xintercept = b0s$value)+
+    geom_density()+
+    theme_classic()
+
+# rho0
 samples_long %>% 
     filter(var=="rho") %>%
     rename(species=v1) %>%
     ggplot(aes(value, color=factor(species)))+
     geom_density()+
     theme_classic()
-
-
-
