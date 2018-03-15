@@ -13,6 +13,10 @@ melt_cube <- function(C) {
     .Call(`_repts_melt_cube`, C)
 }
 
+generate_data <- function(n_time, n_loc, n_spp, mean_b0 = 5, mean_b1 = 0.5, mean_rho = 0, sigma_b0 = 0.1, sigma_b1 = 0.1, sigma_rho = 0.5, sigma_eps = 0.1, sigma_obs = 0, corr_method = "none") {
+    .Call(`_repts_generate_data`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
+}
+
 sim_pops <- function(n_gen, N0, r, alpha, sigma, seed) {
     .Call(`_repts_sim_pops`, n_gen, N0, r, alpha, sigma, seed)
 }

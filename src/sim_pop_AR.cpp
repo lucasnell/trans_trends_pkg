@@ -221,3 +221,82 @@ DataFrame melt_cube(arma::cube C) {
     
     return M;
 }
+
+
+// rho values are on inverse logit scale
+//[[Rcpp::export]]
+List generate_data(const uint& n_time,
+                   const uint& n_loc,
+                   const uint& n_spp,
+                   const double& mean_b0 = 5,
+                   const double& mean_b1 = 0.5,
+                   const double& mean_rho = 0,
+                   const double& sigma_b0 = 0.1,
+                   const double& sigma_b1 = 0.1,
+                   const double& sigma_rho = 0.5,
+                   const double& sigma_eps = 0.1,
+                   const double& sigma_obs = 0,
+                   const std::string& corr_method = "none") {
+    // Set up matrices
+    // Environmental variables
+    arma::mat X_(n_time, n_loc, arma::fill::zeros);
+    arma::vec rnd = as<arma::vec>(Rcpp::rnorm(n_time));
+    X_.each_col() += rnd;
+    // Mean abundance in average environment
+    arma::mat b0_mat_(n_spp, n_loc, arma::fill::zeros);
+    rnd = as<arma::vec>(Rcpp::rnorm(n_spp, mean_b0, sigma_b0));
+    b0_mat_.each_col() += rnd;
+    // Response to environmental variables
+    arma::mat b1_mat_(n_spp, n_loc, arma::fill::zeros);
+    rnd = as<arma::vec>(Rcpp::rnorm(n_spp, mean_b1, sigma_b1));
+    b1_mat_.each_col() += rnd;
+    // Autoregressive parameter
+    arma::mat rho_mat_(n_spp, n_loc, arma::fill::zeros);
+    rnd = as<arma::vec>(Rcpp::rnorm(n_spp, mean_rho, sigma_rho));
+    rnd = arma::exp(rnd) / (1 + arma::exp(rnd));
+    rho_mat_.each_col() += rnd;
+    // Observation error
+    arma::vec obs_sigma_(n_spp);
+    obs_sigma_.fill(sigma_obs);
+    
+    // Initial population size (set to b0)
+    arma::mat N0_mat_(b0_mat_);
+    
+    arma::mat vcv_(n_spp, n_spp, arma::fill::eye);
+    arma::cube vcv_cube_(n_spp, n_spp, n_loc, arma::fill::zeros);
+    if (corr_method == "phylo") {
+        Environment ape = Environment::namespace_env("ape");
+        Function rcoal = ape["rcoal"];
+        Function vcv_phylo = ape["vcv.phylo"];
+        SEXP phylo = rcoal(n_spp);
+        SEXP vcv_SEXP_ = vcv_phylo(phylo);
+        vcv_ = as<arma::mat>(vcv_SEXP_);
+        vcv_ /= vcv_.diag()(0);
+    } else if (corr_method == "random") {
+        uint n_corrs = ((n_spp - 1) / 2) * (1 + (n_spp - 1));
+        arma::vec rnd_phy = as<arma::vec>(Rcpp::runif(n_corrs, -1, 1));
+        for (uint i = 0, rnd_i = 0; i < n_spp; i++) {
+            for (uint j = i+1; j < n_spp; j++, rnd_i++) {
+                vcv_(i,j) = rnd_phy(rnd_i);
+                vcv_(j,i) = rnd_phy(rnd_i);
+            }
+        }
+    } else if (corr_method == "none") {
+        ;
+    } else {
+        stop("corr_method must be none, phylo, or random.");
+    }
+    // Going from correlations to covariances:
+    vcv_ *= (sigma_eps * sigma_eps);
+    vcv_cube_.each_slice() += vcv_;
+    
+    List out = List::create(_["X"] = X_,
+                            _["N0_mat"] = N0_mat_,
+                            _["b0_mat"] = b0_mat_,
+                            _["b1_mat"] = b1_mat_,
+                            _["rho_mat"] = rho_mat_,
+                            _["vcv_cube"] = vcv_cube_,
+                            _["obs_sigma"] = obs_sigma_);
+    
+    return out;
+}
