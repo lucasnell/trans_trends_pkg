@@ -13,7 +13,28 @@ melt_cube <- function(C) {
     .Call(`_repts_melt_cube`, C)
 }
 
-generate_data <- function(n_time, n_loc, n_spp, mean_b0 = 5, mean_b1 = 0.5, mean_rho = 0, sigma_b0 = 0.1, sigma_b1 = 0.1, sigma_rho = 0.5, sigma_eps = 0.1, sigma_obs = 0, corr_method = "none") {
+#' Generate data for simulations.
+#' 
+#' Generate multi-location, multi-species time series data.
+#' 
+#' 
+#' @param n_time Number of time steps.
+#' @param n_loc Number of locations.
+#' @param n_spp Number of species.
+#' @param mean_b0 Mean for the b0 parameter relating X to N.
+#' @param mean_b1 Mean for the b1 parameter relating X to N.
+#' @param mean_rho Mean for the rho parameter relating X to N.
+#'     This parameter is on the inverse logit scale.
+#' @param sigma_b0 Standard deviation for the b0 parameter relating X to N.
+#' @param sigma_b1 Standard deviation for the b1 parameter relating X to N.
+#' @param sigma_rho Standard deviation for the rho parameter relating X to N.
+#'     This parameter is on the inverse logit scale.
+#' @param sigma_eps Standard deviation for the epsilon parameter.
+#' @param sigma_obs Standard deviation for observation error. Defaults to 0.
+#' @param corr_method Method for determining correlations between species.
+#'     Options are "none", "phylo", or "random". Defaults to "none".
+#' 
+generate_data <- function(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs = 0, corr_method = "none") {
     .Call(`_repts_generate_data`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
 }
 
