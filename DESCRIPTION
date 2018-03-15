@@ -1,6 +1,6 @@
-Package: ReplicateTimeseries
+Package: repts
 Type: Package
-Title: Simulate and bootstrap time series.
+Title: Simulate and bootstrap replicate time series.
 Version: 0.0.0.9000
 Date: 2018-02-26
 Authors@R: as.person(c(

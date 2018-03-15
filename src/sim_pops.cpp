@@ -6,7 +6,7 @@
 #include <omp.h>  // OpenMP
 #endif
 
-#include "ReplicateTimeseries_types.h"
+#include "repts_types.h"
 
 using namespace Rcpp;
 

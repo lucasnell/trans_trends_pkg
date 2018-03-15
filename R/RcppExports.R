@@ -2,18 +2,18 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 sim_pop_ar <- function(X, N0, b0, b1, rho, sigma, seed) {
-    .Call(`_ReplicateTimeseries_sim_pop_ar`, X, N0, b0, b1, rho, sigma, seed)
+    .Call(`_repts_sim_pop_ar`, X, N0, b0, b1, rho, sigma, seed)
 }
 
 sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores = 1L) {
-    .Call(`_ReplicateTimeseries_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores)
+    .Call(`_repts_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores)
 }
 
 melt_cube <- function(C) {
-    .Call(`_ReplicateTimeseries_melt_cube`, C)
+    .Call(`_repts_melt_cube`, C)
 }
 
 sim_pops <- function(n_gen, N0, r, alpha, sigma, seed) {
-    .Call(`_ReplicateTimeseries_sim_pops`, n_gen, N0, r, alpha, sigma, seed)
+    .Call(`_repts_sim_pops`, n_gen, N0, r, alpha, sigma, seed)
 }
 

@@ -1,4 +1,4 @@
-# library(ReplicateTimeseries)
+# library(repts)
 # devtools::load_all()
 
 # source(".Rprofile")
