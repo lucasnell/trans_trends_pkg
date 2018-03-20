@@ -26,12 +26,6 @@ n_time = dim(cube)[1]
 cent_scale = function(x){z = (x - mean(x,na.rm=T))/sd(x)}
 cent = function(x){z = (x - mean(x,na.rm=T))}
 
-# Center and scale data
-data = cube_df %>% gather(species, n, -loc, -time) %>%
-    group_by(species) %>%
-    mutate(n_z = cent(n)) %>%
-    ungroup
-
 # Define function to bundle data
 bundle_fn = function(data){
     
@@ -52,11 +46,17 @@ bundle_fn = function(data){
         aperm(c(3,2,1))
 } 
 
+# Center and scale data
+data = cube_df %>% gather(species, n, -loc, -time) %>%
+    group_by(species) %>%
+    mutate(n_z = cent(n)) %>%
+    ungroup
+
 # Scale and bundle n_obs
 n_obs = bundle_fn(data)
 
 # Scale X
-x = array(cent_scale(X_), c(n_time,n_loc)) %>% aperm(c(2,1))
+x = array(cent_scale(gen_data$X), c(n_time,n_loc)) %>% aperm(c(2,1))
 
 data_list = list(
     # Rearrange array to have dimensions site x species x time
@@ -146,26 +146,27 @@ samples_long = samples %>%
 
 
 #==================================================
-#Plot output
+#Plot output: Parameters by Species
 #==================================================
 
-# by species
+spec_par = data_frame(species = 1:ncol(cube),
+                      b1 = gen_data$b1_mat[,1],
+                      rho = gen_data$rho_mat[,1]) %>%
+    gather(var,value,-species)
 
-# b1
+# Select variable v
+v = "rho"
 samples_long %>% 
-    filter(var=="b1") %>%
+    filter(var==v) %>%
     rename(species=v1) %>%
     ggplot(aes(value, color=factor(species)))+
     geom_density()+
+    geom_vline(data = spec_par %>% filter(var==v), aes(xintercept = value, 
+               color=factor(species)),
+               linetype=2)+
     theme_classic()
 
-# rho
-samples_long %>% 
-    filter(var=="rho") %>%
-    rename(species=v1) %>%
-    ggplot(aes(value, color=factor(species)))+
-    geom_density()+
-    theme_classic()
+
 
 # sigma_eps
 samples_long %>% 
@@ -175,9 +176,9 @@ samples_long %>%
     geom_density()+
     theme_classic()
 
-# sigma_eps
+# sigma_b1
 samples_long %>% 
-    filter(var=="sigma_b1") %>%
+    filter(var=="sigma_eps") %>%
     rename(species=v1) %>%
     ggplot(aes(value))+
     geom_density()+
