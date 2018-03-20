@@ -17,20 +17,60 @@ library(jagsUI)
 #Prepare Data
 #==================================================
 
+# Define dimensions
+n_loc = dim(cube)[3]
+n_spp = dim(cube)[2]
+n_time = dim(cube)[1]
+
+# Function to center and scale
+cent_scale = function(x){z = (x - mean(x,na.rm=T))/sd(x)}
+cent = function(x){z = (x - mean(x,na.rm=T))}
+
+# Center and scale data
+data = cube_df %>% gather(species, n, -loc, -time) %>%
+    group_by(species) %>%
+    mutate(n_z = cent(n)) %>%
+    ungroup
+
+# Define function to bundle data
+bundle_fn = function(data){
+    
+    # Create list of day x hour data frames
+    y = lapply(data$loc %>% unique, 
+               function(x){data %>%
+                       filter(loc==x) %>%
+                       select(-n,-loc) %>%
+                       arrange(time) %>%
+                       spread(species, n_z) %>%
+                       select(-time)})
+    
+    # Unlist and store in day x hour x year array
+    y %>% 
+        unlist %>% 
+        array(dim=c(y[[1]] %>% dim, length(y))) %>%
+        # Rearrange array to have dimensions year x day x hour
+        aperm(c(3,2,1))
+} 
+
+# Scale and bundle n_obs
+n_obs = bundle_fn(data)
+
+# Scale X
+x = array(cent_scale(X_), c(n_time,n_loc)) %>% aperm(c(2,1))
+
 data_list = list(
     # Rearrange array to have dimensions site x species x time
-    n_obs = cube %>% aperm(c(3,2,1)),
+    n_obs = n_obs,
     # Initial population sizes
-    n_init = cube[1,,] %>% aperm(c(2,1)),
+    n_init = n_obs[,,1],
     # Environmental variables
-    x = X_ %>% aperm(c(2,1)),
+    x = x,
     # Count dimensions
-    n_loc = dim(cube)[3],n_spp = dim(cube)[2],n_time = dim(cube)[1])
+    n_loc = n_loc, 
+    n_spp = n_spp,
+    n_time = n_time)
 
-# Define dimensions in environment
-n_loc = data_list$n_loc
-n_spp = data_list$n_spp
-n_time = data_list$n_time
+
 
 
 
@@ -40,38 +80,37 @@ n_time = data_list$n_time
 #Fit Model
 #==================================================
 # Fix parameters
-data_list$sigma_obs = 1e-10
+data_list$sigma_obs = 0.5
 
 # Parameters to monitor
-params = c("mean_b0","mean_b1","mean_rho","sigma_b0","sigma_b1","sigma_rho","sigma_eps","b0","b1","rho","eps","n")
+params = c("mean_b1","sigma_b1","sigma_eps","b1","rho","eps","n")
 
 # Initial values
 inits = function(){
-    list(mean_b0 = runif(1,-10,10),
-         mean_b1 = runif(1,-1,1),
-         mean_rho = runif(1,-3,3),
-         sigma_b0 = runif(1,0,1),
-         sigma_b1 = runif(1,0,1),
-         sigma_rho = runif(1,0,3),
-         sigma_eps = runif(1,0,1))
+    list(mean_b1 = rnorm(1,0,1),
+         sigma_b1 = runif(1,0,5),
+         sigma_eps = runif(1,0,5),
+         rho = runif(n_spp,0.2,0.8))
 }
 
 # MCMC specifiations
 n.ad = 100 # number of iterations for adaptation
-n.it = 2000 # number of iterations for Markov Chain
+n.it = 6000 # number of iterations for Markov Chain
 n.burn = n.it/2 # number steps to omit for burnin
 n.thin = 20 # thinning interval
 n.chain = 4 # number of independent chains
 
 # Fit model using MCMC via JAGS
-output = jags.basic(data=data_list, model="under_constr/rep_time_model.txt", 
+output = jags.basic(data=data_list, model="under_constr/rep_ts_jags.txt", 
                     parameters.to.save=params, n.adapt=n.ad, n.burnin=n.burn, 
                     n.iter=n.it, n.thin=n.thin, n.chains=n.chain,parallel=T, DIC=F)
 
 
 
 # Parameters to check convergence
-conv_pars = c("mean_b0","mean_b1","mean_rho","sigma_b0","sigma_b1","sigma_rho","sigma_eps")
+# Define function to define parameters by species
+thread_f = function(var,n_spp){sapply(1:n_spp, function(x){paste0(var,"[",x,"]")})}
+conv_pars = c("mean_b1","sigma_b1","sigma_eps",sapply(c("b1","rho"), thread_f, n_spp))
 output_conv = output[,conv_pars]
 gelman.diag(output_conv)
 
@@ -113,29 +152,34 @@ samples_long = samples %>%
 # by species
 
 # b1
-b1s = data.frame(species=1:n_spp,value=b1_mat_[,1])
 samples_long %>% 
     filter(var=="b1") %>%
     rename(species=v1) %>%
     ggplot(aes(value, color=factor(species)))+
     geom_density()+
-    geom_vline(xintercept = b1s$value)+
     theme_classic()
 
-# b0
-b0s = data.frame(species=1:n_spp,value=b0_mat_[,1])
-samples_long %>% 
-    filter(var=="b0") %>%
-    rename(species=v1) %>%
-    ggplot(aes(value, color=factor(species)))+
-    geom_vline(xintercept = b0s$value)+
-    geom_density()+
-    theme_classic()
-
-# rho0
+# rho
 samples_long %>% 
     filter(var=="rho") %>%
     rename(species=v1) %>%
     ggplot(aes(value, color=factor(species)))+
     geom_density()+
     theme_classic()
+
+# sigma_eps
+samples_long %>% 
+    filter(var=="sigma_eps") %>%
+    rename(species=v1) %>%
+    ggplot(aes(value))+
+    geom_density()+
+    theme_classic()
+
+# sigma_eps
+samples_long %>% 
+    filter(var=="sigma_b1") %>%
+    rename(species=v1) %>%
+    ggplot(aes(value))+
+    geom_density()+
+    theme_classic()
+
