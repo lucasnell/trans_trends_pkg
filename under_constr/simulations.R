@@ -24,7 +24,7 @@ plot(ar_N, type = 'l', ylab = 'N')
 
 
 # 100 time points, 10 locations, 5 species
-n_time = 100; n_locs = 10; n_spp = 5
+n_time = 20; n_locs = 15; n_spp = 5
 set.seed(1)
 X_ <- matrix(rnorm(n_time * n_locs), n_time, n_locs)
 N0_mat_ <- matrix(log(100), n_spp, n_locs)
