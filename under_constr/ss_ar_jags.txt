@@ -1,0 +1,39 @@
+model{
+
+#===============
+#Priors
+#===============
+
+#Process parameters
+b1 ~ dnorm(0, pow(100, -2))
+rho ~ dunif(0,1)
+
+#Errors
+sigma_eps ~ dunif(0,5)
+tau_eps = pow(sigma_eps, -2)
+tau_obs = pow(sigma_obs, -2)
+
+#Initial population size
+n[1] ~ dnorm(n_init, tau_obs)
+
+#===============
+#Likelihood
+#===============
+
+for(t in 2:n_time){
+    
+#Environmental Stochasticity
+eps[t] ~ dnorm(0, tau_eps)
+
+#State process    
+n[t] = b1*x[t] + rho*(n[t-1] - b1*x[t-1]) + eps[t]
+
+    } #t
+
+for(t in 1:n_time){
+    
+#Observation process
+n_obs[t] ~ dnorm(n[t], tau_obs)
+
+    } #t
+}
