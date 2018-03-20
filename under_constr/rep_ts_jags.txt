@@ -4,22 +4,15 @@ model{
 #===============
 
 #Means
-mean_b0 ~ dnorm(0, 0.01)
-mean_b1 ~ dnorm(0, 0.01)
-mean_rho ~ dnorm(0, 0.25)
+mean_b1 ~ dnorm(0, pow(100, -2))
 
 #Standard Deviations
-sigma_b0 ~ dnorm(0, 0.01)T(0,)
-sigma_b1 ~ dnorm(0, 0.01)T(0,)
-sigma_rho ~ dnorm(0, 0.5)T(0,)
-sigma_eps ~ dnorm(0, 0.01)T(0,)
-sigma_obs ~ dnorm(0, 0.01)T(0,)
+sigma_b1 ~ dunif(0,10)
+sigma_eps ~ dunif(0,10)
 
 #Taus
-tau_b0 = pow(sigma_b0, -2)
 tau_b1 = pow(sigma_b1, -2)
-tau_rho = pow(sigma_rho, -2)
-tau_e = pow(sigma_eps, -2)
+tau_eps = pow(sigma_eps, -2)
 tau_obs = pow(sigma_obs, -2)
 
 
@@ -31,12 +24,10 @@ tau_obs = pow(sigma_obs, -2)
 for(s in 1:n_spp){
 
 #Intercepts and slopes
-b0[s] ~ dnorm(mean_b0, tau_b0)
 b1[s] ~ dnorm(mean_b1, tau_b1)
 
 #AR1 parameter
-rho_logit[s] ~ dnorm(mean_rho, tau_rho)
-rho[s] = exp(rho_logit[s])/(1 + exp(rho_logit[s]))
+rho[s] ~ dunif(0,1) 
 
 } #s
 
@@ -53,15 +44,15 @@ for(l in 1:n_loc){
   for(s in 1:n_spp){
 
 #Initial population size
-n[l,s,1] ~ dnorm(n_init[l,s], 0.5*abs(n_init[l,s]))
+n[l,s,1] ~ dnorm(n_init[l,s], tau_obs)
   
     for(t in 2:n_time){
     
 #Environmental Stochasticity
-e[l,s,t] ~ dnorm(0, tau_e)
+eps[l,s,t] ~ dnorm(0, tau_eps)
 
 #State process    
-n[l,s,t] = b0[s] + b1[s]*x[l,t] + rho[s]*(n[l,s,t-1] - b0[s] - b1[s]*x[l,t-1]) + e[l,s,t]
+n[l,s,t] = b1[s]*x[l,t] + rho[s]*(n[l,s,t-1] - b1[s]*x[l,t-1]) + eps[l,s,t]
 
     } #t
     
