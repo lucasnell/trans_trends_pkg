@@ -17,9 +17,15 @@ library(tidyverse)
 # Simulations
 # ==================================================
 
-# Simulate time seires
-cube <- do.call(sim_pops_ar,
-                generate_data(n_time = 30, n_loc = 10, n_spp = 5, corr_method = "none", sigma_obs = 1.5, mean_b0 = 0, sigma_b0 = 1, mean_b1 = 0, sigma_b1 = 4, mean_rho = 0, sigma_rho = 3))
+# Generate input data
+gen_data = generate_data(n_time = 30, n_loc = 10, n_spp = 5, 
+              corr_method = "none", sigma_obs = 1.5, 
+              mean_b0 = 0, sigma_b0 = 1, mean_b1 = 0, 
+              sigma_b1 = 4, mean_rho = 0, sigma_rho = 3, 
+              sigma_eps = 1)
+
+# Simulate communities
+cube <- do.call(sim_pops_ar, gen_data)
 
 
 expr_ <- setNames(rlang::syms(paste0("V", 1:(ncol(cube)+1))),
