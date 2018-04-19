@@ -21,7 +21,11 @@ inline void rnd_row(arma::rowvec& rnd_vec,
     }
 }
 
-
+//' Simulate populations with competition.
+//'
+//'
+//' @export
+//'
 //[[Rcpp::export]]
 arma::mat sim_pops(const uint& n_gen, const arma::rowvec& N0, const arma::rowvec& r,
                    const arma::mat& alpha, const double& sigma, const uint& seed) {

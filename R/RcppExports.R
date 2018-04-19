@@ -5,10 +5,39 @@ sim_pop_ar <- function(X, N0, b0, b1, rho, sigma, seed) {
     .Call(`_repts_sim_pop_ar`, X, N0, b0, b1, rho, sigma, seed)
 }
 
+#' Multiple populations simulated using AR1 process.
+#' 
+#' Input and output N values are logged.
+#' The `X` matrix should have rows associated with a given time point and
+#' columns associated with a given location.
+#' The `vcv_cube` cube should have rows and columns associated with a given species,
+#' and slices associated with a given location.
+#' All other input matrices should have rows associated with a given species and
+#' columns associated with a given location.
+#' `obs_sigma` contains the standard deviations of observation error for each species.
+#' The output array will have rows associated with a given time point,
+#' columns associated with a given species, and 
+#' slices associated with a given location.
+#' 
+#' 
+#' 
+#' 
+#' @export
+#' 
+#' 
 sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores = 1L) {
     .Call(`_repts_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores)
 }
 
+#' Melt a cube into a single data frame.
+#' 
+#' @param C Three-dimensional array that you want to melt into a two-dimensional
+#'     data frame.
+#'
+#' @return
+#' 
+#' @noRd
+#' 
 melt_cube <- function(C) {
     .Call(`_repts_melt_cube`, C)
 }
@@ -34,10 +63,19 @@ melt_cube <- function(C) {
 #' @param corr_method Method for determining correlations between species.
 #'     Options are "none", "phylo", or "random". Defaults to "none".
 #' 
+#' 
+#' @export
+#' 
+#' 
 generate_data <- function(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs = 0, corr_method = "none") {
     .Call(`_repts_generate_data`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
 }
 
+#' Simulate populations with competition.
+#'
+#'
+#' @export
+#'
 sim_pops <- function(n_gen, N0, r, alpha, sigma, seed) {
     .Call(`_repts_sim_pops`, n_gen, N0, r, alpha, sigma, seed)
 }

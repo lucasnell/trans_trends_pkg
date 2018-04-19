@@ -117,20 +117,27 @@ arma::cube make_chol_decomp(const arma::cube& vcv_cube) {
 
 
 
-/*
- Multiple populations simulated using AR1 process.
- Input and output N values are logged.
- The `X` matrix should have rows associated with a given time point and
- columns associated with a given location.
- The `vcv_cube` cube should have rows and columns associated with a given species,
- and slices associated with a given location.
- All other input matrices should have rows associated with a given species and
- columns associated with a given location.
- `obs_sigma` contains the standard deviations of observation error for each species.
- The output array will have rows associated with a given time point,
- columns associated with a given species, and 
- slices associated with a given location.
- */
+
+//' Multiple populations simulated using AR1 process.
+//' 
+//' Input and output N values are logged.
+//' The `X` matrix should have rows associated with a given time point and
+//' columns associated with a given location.
+//' The `vcv_cube` cube should have rows and columns associated with a given species,
+//' and slices associated with a given location.
+//' All other input matrices should have rows associated with a given species and
+//' columns associated with a given location.
+//' `obs_sigma` contains the standard deviations of observation error for each species.
+//' The output array will have rows associated with a given time point,
+//' columns associated with a given species, and 
+//' slices associated with a given location.
+//' 
+//' 
+//' 
+//' 
+//' @export
+//' 
+//' 
 //[[Rcpp::export]]
 arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat,
                        const arma::mat& b0_mat, const arma::mat& b1_mat,
@@ -205,9 +212,16 @@ arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat,
 }
 
 
-/*
- Melt a cube into a single data frame.
- */
+
+//' Melt a cube into a single data frame.
+//' 
+//' @param C Three-dimensional array that you want to melt into a two-dimensional
+//'     data frame.
+//'
+//' @return
+//' 
+//' @noRd
+//' 
 //[[Rcpp::export]]
 DataFrame melt_cube(arma::cube C) {
     
@@ -243,6 +257,10 @@ DataFrame melt_cube(arma::cube C) {
 //' @param sigma_obs Standard deviation for observation error. Defaults to 0.
 //' @param corr_method Method for determining correlations between species.
 //'     Options are "none", "phylo", or "random". Defaults to "none".
+//' 
+//' 
+//' @export
+//' 
 //' 
 //[[Rcpp::export]]
 List generate_data(const uint& n_time,
