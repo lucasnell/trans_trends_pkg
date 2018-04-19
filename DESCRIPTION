@@ -9,10 +9,26 @@ Authors@R: as.person(c(
   ))
 Description: Some day, more details about what the package does will go here.
 License: MIT + file LICENSE
-Imports: Rcpp (>= 0.12.15)
-LinkingTo: Rcpp, RcppArmadillo, sitmo
+Encoding: UTF-8
+LazyData: true
+ByteCompile: true
 SystemRequirements: C++11, GNU make
-RoxygenNote: 6.0.1
+NeedsCompilation: yes
+Depends:
+    R (>= 3.4.0),
+    Rcpp (>= 0.12.16),
+    methods
+Imports:
+    rstan (>= 2.17.3),
+    rstantools (>= 1.5.0),
+    Rcpp (>= 0.12.16)
+LinkingTo:
+    StanHeaders (>= 2.17.2),
+    rstan (>= 2.17.3),
+    BH (>= 1.66.0-1),
+    Rcpp (>= 0.12.16),
+    RcppEigen (>= 0.3.3.4.0),
+    sitmo
 Suggests:
     knitr
 VignetteBuilder: knitr
