@@ -20,16 +20,17 @@ Depends:
     methods
 Imports:
     rstan (>= 2.17.3),
-    rstantools (>= 1.5.0),
-    Rcpp (>= 0.12.16)
+    rstantools (>= 1.5.0)
 LinkingTo:
     StanHeaders (>= 2.17.2),
     rstan (>= 2.17.3),
     BH (>= 1.66.0-1),
     Rcpp (>= 0.12.16),
     RcppEigen (>= 0.3.3.4.0),
+    RcppArmadillo,
     sitmo
 Suggests:
-    knitr
+    knitr,
+    testthat
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1

@@ -3,6 +3,7 @@
 
 #include "repts_types.h"
 #include <RcppEigen.h>
+#include <RcppArmadillo.h>
 #include <sitmo.h>
 #include <Rcpp.h>
 
