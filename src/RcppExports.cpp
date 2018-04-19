@@ -2,7 +2,7 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include "repts_types.h"
-#include <RcppArmadillo.h>
+#include <RcppEigen.h>
 #include <sitmo.h>
 #include <Rcpp.h>
 
@@ -91,18 +91,4 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(sim_pops(n_gen, N0, r, alpha, sigma, seed));
     return rcpp_result_gen;
 END_RCPP
-}
-
-static const R_CallMethodDef CallEntries[] = {
-    {"_repts_sim_pop_ar", (DL_FUNC) &_repts_sim_pop_ar, 7},
-    {"_repts_sim_pops_ar", (DL_FUNC) &_repts_sim_pops_ar, 8},
-    {"_repts_melt_cube", (DL_FUNC) &_repts_melt_cube, 1},
-    {"_repts_generate_data", (DL_FUNC) &_repts_generate_data, 12},
-    {"_repts_sim_pops", (DL_FUNC) &_repts_sim_pops, 6},
-    {NULL, NULL, 0}
-};
-
-RcppExport void R_init_repts(DllInfo *dll) {
-    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-    R_useDynamicSymbols(dll, FALSE);
 }
