@@ -1,4 +1,4 @@
-# library(repts)
+# library(lizard)
 # devtools::load_all()
 
 # source(".Rprofile")
@@ -16,7 +16,7 @@ which(rowSums(aM) == min(rowSums(aM)))
 0.5 / min(diag(aM))
 
 # log(N) for one population using an AR process
-ar_N <- sim_pop_ar(X = 0.1 * 1:100, N0 = 5, b0 = 5, b1 = 0.5, rho = 0.2, 
+ar_N <- sim_pop_ar(X = 0.1 * 1:100, N0 = 5, b0 = 5, b1 = 0.5, rho = 0.2,
                    sigma = 1, seed = 1)
 plot(ar_N, type = 'l', ylab = 'N')
 
@@ -49,15 +49,15 @@ library(tidyverse)
 expr_ <- setNames(rlang::syms(paste0("V", 1:(ncol(cube)+1))),
                   c("loc", paste0("sp", 1:ncol(cube))))
 
-cube_df <- melt_cube(cube) %>% 
-    as_data_frame() %>% 
-    select(!!!expr_) %>% 
-    mutate(loc = factor(as.integer(loc)), 
+cube_df <- melt_cube(cube) %>%
+    as_data_frame() %>%
+    select(!!!expr_) %>%
+    mutate(loc = factor(as.integer(loc)),
            time = rep(1:sum(loc == 1), length(levels(loc))))
 
 
 cube_df %>%
-    gather('species', 'N', -loc, -time, factor_key = TRUE) %>% 
+    gather('species', 'N', -loc, -time, factor_key = TRUE) %>%
     ggplot(aes(time, N, color = species)) +
     theme_classic() +
     geom_line() +

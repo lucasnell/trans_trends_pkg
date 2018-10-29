@@ -39,7 +39,7 @@
 #'
 #'
 sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores = 1L) {
-    .Call(`_repts_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores)
+    .Call(`_lizard_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores)
 }
 
 #' Melt a cube into a single data frame.
@@ -52,7 +52,7 @@ sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma,
 #' @noRd
 #'
 melt_cube <- function(C) {
-    .Call(`_repts_melt_cube`, C)
+    .Call(`_lizard_melt_cube`, C)
 }
 
 #' Generate data for simulations.
@@ -81,7 +81,7 @@ melt_cube <- function(C) {
 #'
 #'
 generate_data <- function(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs = 0, corr_method = "none") {
-    .Call(`_repts_generate_data`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
+    .Call(`_lizard_generate_data`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
 }
 
 #' Simulate populations with competition.
@@ -110,6 +110,6 @@ NULL
 #' @export
 #'
 sim_pops <- function(max_t, N0, r, alpha, sigma) {
-    .Call(`_repts_sim_pops`, max_t, N0, r, alpha, sigma)
+    .Call(`_lizard_sim_pops`, max_t, N0, r, alpha, sigma)
 }
 
