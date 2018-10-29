@@ -8,25 +8,8 @@
 
 using namespace Rcpp;
 
-// sim_pop_ar
-arma::vec sim_pop_ar(const arma::vec& X, const double& N0, const double& b0, const double& b1, const double& rho, const double& sigma, const uint& seed);
-RcppExport SEXP _repts_sim_pop_ar(SEXP XSEXP, SEXP N0SEXP, SEXP b0SEXP, SEXP b1SEXP, SEXP rhoSEXP, SEXP sigmaSEXP, SEXP seedSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const double& >::type N0(N0SEXP);
-    Rcpp::traits::input_parameter< const double& >::type b0(b0SEXP);
-    Rcpp::traits::input_parameter< const double& >::type b1(b1SEXP);
-    Rcpp::traits::input_parameter< const double& >::type rho(rhoSEXP);
-    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< const uint& >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_pop_ar(X, N0, b0, b1, rho, sigma, seed));
-    return rcpp_result_gen;
-END_RCPP
-}
 // sim_pops_ar
-arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat, const arma::mat& b0_mat, const arma::mat& b1_mat, const arma::mat& rho_mat, const arma::cube& vcv_cube, const arma::vec& obs_sigma, const uint& n_cores);
+arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat, const arma::mat& b0_mat, const arma::mat& b1_mat, const arma::mat& rho_mat, const arma::cube& vcv_cube, const arma::vec& obs_sigma, const uint32& n_cores);
 RcppExport SEXP _repts_sim_pops_ar(SEXP XSEXP, SEXP N0_matSEXP, SEXP b0_matSEXP, SEXP b1_matSEXP, SEXP rho_matSEXP, SEXP vcv_cubeSEXP, SEXP obs_sigmaSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -38,31 +21,31 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type rho_mat(rho_matSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type vcv_cube(vcv_cubeSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type obs_sigma(obs_sigmaSEXP);
-    Rcpp::traits::input_parameter< const uint& >::type n_cores(n_coresSEXP);
+    Rcpp::traits::input_parameter< const uint32& >::type n_cores(n_coresSEXP);
     rcpp_result_gen = Rcpp::wrap(sim_pops_ar(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores));
     return rcpp_result_gen;
 END_RCPP
 }
 // melt_cube
-DataFrame melt_cube(arma::cube C);
+DataFrame melt_cube(const arma::cube& C);
 RcppExport SEXP _repts_melt_cube(SEXP CSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cube >::type C(CSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type C(CSEXP);
     rcpp_result_gen = Rcpp::wrap(melt_cube(C));
     return rcpp_result_gen;
 END_RCPP
 }
 // generate_data
-List generate_data(const uint& n_time, const uint& n_loc, const uint& n_spp, const double& mean_b0, const double& mean_b1, const double& mean_rho, const double& sigma_b0, const double& sigma_b1, const double& sigma_rho, const double& sigma_eps, const double& sigma_obs, const std::string& corr_method);
+List generate_data(const uint32& n_time, const uint32& n_loc, const uint32& n_spp, const double& mean_b0, const double& mean_b1, const double& mean_rho, const double& sigma_b0, const double& sigma_b1, const double& sigma_rho, const double& sigma_eps, const double& sigma_obs, const std::string& corr_method);
 RcppExport SEXP _repts_generate_data(SEXP n_timeSEXP, SEXP n_locSEXP, SEXP n_sppSEXP, SEXP mean_b0SEXP, SEXP mean_b1SEXP, SEXP mean_rhoSEXP, SEXP sigma_b0SEXP, SEXP sigma_b1SEXP, SEXP sigma_rhoSEXP, SEXP sigma_epsSEXP, SEXP sigma_obsSEXP, SEXP corr_methodSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const uint& >::type n_time(n_timeSEXP);
-    Rcpp::traits::input_parameter< const uint& >::type n_loc(n_locSEXP);
-    Rcpp::traits::input_parameter< const uint& >::type n_spp(n_sppSEXP);
+    Rcpp::traits::input_parameter< const uint32& >::type n_time(n_timeSEXP);
+    Rcpp::traits::input_parameter< const uint32& >::type n_loc(n_locSEXP);
+    Rcpp::traits::input_parameter< const uint32& >::type n_spp(n_sppSEXP);
     Rcpp::traits::input_parameter< const double& >::type mean_b0(mean_b0SEXP);
     Rcpp::traits::input_parameter< const double& >::type mean_b1(mean_b1SEXP);
     Rcpp::traits::input_parameter< const double& >::type mean_rho(mean_rhoSEXP);
@@ -77,18 +60,33 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_pops
-arma::mat sim_pops(const uint& n_gen, const arma::rowvec& N0, const arma::rowvec& r, const arma::mat& alpha, const double& sigma, const uint& seed);
-RcppExport SEXP _repts_sim_pops(SEXP n_genSEXP, SEXP N0SEXP, SEXP rSEXP, SEXP alphaSEXP, SEXP sigmaSEXP, SEXP seedSEXP) {
+arma::mat sim_pops(const uint32& max_t, const arma::rowvec& N0, const arma::rowvec& r, const arma::mat& alpha, const double& sigma);
+RcppExport SEXP _repts_sim_pops(SEXP max_tSEXP, SEXP N0SEXP, SEXP rSEXP, SEXP alphaSEXP, SEXP sigmaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const uint& >::type n_gen(n_genSEXP);
+    Rcpp::traits::input_parameter< const uint32& >::type max_t(max_tSEXP);
     Rcpp::traits::input_parameter< const arma::rowvec& >::type N0(N0SEXP);
     Rcpp::traits::input_parameter< const arma::rowvec& >::type r(rSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< const uint& >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_pops(n_gen, N0, r, alpha, sigma, seed));
+    rcpp_result_gen = Rcpp::wrap(sim_pops(max_t, N0, r, alpha, sigma));
     return rcpp_result_gen;
 END_RCPP
+}
+
+RcppExport SEXP _rcpp_module_boot_stan_fit4fit_ts_mod();
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_repts_sim_pops_ar", (DL_FUNC) &_repts_sim_pops_ar, 8},
+    {"_repts_melt_cube", (DL_FUNC) &_repts_melt_cube, 1},
+    {"_repts_generate_data", (DL_FUNC) &_repts_generate_data, 12},
+    {"_repts_sim_pops", (DL_FUNC) &_repts_sim_pops, 5},
+    {"_rcpp_module_boot_stan_fit4fit_ts_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4fit_ts_mod, 0},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_repts(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

@@ -5,18 +5,42 @@
 \title{Multiple populations simulated using AR1 process.}
 \usage{
 sim_pops_ar(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma,
-  n_cores = 1L)
+  n_cores = 1)
+}
+\arguments{
+\item{X}{Matrix of environmental variable.
+It should have rows associated with a given time point and
+columns associated with a given location.}
+
+\item{N0_mat}{Matrix of starting population abundances (\code{log(# individuals)})
+by species and location.}
+
+\item{b0_mat}{Matrix of $\beta_0$ (the population-abundance intercept) values
+by species and location.}
+
+\item{b1_mat}{Matrix of $\beta_1$ (the effect of $X$ on $N$) values
+by species and location.}
+
+\item{rho_mat}{Matrix of growth rates by species and location.}
+
+\item{vcv_cube}{Cube representing variance-covariance matrices for process error
+among species, one matrix for each location.
+It should have rows and columns associated with a given species,
+and slices associated with a given location.}
+
+\item{obs_sigma}{Vector of standard deviations of observation error for each species.}
+
+\item{n_cores}{Number of cores to use. Defaults to 1.}
+}
+\value{
+A 3-dimensional array.
+The output will have rows associated with a given time point,
+columns associated with a given species, and
+slices associated with a given location.
 }
 \description{
 Input and output N values are logged.
-The `X` matrix should have rows associated with a given time point and
-columns associated with a given location.
-The `vcv_cube` cube should have rows and columns associated with a given species,
-and slices associated with a given location.
-All other input matrices should have rows associated with a given species and
-columns associated with a given location.
-`obs_sigma` contains the standard deviations of observation error for each species.
-The output array will have rows associated with a given time point,
-columns associated with a given species, and 
-slices associated with a given location.
+All input matrices other than \code{X} and \code{vcv_cube} should have rows associated
+with a given species and columns associated with a given location.
+See descriptions for \code{X} and \code{vcv_cube}.
 }
