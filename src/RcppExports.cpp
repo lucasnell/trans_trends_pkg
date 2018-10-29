@@ -92,3 +92,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_repts_sim_pop_ar", (DL_FUNC) &_repts_sim_pop_ar, 7},
+    {"_repts_sim_pops_ar", (DL_FUNC) &_repts_sim_pops_ar, 8},
+    {"_repts_melt_cube", (DL_FUNC) &_repts_melt_cube, 1},
+    {"_repts_generate_data", (DL_FUNC) &_repts_generate_data, 12},
+    {"_repts_sim_pops", (DL_FUNC) &_repts_sim_pops, 6},
+    {NULL, NULL, 0}
+};
+
+void rstan_additional_init(DllInfo *dll);
+RcppExport void R_init_repts(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+    rstan_additional_init(dll);
+}

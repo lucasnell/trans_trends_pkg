@@ -13,8 +13,13 @@ static const R_CallMethodDef CallEntries[] = {
 };
 
 
-void attribute_visible R_init_repts(DllInfo *dll) {
-  // next line is necessary to avoid a NOTE from R CMD check
-  R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-  R_useDynamicSymbols(dll, TRUE); // necessary for .onLoad() to work
+// void attribute_visible R_init_repts(DllInfo *dll) {
+//   // next line is necessary to avoid a NOTE from R CMD check
+//   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+//   R_useDynamicSymbols(dll, TRUE); // necessary for .onLoad() to work
+// }
+
+// [[Rcpp::init]]
+void rstan_additional_init(DllInfo *dll){
+    R_useDynamicSymbols(dll, TRUE); // necessary for .onLoad() to work
 }

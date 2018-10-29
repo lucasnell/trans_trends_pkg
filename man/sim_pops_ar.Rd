@@ -5,7 +5,7 @@
 \title{Multiple populations simulated using AR1 process.}
 \usage{
 sim_pops_ar(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma,
-  n_cores = 1L)
+  n_cores = 1)
 }
 \description{
 Input and output N values are logged.
