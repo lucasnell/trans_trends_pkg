@@ -20,3 +20,7 @@ sim_pops(max_t, N0, r, alpha, sigma)
 \description{
 Simulate populations with competition.
 }
+\examples{
+sim_pops(10, c(10, 10), c(0.5, 0.5), matrix(rep(1e-3, 4), 2, 2), 0.25)
+
+}

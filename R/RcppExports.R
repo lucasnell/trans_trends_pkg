@@ -37,6 +37,17 @@
 #'
 #' @export
 #'
+#' @examples
+#' X <- matrix(rlnorm(20), 10)
+#' N0 <- matrix(rep(log(10), 6), 3, 2)
+#' b0 <- matrix(rep(log(100), 6), 3, 2)
+#' b1 <- matrix(rep(0.1, 6), 3, 2)
+#' rho <- matrix(rep(0.2, 6), 3, 2)
+#' vcv <- diag(3)
+#' vcv[lower.tri(vcv)] <- vcv[upper.tri(vcv)] <- 0.1
+#' vcv <- array(vcv, dim = c(3, 3, 2))
+#' obs <- rep(0.1, 3)
+#' sim_pops_ar(X, N0, b0, b1, rho, vcv, obs)
 #'
 sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores = 1L) {
     .Call(`_lizard_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores)
@@ -79,6 +90,16 @@ melt_cube <- function(C) {
 #'
 #' @export
 #'
+#' @examples
+#' generate_data(10, 2, 3,
+#'               mean_b0 = log(100),
+#'               mean_b1 = 0.1,
+#'               mean_rho = 0.25,
+#'               sigma_b0 = 0.1,
+#'               sigma_b1 = 0.1,
+#'               sigma_rho = 0.1,
+#'               sigma_eps = 0.1)
+#'
 #'
 generate_data <- function(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs = 0, corr_method = "none") {
     .Call(`_lizard_generate_data`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
@@ -108,6 +129,9 @@ NULL
 #'
 #'
 #' @export
+#'
+#' @examples
+#' sim_pops(10, c(10, 10), c(0.5, 0.5), matrix(rep(1e-3, 4), 2, 2), 0.25)
 #'
 sim_pops <- function(max_t, N0, r, alpha, sigma) {
     .Call(`_lizard_sim_pops`, max_t, N0, r, alpha, sigma)

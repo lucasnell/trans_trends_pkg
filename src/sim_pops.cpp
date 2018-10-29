@@ -61,6 +61,9 @@ void sim_pops_(arma::mat& N,
 //'
 //' @export
 //'
+//' @examples
+//' sim_pops(10, c(10, 10), c(0.5, 0.5), matrix(rep(1e-3, 4), 2, 2), 0.25)
+//'
 //[[Rcpp::export]]
 arma::mat sim_pops(const uint32& max_t, const arma::rowvec& N0, const arma::rowvec& r,
                    const arma::mat& alpha, const double& sigma) {

@@ -143,6 +143,17 @@ arma::cube make_chol_decomp(const arma::cube& vcv_cube) {
 //'
 //' @export
 //'
+//' @examples
+//' X <- matrix(rlnorm(20), 10)
+//' N0 <- matrix(rep(log(10), 6), 3, 2)
+//' b0 <- matrix(rep(log(100), 6), 3, 2)
+//' b1 <- matrix(rep(0.1, 6), 3, 2)
+//' rho <- matrix(rep(0.2, 6), 3, 2)
+//' vcv <- diag(3)
+//' vcv[lower.tri(vcv)] <- vcv[upper.tri(vcv)] <- 0.1
+//' vcv <- array(vcv, dim = c(3, 3, 2))
+//' obs <- rep(0.1, 3)
+//' sim_pops_ar(X, N0, b0, b1, rho, vcv, obs)
 //'
 //[[Rcpp::export]]
 arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat,
@@ -267,6 +278,16 @@ DataFrame melt_cube(const arma::cube& C) {
 //'
 //'
 //' @export
+//'
+//' @examples
+//' generate_data(10, 2, 3,
+//'               mean_b0 = log(100),
+//'               mean_b1 = 0.1,
+//'               mean_rho = 0.25,
+//'               sigma_b0 = 0.1,
+//'               sigma_b1 = 0.1,
+//'               sigma_rho = 0.1,
+//'               sigma_eps = 0.1)
 //'
 //'
 //[[Rcpp::export]]
