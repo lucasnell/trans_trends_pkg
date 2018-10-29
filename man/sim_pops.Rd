@@ -4,7 +4,18 @@
 \alias{sim_pops}
 \title{Simulate populations with competition.}
 \usage{
-sim_pops(n_gen, N0, r, alpha, sigma, seed)
+sim_pops(max_t, N0, r, alpha, sigma)
+}
+\arguments{
+\item{max_t}{Number of time points to simulate.}
+
+\item{N0}{Vector of starting population abundances, one for each species.}
+
+\item{r}{Vector of growth rates, one for each species.}
+
+\item{alpha}{Matrix of intra- and inter-specific density dependences.}
+
+\item{sigma}{Standard deviation of process error.}
 }
 \description{
 Simulate populations with competition.

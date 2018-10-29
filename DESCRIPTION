@@ -27,11 +27,11 @@ LinkingTo:
     BH (>= 1.66.0-1),
     Rcpp (>= 0.12.16),
     RcppEigen (>= 0.3.3.4.0),
-    RcppArmadillo,
-    sitmo
+    RcppArmadillo
 Suggests:
     parallel,
     knitr,
     testthat
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
+Roxygen: list(markdown = TRUE)
