@@ -36,7 +36,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_fit_ts");
-    reader.add_event(57, 55, "end", "model_fit_ts");
+    reader.add_event(58, 56, "end", "model_fit_ts");
     return reader;
 }
 
@@ -432,15 +432,25 @@ public:
                             "assigning variable pop");
                 current_statement_begin__ = 36;
                 for (int t = (pos + 1); t <= ((pos + get_base1(n_per,n_ts,"n_per",1)) - 1); ++t) {
-
+                    {
                     current_statement_begin__ = 38;
+                    local_scalar_t__ pop_t0;
+                    (void) pop_t0;  // dummy to suppress unused var warning
+
+                    stan::math::initialize(pop_t0, DUMMY_VAR__);
+                    stan::math::fill(pop_t0,DUMMY_VAR__);
+                    stan::math::assign(pop_t0,get_base1(pop,(t - 1),"pop",1));
+
+
+                    current_statement_begin__ = 39;
                     stan::model::assign(pop, 
                                 stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list()), 
-                                stan::model::deep_copy((((get_base1(beta,i,"beta",1) * get_base1(x,t,"x",1)) + (get_base1(rho,i,"rho",1) * (get_base1(pop,(t - 1),"pop",1) - (get_base1(beta,i,"beta",1) * get_base1(x,(t - 1),"x",1))))) + (sig_proc * get_base1(z_proc,(t - (i - 1)),"z_proc",1)))), 
+                                (((get_base1(beta,i,"beta",1) * get_base1(x,t,"x",1)) + (get_base1(rho,i,"rho",1) * (pop_t0 - (get_base1(beta,i,"beta",1) * get_base1(x,(t - 1),"x",1))))) + (sig_proc * get_base1(z_proc,(t - (i - 1)),"z_proc",1))), 
                                 "assigning variable pop");
+                    }
                 }
-                current_statement_begin__ = 41;
-                stan::math::assign(pos, stan::model::deep_copy((pos + get_base1(n_per,i,"n_per",1))));
+                current_statement_begin__ = 42;
+                stan::math::assign(pos, (pos + get_base1(n_per,i,"n_per",1)));
             }
             }
 
@@ -467,17 +477,17 @@ public:
 
             // model body
 
-            current_statement_begin__ = 47;
-            lp_accum__.add(normal_log<propto__>(beta, get_base1(beta_prior,1,"beta_prior",1), get_base1(beta_prior,2,"beta_prior",1)));
             current_statement_begin__ = 48;
-            lp_accum__.add(normal_log<propto__>(logit_rho, get_base1(logit_rho_prior,1,"logit_rho_prior",1), get_base1(logit_rho_prior,2,"logit_rho_prior",1)));
+            lp_accum__.add(normal_log<propto__>(beta, get_base1(beta_prior,1,"beta_prior",1), get_base1(beta_prior,2,"beta_prior",1)));
             current_statement_begin__ = 49;
-            lp_accum__.add(normal_log<propto__>(sig_proc, get_base1(sig_proc_prior,1,"sig_proc_prior",1), get_base1(sig_proc_prior,2,"sig_proc_prior",1)));
+            lp_accum__.add(normal_log<propto__>(logit_rho, get_base1(logit_rho_prior,1,"logit_rho_prior",1), get_base1(logit_rho_prior,2,"logit_rho_prior",1)));
             current_statement_begin__ = 50;
+            lp_accum__.add(normal_log<propto__>(sig_proc, get_base1(sig_proc_prior,1,"sig_proc_prior",1), get_base1(sig_proc_prior,2,"sig_proc_prior",1)));
+            current_statement_begin__ = 51;
             lp_accum__.add(normal_log<propto__>(pop_init, get_base1(pop_prior,1,"pop_prior",1), get_base1(pop_prior,2,"pop_prior",1)));
-            current_statement_begin__ = 52;
+            current_statement_begin__ = 53;
             lp_accum__.add(normal_log<propto__>(z_proc, 0, 1));
-            current_statement_begin__ = 54;
+            current_statement_begin__ = 55;
             lp_accum__.add(normal_log<propto__>(pop_obs, pop, sig_obs));
 
         } catch (const std::exception& e) {
@@ -635,15 +645,25 @@ public:
                             "assigning variable pop");
                 current_statement_begin__ = 36;
                 for (int t = (pos + 1); t <= ((pos + get_base1(n_per,n_ts,"n_per",1)) - 1); ++t) {
-
+                    {
                     current_statement_begin__ = 38;
+                    local_scalar_t__ pop_t0;
+                    (void) pop_t0;  // dummy to suppress unused var warning
+
+                    stan::math::initialize(pop_t0, DUMMY_VAR__);
+                    stan::math::fill(pop_t0,DUMMY_VAR__);
+                    stan::math::assign(pop_t0,get_base1(pop,(t - 1),"pop",1));
+
+
+                    current_statement_begin__ = 39;
                     stan::model::assign(pop, 
                                 stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list()), 
-                                stan::model::deep_copy((((get_base1(beta,i,"beta",1) * get_base1(x,t,"x",1)) + (get_base1(rho,i,"rho",1) * (get_base1(pop,(t - 1),"pop",1) - (get_base1(beta,i,"beta",1) * get_base1(x,(t - 1),"x",1))))) + (sig_proc * get_base1(z_proc,(t - (i - 1)),"z_proc",1)))), 
+                                (((get_base1(beta,i,"beta",1) * get_base1(x,t,"x",1)) + (get_base1(rho,i,"rho",1) * (pop_t0 - (get_base1(beta,i,"beta",1) * get_base1(x,(t - 1),"x",1))))) + (sig_proc * get_base1(z_proc,(t - (i - 1)),"z_proc",1))), 
                                 "assigning variable pop");
+                    }
                 }
-                current_statement_begin__ = 41;
-                stan::math::assign(pos, stan::model::deep_copy((pos + get_base1(n_per,i,"n_per",1))));
+                current_statement_begin__ = 42;
+                stan::math::assign(pos, (pos + get_base1(n_per,i,"n_per",1)));
             }
             }
 

@@ -35,10 +35,11 @@ transformed parameters{
             pop[pos] = pop_init[i];
             for (t in (pos + 1):(pos + n_per[n_ts] - 1)) {
                 // state process
-                pop[t] = beta[i] * x[t] + rho[i] * (pop[t-1] - beta[i] * x[t-1]) +
+                real pop_t0 = pop[t-1];  // to avoid deep copying
+                pop[t] = beta[i] * x[t] + rho[i] * (pop_t0 - beta[i] * x[t-1]) +
                     sig_proc * z_proc[t - (i - 1)];
             }
-            pos = pos + n_per[i];
+            pos += n_per[i];
         }
     }
 }
