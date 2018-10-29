@@ -5,7 +5,7 @@
 \title{Multiple populations simulated using AR1 process.}
 \usage{
 sim_pops_ar(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma,
-  n_cores = 1)
+  n_cores = 1L)
 }
 \arguments{
 \item{X}{Matrix of environmental variable.
@@ -15,10 +15,10 @@ columns associated with a given location.}
 \item{N0_mat}{Matrix of starting population abundances (\code{log(# individuals)})
 by species and location.}
 
-\item{b0_mat}{Matrix of $\beta_0$ (the population-abundance intercept) values
+\item{b0_mat}{Matrix of \eqn{\beta_0} (the population-abundance intercept) values
 by species and location.}
 
-\item{b1_mat}{Matrix of $\beta_1$ (the effect of $X$ on $N$) values
+\item{b1_mat}{Matrix of \eqn{\beta_1} (the effect of \eqn{X} on \eqn{N}) values
 by species and location.}
 
 \item{rho_mat}{Matrix of growth rates by species and location.}

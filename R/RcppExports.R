@@ -13,9 +13,9 @@
 #'     columns associated with a given location.
 #' @param N0_mat Matrix of starting population abundances (`log(# individuals)`)
 #'     by species and location.
-#' @param b0_mat Matrix of $\beta_0$ (the population-abundance intercept) values
+#' @param b0_mat Matrix of \eqn{\beta_0} (the population-abundance intercept) values
 #'     by species and location.
-#' @param b1_mat Matrix of $\beta_1$ (the effect of $X$ on $N$) values
+#' @param b1_mat Matrix of \eqn{\beta_1} (the effect of \eqn{X} on \eqn{N}) values
 #'     by species and location.
 #' @param rho_mat Matrix of growth rates by species and location.
 #' @param vcv_cube Cube representing variance-covariance matrices for process error
@@ -47,7 +47,7 @@ sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma,
 #' @param C Three-dimensional array that you want to melt into a two-dimensional
 #'     data frame.
 #'
-#' @return
+#' @return A melted data frame.
 #'
 #' @noRd
 #'

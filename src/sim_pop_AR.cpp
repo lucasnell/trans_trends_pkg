@@ -119,9 +119,9 @@ arma::cube make_chol_decomp(const arma::cube& vcv_cube) {
 //'     columns associated with a given location.
 //' @param N0_mat Matrix of starting population abundances (`log(# individuals)`)
 //'     by species and location.
-//' @param b0_mat Matrix of $\beta_0$ (the population-abundance intercept) values
+//' @param b0_mat Matrix of \eqn{\beta_0} (the population-abundance intercept) values
 //'     by species and location.
-//' @param b1_mat Matrix of $\beta_1$ (the effect of $X$ on $N$) values
+//' @param b1_mat Matrix of \eqn{\beta_1} (the effect of \eqn{X} on \eqn{N}) values
 //'     by species and location.
 //' @param rho_mat Matrix of growth rates by species and location.
 //' @param vcv_cube Cube representing variance-covariance matrices for process error
@@ -225,7 +225,7 @@ arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat,
 //' @param C Three-dimensional array that you want to melt into a two-dimensional
 //'     data frame.
 //'
-//' @return
+//' @return A melted data frame.
 //'
 //' @noRd
 //'
