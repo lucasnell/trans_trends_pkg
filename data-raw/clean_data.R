@@ -54,5 +54,5 @@ inf_clean = inf %>%
     summarize(midges = sum(midges, na.rm=T))
 
 # merge data frames and save
-myv_arth = left_join(pit_clean, inf_clean)
+myv_arth = left_join(pit_clean, inf_clean) %>% as.data.frame()
 usethis::use_data(myv_arth)
