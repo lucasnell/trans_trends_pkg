@@ -93,18 +93,19 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP _rcpp_module_boot_stan_fit4fit_ts_mod();
+
 static const R_CallMethodDef CallEntries[] = {
     {"_repts_sim_pop_ar", (DL_FUNC) &_repts_sim_pop_ar, 7},
     {"_repts_sim_pops_ar", (DL_FUNC) &_repts_sim_pops_ar, 8},
     {"_repts_melt_cube", (DL_FUNC) &_repts_melt_cube, 1},
     {"_repts_generate_data", (DL_FUNC) &_repts_generate_data, 12},
     {"_repts_sim_pops", (DL_FUNC) &_repts_sim_pops, 6},
+    {"_rcpp_module_boot_stan_fit4fit_ts_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4fit_ts_mod, 0},
     {NULL, NULL, 0}
 };
 
-void rstan_additional_init(DllInfo *dll);
 RcppExport void R_init_repts(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
-    rstan_additional_init(dll);
 }
