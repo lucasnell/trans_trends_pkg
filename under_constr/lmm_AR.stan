@@ -14,10 +14,10 @@ parameters {
     real b1_mean;
     real z_b0[n_sp];
     real z_b1[n_sp];
-    real<lower=0> sig_b0[n_sp];
-    real<lower=0> sig_b1[n_sp];
-    real<lower=0, upper=1> phi[n_sp];
+    real<lower=0> sig_b0;
+    real<lower=0> sig_b1;
     real<lower=0> sig_res;
+    real<lower=0, upper=1> phi[n_sp];
 }
 transformed parameters {
     // delcare variables
@@ -25,8 +25,8 @@ transformed parameters {
     real b1[n_sp];
     // intercepts and slopes by group
     for(j in 1:n_sp){
-        b0[j] = b0_mean + sig_b0[j]*z_b0[j];
-        b1[j] = b1_mean + sig_b1[j]*z_b1[j];
+        b0[j] = b0_mean + sig_b0*z_b0[j];
+        b1[j] = b1_mean + sig_b1*z_b1[j];
     }
 }
 model {
@@ -35,12 +35,10 @@ model {
     b1_mean ~ normal(0, 1);
     z_b0 ~ normal(0, 1);
     z_b1 ~ normal(0, 1);
-    phi ~ uniform(0, 1);
-    for(j in 1:n_sp){
-        sig_b0[j] ~ normal(0, 1) T[0, ];
-        sig_b1[j] ~ normal(0, 1) T[0, ];
-    }
+    sig_b0 ~ normal(0, 1) T[0, ];
+    sig_b1 ~ normal(0, 1) T[0, ];
     sig_res ~ normal(0, 1) T[0, ];
+    phi ~ uniform(0, 1);
     // observations
     {
         int pos = 1;
