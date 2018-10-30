@@ -29,12 +29,19 @@ myv_arth2 = myv_arth %>%
     mutate(z_count = (log_count - mean(log_count, na.rm=T))/sd(log_count, na.rm=T)) %>%
     ungroup()
 
-# plot
+# plot: vs. midges
 myv_arth2 %>%
     ggplot(aes(z_midges, z_count))+
     facet_wrap(~taxon)+
     geom_point(alpha = 0.4, size = 1)+
     geom_smooth(method="lm", formula = y ~ x, se=F, color="firebrick")+
+    theme_bw()
+
+# plot: vs year
+myv_arth2 %>%
+    ggplot(aes(year, z_count, group = group))+
+    facet_wrap(~taxon)+
+    geom_line(alpha = 0.5, size = 0.5)+
     theme_bw()
 
 # package data
@@ -80,45 +87,66 @@ fit_summary %>% filter(Rhat > 1.05) %>% select(Rhat, n_eff, var)
 fit_summary %>% filter(n_eff < 0.5*(chains*iter/2)) %>% select(Rhat, n_eff, var) %>% arrange(n_eff) %>%
     mutate(eff_frac = n_eff/(chains*iter/2))
 
+
+
+
+#==========
+#========== Plot outpu
+#==========
+
 # extract coefficients
-coefs = fit_summary %>%
+b0 = fit_summary %>%
+    filter(var %in% paste0("b0[",1:7,"]")) %>%
+    mutate(spec = 1:7) %>%
+    select(var, spec, `16%`,`50%`,`84%`) %>%
+    left_join(data_frame(spec = data_list$map %>% unique, taxon = data_list$taxon %>% unique))
+
+b1 = fit_summary %>%
     filter(var %in% paste0("b1[",1:7,"]")) %>%
     mutate(spec = 1:7) %>%
     select(var, spec, `16%`,`50%`,`84%`) %>%
     left_join(data_frame(spec = data_list$map %>% unique, taxon = data_list$taxon %>% unique))
 
-
-
-# plot coefs
-coefs %>%
-    ggplot(aes(taxon, `50%`))+
-    geom_hline(yintercept = 0, size = 0.3, alpha = 0.5)+
-    geom_point(size = 2)+
-    geom_errorbar(aes(ymin = `16%`, ymax = `84%`), width = 0)+
-    scale_y_continuous(limits=c(-0.25, 0.25))+
-    theme_bw()
-
-fit_summary %>%
+phi = fit_summary %>%
     filter(var %in% paste0("phi[",1:7,"]")) %>%
     mutate(spec = 1:7) %>%
     select(var, spec, `16%`,`50%`,`84%`) %>%
-    left_join(data_frame(spec = data_list$map %>% unique, taxon = data_list$taxon %>% unique)) %>%
+    left_join(data_frame(spec = data_list$map %>% unique, taxon = data_list$taxon %>% unique))
+
+# plot coefs
+b0 %>%
     ggplot(aes(taxon, `50%`))+
     geom_hline(yintercept = 0, size = 0.3, alpha = 0.5)+
     geom_point(size = 2)+
     geom_errorbar(aes(ymin = `16%`, ymax = `84%`), width = 0)+
     theme_bw()
 
-test = coefs %>%
-    expand(taxon, z_midges = -3:1.5) %>%
-    left_join(coefs %>% select(taxon, `50%`)) %>%
-    mutate(z_count = `50%`*z_midges)
+b1 %>%
+    ggplot(aes(taxon, `50%`))+
+    geom_hline(yintercept = 0, size = 0.3, alpha = 0.5)+
+    geom_point(size = 2)+
+    geom_errorbar(aes(ymin = `16%`, ymax = `84%`), width = 0)+
+    theme_bw()
 
+phi %>%
+    ggplot(aes(taxon, `50%`))+
+    geom_hline(yintercept = 0, size = 0.3, alpha = 0.5)+
+    geom_point(size = 2)+
+    geom_errorbar(aes(ymin = `16%`, ymax = `84%`), width = 0)+
+    theme_bw()
+
+
+# plot predictions
+preds = b0 %>%
+    expand(taxon, z_midges = -3:1.5) %>%
+    left_join(b0 %>% rename(b0 = `50%`) %>% select(taxon, b0)) %>%
+    left_join(b1 %>% rename(b1 = `50%`) %>% select(taxon, b1)) %>%
+    mutate(z_count = b0 + b1*z_midges)
 myv_arth2 %>%
     ggplot(aes(z_midges, z_count))+
     facet_wrap(~taxon)+
     geom_point(alpha = 0.4, size = 1)+
-    geom_line(data = test, color = "red", size = 0.8)+
+    geom_line(data = preds, color = "red", size = 0.8)+
     geom_smooth(method="lm", formula = y ~ x, se=F, color="blue", linetype = 2)+
     theme_bw()
 
