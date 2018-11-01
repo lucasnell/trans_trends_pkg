@@ -12,6 +12,8 @@
 using namespace Rcpp;
 
 
+
+
 // /*
 //  One population simulated using AR1 process.
 //  N in this case is already logged
@@ -255,9 +257,9 @@ DataFrame melt_cube(const arma::cube& C) {
 }
 
 
-//' Generate data for simulations.
+//' Generate parameter values for simulations.
 //'
-//' Generate multi-location, multi-species time series data.
+//' Generate parameter values to simulate multi-location, multi-species time series data.
 //'
 //'
 //' @param n_time Number of time steps.
@@ -280,7 +282,7 @@ DataFrame melt_cube(const arma::cube& C) {
 //' @export
 //'
 //' @examples
-//' generate_data(10, 2, 3,
+//' generate_pars(10, 2, 3,
 //'               mean_b0 = log(100),
 //'               mean_b1 = 0.1,
 //'               mean_rho = 0.25,
@@ -291,7 +293,7 @@ DataFrame melt_cube(const arma::cube& C) {
 //'
 //'
 //[[Rcpp::export]]
-List generate_data(const uint32& n_time,
+List generate_pars(const uint32& n_time,
                    const uint32& n_loc,
                    const uint32& n_spp,
                    const double& mean_b0,
@@ -303,22 +305,28 @@ List generate_data(const uint32& n_time,
                    const double& sigma_eps,
                    const double& sigma_obs = 0,
                    const std::string& corr_method = "none") {
+
+    std::normal_distribution<double> rnorm_distr(0.0, 1.0);
+    pcg32 eng = seeded_pcg();
+
     // Set up matrices
     // Environmental variables
     arma::mat X_(n_time, n_loc, arma::fill::zeros);
-    arma::vec rnd = as<arma::vec>(Rcpp::rnorm(n_time));
+    arma::vec rnd(n_time);
+    for (double& r : rnd) r = rnorm_distr(eng);
     X_.each_col() += rnd;
     // Mean abundance in average environment
     arma::mat b0_mat_(n_spp, n_loc, arma::fill::zeros);
-    rnd = as<arma::vec>(Rcpp::rnorm(n_spp, mean_b0, sigma_b0));
+    rnd.set_size(n_spp);
+    for (double& r : rnd) r = rnorm_distr(eng) * sigma_b0 + mean_b0;
     b0_mat_.each_col() += rnd;
     // Response to environmental variables
     arma::mat b1_mat_(n_spp, n_loc, arma::fill::zeros);
-    rnd = as<arma::vec>(Rcpp::rnorm(n_spp, mean_b1, sigma_b1));
+    for (double& r : rnd) r = rnorm_distr(eng) * sigma_b1 + mean_b1;
     b1_mat_.each_col() += rnd;
     // Autoregressive parameter
     arma::mat rho_mat_(n_spp, n_loc, arma::fill::zeros);
-    rnd = as<arma::vec>(Rcpp::rnorm(n_spp, mean_rho, sigma_rho));
+    for (double& r : rnd) r = rnorm_distr(eng) * sigma_rho + mean_rho;
     rnd = arma::exp(rnd) / (1 + arma::exp(rnd));
     rho_mat_.each_col() += rnd;
     // Observation error
@@ -340,7 +348,8 @@ List generate_data(const uint32& n_time,
         vcv_ /= vcv_.diag()(0);
     } else if (corr_method == "random") {
         uint32 n_corrs = ((n_spp - 1) / 2) * (1 + (n_spp - 1));
-        arma::vec rnd_phy = as<arma::vec>(Rcpp::runif(n_corrs, -1, 1));
+        arma::vec rnd_phy(n_corrs);
+        for (double& r : rnd_phy) r = runif_ab(eng, -1, 1);
         for (uint32 i = 0, rnd_i = 0; i < n_spp; i++) {
             for (uint32 j = i+1; j < n_spp; j++, rnd_i++) {
                 vcv_(i,j) = rnd_phy(rnd_i);
