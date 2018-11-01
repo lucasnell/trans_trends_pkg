@@ -37,9 +37,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// generate_data
-List generate_data(const uint32& n_time, const uint32& n_loc, const uint32& n_spp, const double& mean_b0, const double& mean_b1, const double& mean_rho, const double& sigma_b0, const double& sigma_b1, const double& sigma_rho, const double& sigma_eps, const double& sigma_obs, const std::string& corr_method);
-RcppExport SEXP _lizard_generate_data(SEXP n_timeSEXP, SEXP n_locSEXP, SEXP n_sppSEXP, SEXP mean_b0SEXP, SEXP mean_b1SEXP, SEXP mean_rhoSEXP, SEXP sigma_b0SEXP, SEXP sigma_b1SEXP, SEXP sigma_rhoSEXP, SEXP sigma_epsSEXP, SEXP sigma_obsSEXP, SEXP corr_methodSEXP) {
+// generate_pars
+List generate_pars(const uint32& n_time, const uint32& n_loc, const uint32& n_spp, const double& mean_b0, const double& mean_b1, const double& mean_rho, const double& sigma_b0, const double& sigma_b1, const double& sigma_rho, const double& sigma_eps, const double& sigma_obs, const std::string& corr_method);
+RcppExport SEXP _lizard_generate_pars(SEXP n_timeSEXP, SEXP n_locSEXP, SEXP n_sppSEXP, SEXP mean_b0SEXP, SEXP mean_b1SEXP, SEXP mean_rhoSEXP, SEXP sigma_b0SEXP, SEXP sigma_b1SEXP, SEXP sigma_rhoSEXP, SEXP sigma_epsSEXP, SEXP sigma_obsSEXP, SEXP corr_methodSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -55,7 +55,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type sigma_eps(sigma_epsSEXP);
     Rcpp::traits::input_parameter< const double& >::type sigma_obs(sigma_obsSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type corr_method(corr_methodSEXP);
-    rcpp_result_gen = Rcpp::wrap(generate_data(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method));
+    rcpp_result_gen = Rcpp::wrap(generate_pars(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -81,7 +81,7 @@ RcppExport SEXP _rcpp_module_boot_stan_fit4lmm_mod();
 static const R_CallMethodDef CallEntries[] = {
     {"_lizard_sim_pops_ar", (DL_FUNC) &_lizard_sim_pops_ar, 8},
     {"_lizard_melt_cube", (DL_FUNC) &_lizard_melt_cube, 1},
-    {"_lizard_generate_data", (DL_FUNC) &_lizard_generate_data, 12},
+    {"_lizard_generate_pars", (DL_FUNC) &_lizard_generate_pars, 12},
     {"_lizard_sim_pops", (DL_FUNC) &_lizard_sim_pops, 5},
     {"_rcpp_module_boot_stan_fit4fit_ts_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4fit_ts_mod, 0},
     {"_rcpp_module_boot_stan_fit4lmm_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4lmm_mod, 0},

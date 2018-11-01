@@ -66,9 +66,9 @@ melt_cube <- function(C) {
     .Call(`_lizard_melt_cube`, C)
 }
 
-#' Generate data for simulations.
+#' Generate parameter values for simulations.
 #'
-#' Generate multi-location, multi-species time series data.
+#' Generate parameter values to simulate multi-location, multi-species time series data.
 #'
 #'
 #' @param n_time Number of time steps.
@@ -91,7 +91,7 @@ melt_cube <- function(C) {
 #' @export
 #'
 #' @examples
-#' generate_data(10, 2, 3,
+#' generate_pars(10, 2, 3,
 #'               mean_b0 = log(100),
 #'               mean_b1 = 0.1,
 #'               mean_rho = 0.25,
@@ -101,8 +101,8 @@ melt_cube <- function(C) {
 #'               sigma_eps = 0.1)
 #'
 #'
-generate_data <- function(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs = 0, corr_method = "none") {
-    .Call(`_lizard_generate_data`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
+generate_pars <- function(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs = 0, corr_method = "none") {
+    .Call(`_lizard_generate_pars`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
 }
 
 #' Simulate populations with competition.
