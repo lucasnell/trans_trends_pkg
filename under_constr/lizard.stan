@@ -6,7 +6,7 @@ data {
     int nq; // number of coefficients (same as number of fixed effects + intercepts)
     int k[nq]; // number of groups per fixed effect;
     int l[sum(k)]; // number of levels per group (repeated for each fixed effect)
-    int g[ns, sum(nq)]; // grouping structure
+    int g[ns, sum(k)]; // grouping structure
     // data
     real y[n_obs]; // response variables
     real x[n_obs,nq]; // predictor variables
@@ -27,16 +27,20 @@ transformed parameters {
             int pos2 = 1;
             // loop over coefficients
             for (q in 1:nq){
-                real sigs[k[q]];
-                real zs[k[q]];
-                // loop over groups
-                for(i in pos2:(pos2 + k[q] - 1)){
-                    sigs[i - pos2 + 1] = sig_beta[i];
-                    zs[i - pos2 + 1] = z[g[s, i]];
-                } // i
-                // calculate coefficients (fixed + random effect)
-                beta[s,q] = alpha[q] + dot_product(sigs, zs);
-                pos2 = pos2 + k[q];
+                if(k[q]==0) {
+                    beta[s,q] = alpha[q];
+                } else {
+                    real sigs[k[q]];
+                    real zs[k[q]];
+                    // loop over groups
+                    for(i in pos2:(pos2 + k[q] - 1)){
+                        sigs[i - pos2 + 1] = sig_beta[i];
+                        zs[i - pos2 + 1] = z[g[s, i]];
+                    } // i
+                    // calculate coefficients (fixed + random effect)
+                    beta[s,q] = alpha[q] + dot_product(sigs, zs);
+                    pos2 += k[q];
+                }
             } // q
             // predicted values
             y_pred[pos1] = dot_product(beta[s,], x[pos1,]);
