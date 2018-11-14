@@ -1,47 +1,47 @@
 data {
     // indeces
-    int Y // number of observations
-    int S; // number of time series
-    int Y_S; // number of observations per time series
-    int Q; // number of coefficients (same as number of fixed effects + intercepts)
-    int K[Q]; // number of groups per fixed effect;
-    int L[sum[K]]; // number of levels per group (repeated for each fixed effect)
-    int G[S, sum(Q)]; // grouping structure
+    int n_obs // number of observations
+    int ns; // number of time series
+    int obs_per; // number of observations per time series
+    int nq; // number of coefficients (same as number of fixed effects + intercepts)
+    int k[nq]; // number of groups per fixed effect;
+    int l[sum(k)]; // number of levels per group (repeated for each fixed effect)
+    int g[ns, sum(nq)]; // grouping structure
     // data
-    real y[Y]; // response variables
-    real X[Y,QQ]; // predictor variables
+    real y[n_obs]; // response variables
+    real x[n_obs,nq]; // predictor variables
 }
 parameters {
-    real alpha[Q]; // fixed effects and intercepts
-    real z[sum(L)]; // standardized variates for group levels
-    real<lower=0> sig_beta[sum(K)]; // group standard deviations
+    real alpha[nq]; // fixed effects and intercepts
+    real z[sum(l)]; // standardized variates for group levels
+    real<lower=0> sig_beta[sum(k)]; // group standard deviations
     real<lower=0> sig_res; // residual standard deviation
 }
 transformed parameters {
-    real beta[S,Q]; // coefficients
-    real y_pred[Y]; // predicted values
+    real beta[ns,nq]; // coefficients
+    real y_pred[n_obs]; // predicted values
     {
         int pos1 = 1;
         // loop over time series
-        for (s in 1:S){
+        for (s in 1:ns){
             int pos2 = 1;
             // loop over coefficients
-            for (q in 1:Q){
-                real sigs[K[q]];
-                real zs[K[q]];
+            for (q in 1:nq){
+                real sigs[k[q]];
+                real zs[k[q]];
                 // loop over groups
-                for(i in pos2:(pos2 + K[q] - 1)){
+                for(i in pos2:(pos2 + k[q] - 1)){
                     sigs[i - pos2 + 1] = sig_beta[i];
-                    zs[i - pos2 + 1] = z[G[s, i]];
+                    zs[i - pos2 + 1] = z[g[s, i]];
                 } // i
                 // calculate coefficients (fixed + random effect)
                 beta[s,q] = alpha[q] + dot_product(sigs, zs);
-                pos2 = pos2 + K[q];
+                pos2 = pos2 + k[q];
             } // q
             // predicted values
-            y_pred[pos1] = dot_product(beta[s,], X[pos1,]);
-            for (t in (pos1 + 1):(pos1 + Y_S[s] -1)) {
-                    y_pred[t] = dot_product(beta[s,], X[t,]) + phi[s]*(y[t-1] - dot_product(beta[s,], X[t-1,]));
+            y_pred[pos1] = dot_product(beta[s,], x[pos1,]);
+            for (t in (pos1 + 1):(pos1 + obs_per[s] -1)) {
+                    y_pred[t] = dot_product(beta[s,], x[t,]) + phi[s]*(y[t-1] - dot_product(beta[s,], x[t-1,]));
            } // t
         } // s
     }
@@ -49,7 +49,7 @@ transformed parameters {
 model {
     // priors
     z ~ normal(0, 1);
-    for (i in 1:sum(K)){
+    for (i in 1:sum(k)){
         sig_beta ~ normal(0, 1) T[0, ];
     }
     sig_res ~ normal(0, 1) T[0, ];
