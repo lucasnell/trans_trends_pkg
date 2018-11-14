@@ -11,6 +11,7 @@ data {
     // data
     real y[n_obs];                      // response variables
     real x[n_obs, n_coef];              // predictor variables
+    real<lower=0> time[n_obs];          // response variable times
 }
 parameters {
     real alpha[n_coef];                         // fixed effects and intercepts
@@ -48,8 +49,9 @@ transformed parameters {
             y_pred[xy_pos] = dot_product(beta[ts,], x[xy_pos,]);
             for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
                     y_pred[t] = dot_product(beta[ts,], x[t,]) +
-                        phi[p_groups[ts]] * (y[t-1] - dot_product(beta[ts,], x[t-1,]));
+                        phi[p_groups[ts]]^(time[t] - time[t-1]) * (y[t-1] - dot_product(beta[ts,], x[t-1,]));
            } // t
+           xy_pos += obs_per[ts];
         } // ts
     }
 }
