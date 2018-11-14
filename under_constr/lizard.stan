@@ -6,7 +6,8 @@ data {
     int nq; // number of coefficients (same as number of fixed effects + intercepts)
     int k[nq]; // number of groups per fixed effect;
     int l[sum(k)]; // number of levels per group (repeated for each fixed effect)
-    int g[ns, sum(k)]; // grouping structure
+    int g[ns, sum(k)]; // grouping structure for betas
+    int h[ns]; // grouping structure for phis
     // data
     real y[n_obs]; // response variables
     real x[n_obs,nq]; // predictor variables
@@ -14,7 +15,7 @@ data {
 parameters {
     real alpha[nq]; // fixed effects and intercepts
     real z[sum(l)]; // standardized variates for group levels
-    real<lower=0, upper=1> phi[ns]; // autoregressive paramter for each
+    real<lower=0, upper=1> phi[max(h)]; // autoregressive paramter for each
     real<lower=0> sig_beta[sum(k)]; // group standard deviations
     real<lower=0> sig_res; // residual standard deviation
 }
@@ -45,8 +46,8 @@ transformed parameters {
             } // q
             // predicted values
             y_pred[pos1] = dot_product(beta[s,], x[pos1,]);
-            for (t in (pos1 + 1):(pos1 + obs_per[s] -1)) {
-                    y_pred[t] = dot_product(beta[s,], x[t,]) + phi[s]*(y[t-1] - dot_product(beta[s,], x[t-1,]));
+            for (t in (pos1 + 1):(pos1 + obs_per[s] - 1)) {
+                    y_pred[t] = dot_product(beta[s,], x[t,]) + phi[h[s]]*(y[t-1] - dot_product(beta[s,], x[t-1,]));
            } // t
         } // s
     }
