@@ -1,8 +1,8 @@
 data {
     // indeces
-    int n_obs // number of observations
+    int n_obs; // number of observations
     int ns; // number of time series
-    int obs_per; // number of observations per time series
+    int obs_per[ns]; // number of observations per time series
     int nq; // number of coefficients (same as number of fixed effects + intercepts)
     int k[nq]; // number of groups per fixed effect;
     int l[sum(k)]; // number of levels per group (repeated for each fixed effect)
@@ -14,6 +14,7 @@ data {
 parameters {
     real alpha[nq]; // fixed effects and intercepts
     real z[sum(l)]; // standardized variates for group levels
+    real<lower=0, upper=1> phi[ns]; // autoregressive paramter for each
     real<lower=0> sig_beta[sum(k)]; // group standard deviations
     real<lower=0> sig_res; // residual standard deviation
 }
@@ -52,11 +53,13 @@ transformed parameters {
 }
 model {
     // priors
+    alpha ~ normal(0, 1);
     z ~ normal(0, 1);
+    phi ~ uniform(0, 1);
     for (i in 1:sum(k)){
-        sig_beta ~ normal(0, 1) T[0, ];
+        sig_beta[i] ~ normal(0, 1) T[0, ];
     }
     sig_res ~ normal(0, 1) T[0, ];
     // model
-    y ~ normal(y_pred, sig_res)
+    y ~ normal(y_pred, sig_res);
 }
