@@ -9,6 +9,142 @@ f_apply <- function(X, FUN, bind_fxn = base::c, ...) {
     return(x)
 }
 
+#' Expand interactions for a formula, part of a formula, or a formula string.
+#'
+#' @param x The input formula, part of a formula, or a formula string.
+#'
+#' @noRd
+#'
+expand_inters <- function(x) {
+    if (inherits(x, "call") || inherits(x, "name") || inherits(x, "formula")) {
+        fs <- deparse(x)
+    } else if (isTRUE(x == 1)) {
+        return("1")
+    } else if (!inherits(x, "character")) {
+        stop("Must be character, formula, name, call, or 1.")
+    }
+    if (!grepl("~", fs)) fs <- paste("1~", fs)
+    f <- as.formula(fs)
+    return(attr(terms.formula(f), "term.labels"))
+}
+
+
+#' Make info for random effects and check inputs.
+#'
+#'
+#' @noRd
+#'
+make_check_rand <- function(fixed, rand_chunks, data) {
+
+    # Check strings for weird characters:
+    # ----------------------*
+    if (any(f_apply(rand_chunks, function(x)
+        sum(gregexpr("|", deparse(x), fixed=TRUE)[[1]] > 0) > 1))) {
+        stop("\nWhen using bars to represent random effects, use parentheses ",
+             "around each random effect and don't use multiple bars.",
+             call. = FALSE)
+    }
+    # The variables being grouped into random effects:
+    rand <- f_apply(rand_chunks, function(x) deparse(x[[2]], 500L))
+    # The variables grouping the random effects:
+    rand_g <- f_apply(rand_chunks, function(x) deparse(x[[3]], 500L))
+    # Checking for weird chars in LHS (`rand`)
+    if (any(grepl("[\\||\\(|\\)|~]", rand))) {
+        stop("\nNone of the following characters should be on the left side of ",
+             "a random effect-specifying chunk: |, (, ), ~",
+             call. = FALSE)
+    }
+    # Check for weird characters in the grouping sides:
+    if (any(grepl("[\\||\\(|\\)|~]", rand_g))) {
+        stop("\nNone of the following characters should be on the right side of ",
+             "a random effect-specifying chunk: |, (, ), ~",
+             call. = FALSE)
+    }
+    # Check for any interactions in grouping side:
+    if (any(grepl("\\*", rand_g))) {
+        stop("\nDo not include interactions in the grouping variables for random ",
+             "effects. Instead create a new factor to group by.",
+             call. = FALSE)
+    }
+
+    # Split up, then group random effects:
+    # ----------------------*
+    rand <- lapply(rand_chunks, function(x) expand_inters(x[[2]]))
+    rand_g <- f_apply(1:length(rand_chunks),
+                      function(i) replicate(length(rand[[i]]),
+                                            all.vars(rand_chunks[[i]][[3]]),
+                                            simplify = FALSE))
+    rand <- c(rand, recursive = TRUE)
+    names(rand_g) <- rand
+    if ("0" %in% rand) {
+        stop("\n`0` cannot be a covariate grouped for random effects.", call. = FALSE)
+    }
+    if (sum(duplicated(rand)) > 0) {
+        stop("\nYou have duplicates in the terms used on the left-hand side of the ",
+             "bar in your random effects.",
+             call. = FALSE)
+    }
+    # Make sure all grouping variables are factors
+    g_factors <- sapply(unique(c(rand_g, recursive = TRUE)),
+                        function(x) inherits(get(x, envir = data), "factor"))
+    if (!all(g_factors)) {
+        stop("\nAll mixed-effects grouping variables must be factors. ",
+             "Please change the following variable(s) to factor(s): `",
+             paste(names(g_factors)[!g_factors], collapse = ", "), "`.",
+             call. = FALSE)
+    }
+    # Take care of weird scenario where a 0 is in `fixed` and a 1 in `rand`
+    if ("0" %in% fixed && "1" %in% rand) {
+        stop("\nIf including the intercept as a random effect (using `+ (1 | ...)`) ",
+             "you cannot also add `+ 0` to the formula.",
+             call. = TRUE)
+    }
+    # Make sure all random-effects variables have an intercept:
+    if (!all(rand %in% fixed)) {
+        stop("\nAll random effects are required to have an intercept. ",
+             "So `y ~ x1 + (x1 | g1)` works, but `y ~ (x1 | g1)` does not.",
+             call. = TRUE)
+    }
+
+    return(list(rand = rand, rand_g = rand_g))
+}
+
+
+
+#' Create vector of the number of columns in model matrix per covariate.
+#'
+#' This will always be 1 for non-factors.
+#'
+#'
+#' @noRd
+#'
+n_cols_per_cov <- function(fixed, formula, data) {
+    # Number of columns in model matrix for each covariate.
+    # This will always be 1 unless the covariate is a factor.
+    ncpc <- f_apply(fixed,
+                             function(v) {
+                                 if (v == "0") return(0L)
+                                 if (v == "1") return(1L)
+                                 f <- reformulate(v, deparse(formula[[2]]),
+                                                  intercept = FALSE)
+                                 z <- model.matrix(f, data = data)
+                                 return(ncol(z))
+                             })
+    names(ncpc) <- fixed
+    if (sum(is_fctr <- ncpc > 1) > 0) {
+        has_inter <- "1" %in% fixed
+        first_fctr <- TRUE
+        for (i in which(is_fctr)) {
+            if (first_fctr) {
+                first_fctr <- FALSE
+                if (has_inter) ncpc[i] <- ncpc[i] - 1
+            } else ncpc[i] <- ncpc[i] - 1
+        }
+    }
+
+    return(ncpc)
+}
+
 
 #' Get information from some object by time series.
 #'
@@ -40,6 +176,61 @@ get_ts_info <- function(x, start_end_mat, err_msg_arg) {
 }
 
 
+
+#' Make information list when formula has random effects.
+#'
+#'
+#' @noRd
+#'
+form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
+
+    rand_info <- make_check_rand(fixed, rand_chunks, data)
+    rand <- rand_info$rand
+    rand_g <- rand_info$rand_g
+
+    # Number of columns in model matrix for each covariate.
+    # This will always be 1 unless the covariate is a factor.
+    ncpc <- n_cols_per_cov(fixed, formula, data)
+
+    # number of coefficients (fixed effects + intercepts)
+    # number of groups per fixed effect:
+    g_per_ff <- f_apply(fixed,
+                        function(x) {
+                            z <- ifelse(!x %in% rand, 0L, length(rand_g[[x]]))
+                            return(rep(z, ncpc[[x]]))
+                        })
+    # levels per group (repeated by fixed effect):
+    lev_per_g <- f_apply(fixed,
+                         function(x) {
+                             if (!x %in% rand) return(integer(0))
+                             z <- f_apply(rand_g[[x]],
+                                          function(xx) {
+                                              length(levels(get(xx, envir = data)))
+                                          })
+                             return(rep(z, ncpc[[x]]))
+                         })
+    # grouping structure for betas:
+    # Getting dataset of grouping variables
+    g_mat <- f_apply(fixed,
+                     function(x) {
+                         if (!x %in% rand) return(NULL)
+                         z <- lapply(rand_g[[x]],
+                                     function(xx) cbind(get(xx, envir = data)))
+                         return(do.call(cbind, rep(z, ncpc[[x]])))
+                     }, bind_fxn = base::cbind)
+    b_groups <- get_ts_info(g_mat, start_end_mat,
+                            "Random effects-grouping variables")
+
+    info_list <- list(
+        g_per_ff = g_per_ff,
+        lev_per_g = lev_per_g,
+        b_groups = b_groups
+    )
+
+    return(info_list)
+}
+
+
 #' Check that formulas are of proper structure.
 #'
 #' This is only used to create error messages, so this function invisibly returns `NULL`.
@@ -59,17 +250,24 @@ proper_formula <- function(form, arg) {
     if (arg == "formula") {
         allow_bars <- TRUE
         one_sided <- FALSE
+        allow_inter <- TRUE
     } else if (arg == "time_form") {
         allow_bars <- TRUE
         one_sided <- TRUE
+        allow_inter <- FALSE
     } else {
         allow_bars <- FALSE
         one_sided <- TRUE
+        allow_inter <- FALSE
     }
 
     if (!inherits(form, "formula") || !identical(quote(`~`), form[[1]])) {
         err_msg <- paste("\nArgument", arg, "is not a formula.")
         stop(err_msg, call. = FALSE)
+    }
+    if (sum(all.names(form) == "~") > 1) {
+        stop("\nYou should never include > 1 tilde (`~`) in any `lizard` argument.",
+             call. = TRUE)
     }
 
     if (one_sided && length(form) != 2) err_msg <- "one-sided"
@@ -79,10 +277,21 @@ proper_formula <- function(form, arg) {
              call. = FALSE)
     }
 
-    allowed_chars <- c("\\.", "\\_", "\\~", "\\+", "\\(", "\\)", "\\|")
-    if (!allow_bars) allowed_chars <- allowed_chars[1:4]
+    # First check for colons to provide more useful error message for this case:
+    if (grepl("\\:", deparse(formula))) {
+        stop("\nIn the `", arg, "` argument, you've included a colon. ",
+             "This is not allowed in `lizard`, so please just use an asterisk to ",
+             "specify interactive effects.", call. = FALSE)
+    }
+    # Do the same for double bars:
+    if (sum(all.names(form) == "||") > 0) {
+        stop("\nDouble bars (`||`) are not allowed in formulas.", call. = FALSE)
+    }
+    allowed_chars <- c("\\.", "\\_", "\\~", "\\+")
+    if (allow_inter) allowed_chars <- c(allowed_chars, "\\*")
+    if (allow_bars) allowed_chars <- c(allowed_chars, "\\(", "\\)", "\\|")
     grep_str <- paste0(c(paste0("(?!", allowed_chars, ")"), "[[:punct:]]"), collapse = "")
-    if (any(grepl(grep_str, deparse(form), perl = TRUE))) {
+    if (grepl(grep_str, deparse(form), perl = TRUE)) {
         stop("\nIn the `", arg, "` argument, you're only allowed the following ",
              "characters: ", paste(gsub("\\\\", "", allowed_chars), collapse = ", "), ".",
              call. = FALSE)
@@ -107,11 +316,6 @@ proper_formula <- function(form, arg) {
              call. = FALSE)
     }
 
-    if (grepl("\\|\\|", deparse(form))) {
-        stop("\nDouble bars (`||`) are not allowed in formulas.",
-             call. = FALSE)
-    }
-
     invisible(NULL)
 
 }
@@ -127,14 +331,13 @@ proper_formula <- function(form, arg) {
 #' @noRd
 #'
 initial_input_checks <- function(formula,
-                         time_form,
-                         data,
-                         ar_form) {
+                                 time_form,
+                                 data,
+                                 ar_form) {
 
     if (!inherits(data, "environment")) {
-        stop("\nThe `data` argument to the `lizard` function, if provided, must ",
-             "be a list, data frame, or environment.",
-             call. = FALSE)
+        stop("\nThe `data` argument to the `initial_input_checks` function must be an ",
+             " environment.", call. = FALSE)
     }
 
     # Checking structure of the formulas:
@@ -261,160 +464,71 @@ check_len_sort_data <- function(formula,
 
 #' Make objects related to coefficients.
 #'
+#' Output list has the following items:
 #'
+#' - `n_coef`:      number of coefficients (fixed effects + intercepts)
+#' - `g_per_ff`:    number of groups per fixed effect
+#' - `lev_per_g`:   number of levels per group (repeated by fixed effect)
+#' - `b_groups`:    grouping structure for betas
+#' - `x`:           predictor variables
+
 #' @noRd
 #'
-make_coef_objects <- function(formula, data, start_end_mat) {
+make_coef_objects <- function(formula, data, obs_per, time_form, ar_form) {
+
+    # Starting and ending positions for each time series
+    # (this will be useful for later functions):
+    start_end_mat <- cbind(c(1, cumsum(head(obs_per, -1)) + 1),
+                           c(cumsum(obs_per[-1]), sum(obs_per)))
 
     rand_chunks <- lme4::findbars(formula)
-    fixed <- strsplit(deparse(lme4::nobars(formula)[[3]], 500L), " \\+ ")[[1]]
+    fixed <- expand_inters(lme4::nobars(formula)[[3]])
+
+    # Make sure intercept is explicitly included in fixed if not already:
+    if (!any(c("0","1") %in% fixed)) fixed <- c("1", fixed)
+    # If the intercept isn't the first item, switch it in the names so that it is:
+    if (sum(fixed == "1") > 0 && (i <- which(fixed == "1")) != 1) {
+        fixed <- c("1", fixed[-i])
+    }
 
     if (is.null(rand_chunks)) {
-        # predictor variables
-        x <- model.matrix(formula, data = data)
-        # number of coefficients:
-        n_coef <- ncol(x)
-        # groups per independent variable
-        g_per_ff <- rep(0, n_coef)
-        # levels per group
-        lev_per_g <- integer(0)
-        # grouping structure for betas
-        b_groups <- matrix(0L, nrow = nrow(start_end_mat), ncol = 0)
+
+        out <- list()
+        out$x <- model.matrix(formula, data = data)
+        out$n_coef <- ncol(out$x)
+        out$g_per_ff <- rep(0, out$n_coef)
+        out$lev_per_g <- integer(0)
+        out$b_groups <- matrix(0L, nrow = nrow(start_end_mat), ncol = 0)
+
     } else {
-        if (any(f_apply(rand_chunks, function(x)
-            length(gregexpr("|", deparse(x), fixed=TRUE)[[1]])) > 1)) {
-            stop("\nWhen using bars to represent random effects, use parentheses ",
-                 "around each random effect and don't use multiple bars.",
-                 call. = FALSE)
-        }
-        # The variables being grouped into random effects:
-        rand <- f_apply(rand_chunks, function(x) deparse(x[[2]], 500L))
-        if ("0" %in% rand) {
-            stop("\n`0` cannot be a covariate grouped for random effects.", call. = FALSE)
-        }
-        if (any(grepl("\\+", rand))) {
-            stop("\nDon't include multiple variables on the left side of a random ",
-                 "effect-specifying chunk. ",
-                 "Instead, make multiple chunks, one for each variable being grouped.",
-                 call. = FALSE)
-        }
-        if (any(grepl("[\\||\\(|\\)|~]", rand))) {
-            stop("\nNone of the following characters should be on the left side of ",
-                 "a random effect-specifying chunk: |, (, ), ~",
-                 call. = FALSE)
-        }
-        if (sum(duplicated(rand)) > 0) {
-            stop("\nYou have duplicates in the terms used on the left-hand side of the ",
-                 "bar in your random effects.",
-                 call. = FALSE)
-        }
-        # The variables grouping random-effects:
-        rand_groups <- lapply(rand_chunks,
-                              function(x) strsplit(deparse(x[[3]], 500L)," \\+ ")[[1]])
-        names(rand_groups) <- rand
-        # Check for weird characters in the grouping sides of the random-effect chunks
-        if (any(grepl("[\\||\\(|\\)|~]", c(rand_groups, recursive = TRUE)))) {
-            stop("\nNone of the following characters should be on the right side of ",
-                 "a random effect-specifying chunk: |, (, ), ~",
-                 call. = FALSE)
-        }
-        # Make sure all grouping variables are factors
-        g_factors <- vapply(c(rand_groups, recursive = TRUE),
-                            function(x) inherits(get(x, envir = data), "factor"),
-                            TRUE)
-        if (!all(g_factors)) {
-            stop("\nAll mixed-effects grouping variables must be factors. ",
-                 "Please change the following variable(s) to factor(s): `",
-                 paste(names(g_factors)[!g_factors], collapse = ", "), "`.",
-                 call. = FALSE)
-        }
-        # Take care of weirdness with lme4::nobars changing fixed to y~1 when there
-        # are no fixed effects:
-        if (all(fixed == "1") && "1" %in% rand) fixed <- character(0)
-        # Take care of weird scenario where a 0 is in `fixed` and a 1 in `rand`
-        if ("0" %in% fixed && "1" %in% rand) {
-            stop("\nDo not include intercept as both random (using `+ (1 | ...)`) ",
-                 "and fixed (using `+ 0`) effects.",
-                 call. = TRUE)
-        }
 
-        # Necessary objects for creating output:
-        if (!any(c("0","1") %in% fixed) && !"1" %in% rand) fixed <- c("1", fixed)
-        ff_names <- c(fixed, rand)
-        if (sum(duplicated(ff_names)) > 0) {
-            stop("\nThe following covariate(s) is/are duplicated: ",
-                 paste(ff_names[duplicated(ff_names)], collapse = ", "), call. = FALSE)
-        }
-        # If the intercept isn't the first item, switch it in the names so that it is:
-        if (sum(ff_names == "1") > 0 && (i <- which(ff_names == "1")) != 1) {
-            ff_names <- c("1", ff_names[-i])
-        }
-        ff_form <- reformulate(ff_names, deparse(formula[[2]]))
-        # Number of columns in model matrix for each covariate.
-        # This will always be 1 unless the covariate is a factor.
-        n_cols_per_ff <- f_apply(ff_names,
-                                 function(v) {
-                                     if (v == "0") return(0L)
-                                     if (v == "1") return(1L)
-                                     z <- get(v, envir = data)
-                                     if (inherits(z, "factor")) return(length(levels(z)))
-                                     return(1L)
-                                 })
-        names(n_cols_per_ff) <- ff_names
-        if (sum(is_fctr <- n_cols_per_ff > 1) > 0) {
-            has_inter <- "1" %in% ff_names
-            first_fctr <- TRUE
-            for (i in which(is_fctr)) {
-                if (first_fctr) {
-                    first_fctr <- FALSE
-                    if (has_inter) n_cols_per_ff[i] <- n_cols_per_ff[i] - 1
-                } else n_cols_per_ff[i] <- n_cols_per_ff[i] - 1
-            }
-        }
-        x <- model.matrix(ff_form, data = data)
+        ff_form <- reformulate(fixed, deparse(formula[[2]]))
 
-        # number of coefficients (fixed effects + intercepts)
-        n_coef <- ncol(x)
-        # number of groups per fixed effect:
-        g_per_ff <- f_apply(ff_names,
-                            function(x) {
-                                if (x %in% fixed) z <- 0L
-                                else z <- length(rand_groups[[x]])
-                                return(rep(z, n_cols_per_ff[[x]]))
-                            })
-        # levels per group (repeated by fixed effect):
-        lev_per_g <- f_apply(ff_names,
-                             function(x) {
-                                 if (x %in% fixed) return(integer(0))
-                                 z <- f_apply(rand_groups[[x]],
-                                              function(xx) {
-                                                  length(levels(get(xx, envir = data)))
-                                                  })
-                                 return(rep(z, n_cols_per_ff[[x]]))
-                             })
-        # grouping structure for betas:
-        # Getting dataset of grouping variables
-        g_mat <- f_apply(ff_names,
-                         function(x) {
-                             if (x %in% fixed || x == "0") return(NULL)
-                             z <- lapply(rand_groups[[x]],
-                                         function(xx) {
-                                             cbind(get(xx, envir = data))
-                                         })
-                             return(do.call(cbind, rep(z, n_cols_per_ff[[x]])))
-                         }, bind_fxn = base::cbind)
-        b_groups <- get_ts_info(g_mat, start_end_mat,
-                                "Random effects-grouping variables")
+        out <- form_info_w_rand(formula, fixed, rand_chunks, data, start_end_mat)
+        out$x <- model.matrix(ff_form, data = data)
+        out$n_coef <- ncol(out$x)
+
 
     }
 
-    out <- list(
-        n_coef = n_coef,        # number of coefficients (fixed effects + intercepts)
-        g_per_ff = g_per_ff,    # number of groups per fixed effect
-        lev_per_g = lev_per_g,  # number of levels per group (repeated by fixed effect)
-        b_groups = b_groups,    # grouping structure for betas
-        x = x                   # predictor variables
-    )
+    # Set up groups of autoregressive parameters
+    if (length(all.vars(ar_form)) == 0) {
+        out$p_groups <- rep(1, nrow(start_end_mat))
+    } else {
+        out$p_groups <- do.call(interaction,
+                                      c(lapply(all.vars(ar_form), get, envir = data),
+                                        drop = TRUE))
+        out$p_groups <- as.integer(out$p_groups)
+        out$p_groups <- get_ts_info(out$p_groups, start_end_mat,
+                                          "Autoregressive term-grouping variables")
+    }
+
+    # Adding other info:
+    out$y <- eval(formula[[2]], envir = data)
+    out$n_obs <- length(out$y)
+    out$n_ts <- length(obs_per)
+    out$obs_per <- obs_per
+    out$time <- eval(time_form[[2]][[2]], envir = data)
 
     return(out)
 
@@ -423,7 +537,7 @@ make_coef_objects <- function(formula, data, start_end_mat) {
 
 
 
-
+# start doc ------
 #' Mixed-effects, autoregressive model.
 #'
 #' @param formula A required, two-sided, linear formula specifying both fixed
@@ -453,12 +567,35 @@ make_coef_objects <- function(formula, data, start_end_mat) {
 #'     The left-hand side of this formula is ignored.
 #'     Defaults to no grouping, which results in a single parameter estimate.
 #' @param rstan_control A list of arguments passed to `rstan::sampling`
-#'     (e.g., iter, chains). See \code{\link[rstan]{sampling}}.
+#'     (e.g., `iter`, `chains`, `cores`). See \code{\link[rstan]{sampling}}.
 #'
-#' @return A `stanfit` object containing the model fit.
+#' @return A list containing, among other things, a `stanfit` object with the model fit.
+#'
 #' @export
 #'
+#' @examples
+#' formula <- y ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2)
+#' time_form <- ~ t | tg + g1
+#' ar_form <- ~ g1
 #'
+#' set.seed(1)
+#' x1_coef <- 1.5
+#' x2_coefs <- runif(10, 1, 5)
+#' data <- data.frame(g1 = factor(rep(1:5, each = 20)),
+#'                    g2 = factor(rep(2:1, each = 50)),
+#'                    y = rnorm(100),
+#'                    x1 = runif(100),
+#'                    x2 = rnorm(100),
+#'                    x3 = factor(rep(1:4, 25)),
+#'                    t = rep(1:10, 10),
+#'                    tg = factor(rep(1:10, each = 10)))
+#' data$y <- data$y + data$x1 * x1_coef
+#' data$y <- data$y + data$x2 *
+#'     sapply(as.integer(interaction(data$g1, data$g2)),
+#'            function(i) x2_coefs[i])
+#'
+#' liz <- lizard(formula, time_form, data, ar_form,
+#'               list(chains = 1, iter = 100))
 #'
 lizard <- function(formula,
                    time_form,
@@ -466,26 +603,7 @@ lizard <- function(formula,
                    ar_form,
                    rstan_control = list()) {
 
-    # formula <- y ~ x1 + (x2 | g1 + g2)
-    # time_form <- ~ t | tg + g1
-    #
-    # set.seed(1)
-    # x1_coef <- 1.5
-    # x2_coefs <- runif(10, 1, 5)
-    # data <- data.frame(g1 = factor(rep(1:5, each = 20)),
-    #                 g2 = factor(rep(2:1, each = 50)),
-    #                 y = rnorm(100),
-    #                 x1 = runif(100),
-    #                 x2 = rnorm(100),
-    #                 x3 = factor(rep(1:4, 25)),
-    #                 t = rep(1:10, 10),
-    #                 tg = factor(rep(1:10, each = 10)))
-    # data$y <- data$y + data$x1 * x1_coef
-    # data$y <- data$y + data$x2 * sapply(as.integer(interaction(data$g1, data$g2)),
-    #                                     function(i) x2_coefs[i])
-    #
-    # ar_form <- ~ g1
-
+    call_ = match.call()
 
     if (missing(formula)) {
         stop("\nThe `lizard` function requires the `formula` argument.",
@@ -511,37 +629,19 @@ lizard <- function(formula,
     initial_input_checks(formula, time_form, data, ar_form)
     # Checks for variables being same length and reorders by time if necessary
     obs_per <- check_len_sort_data(formula, time_form, data, ar_form)
-    # Starting and ending positions for each time series
-    # (this will be useful for later functions):
-    start_end_mat <- cbind(c(1, cumsum(head(obs_per, -1)) + 1),
-                           c(cumsum(obs_per[-1]), sum(obs_per)))
 
-    # Most of the info for the stan model:
-    stan_data <- make_coef_objects(formula, data, start_end_mat)
-    # Adding other info:
-    stan_data$n_obs <- length(stan_data$y)
-    stan_data$n_ts <- length(obs_per)
-    stan_data$obs_per <- obs_per
-    stan_data$y <- eval(formula[[2]], envir = data)
-    stan_data$time <- eval(time_form[[2]][[2]], envir = data)
-
-    # Set up groups of autoregressive parameters
-    if (length(all.vars(ar_form)) == 0) {
-        stan_data$p_groups <- rep(1, nrow(start_end_mat))
-    } else {
-        stan_data$p_groups <- do.call(interaction,
-                                      c(lapply(all.vars(ar_form), get, envir = data),
-                                        drop = TRUE))
-        stan_data$p_groups <- as.integer(stan_data$p_groups)
-        stan_data$p_groups <- get_ts_info(stan_data$p_groups, start_end_mat,
-                                          "Autoregressive term-grouping variables")
-    }
+    # Create the data to input to the stan model:
+    stan_data <- make_coef_objects(formula, data, obs_per, time_form, ar_form)
 
     rstan_control <- c(rstan_control, list(object = stanmodels[["lizard"]],
                                            data = stan_data))
 
     stan_fit <- do.call(rstan::sampling, rstan_control)
 
-    return(stan_fit)
+    lizard_obj <- list(stan = stan_fit, call = call_)
+
+    class(lizard_obj) <- "lizard"
+
+    return(lizard_obj)
 }
 
