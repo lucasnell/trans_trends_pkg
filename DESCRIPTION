@@ -15,13 +15,13 @@ ByteCompile: true
 SystemRequirements: C++11, GNU make
 NeedsCompilation: yes
 Depends:
-    R (>= 3.4.0),
+    R (>= 3.4.0)
+Imports:
     Rcpp (>= 0.12.16),
     methods,
-    lme4
-Imports:
     rstan (>= 2.18.1),
-    rstantools (>= 1.5.0)
+    rstantools (>= 1.5.0),
+    lme4
 LinkingTo:
     StanHeaders (>= 2.18.0),
     rstan (>= 2.18.1),
