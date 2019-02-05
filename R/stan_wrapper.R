@@ -45,9 +45,9 @@ make_check_rand <- function(fixed, rand_chunks, data) {
              call. = FALSE)
     }
     # The variables being grouped into random effects:
-    rand <- f_apply(rand_chunks, function(x) deparse(x[[2]], 500L))
+    rand <- f_apply(rand_chunks, function(x) deparse(x[[2]], 5000L))
     # The variables grouping the random effects:
-    rand_g <- f_apply(rand_chunks, function(x) deparse(x[[3]], 500L))
+    rand_g <- f_apply(rand_chunks, function(x) deparse(x[[3]], 5000L))
     # Checking for weird chars in LHS (`rand`)
     if (any(grepl("[\\||\\(|\\)|~]", rand))) {
         stop("\nNone of the following characters should be on the left side of ",
@@ -124,7 +124,7 @@ n_cols_per_cov <- function(fixed, formula, data) {
                              function(v) {
                                  if (v == "0") return(0L)
                                  if (v == "1") return(1L)
-                                 f <- reformulate(v, deparse(formula[[2]]),
+                                 f <- reformulate(v, deparse(formula[[2]], 5000L),
                                                   intercept = FALSE)
                                  z <- model.matrix(f, data = data)
                                  return(ncol(z))
@@ -277,7 +277,7 @@ proper_formula <- function(formula, arg) {
     }
 
     # First check for colons to provide more useful error message for this case:
-    if (grepl("\\:", deparse(formula))) {
+    if (grepl("\\:", deparse(formula, 5000L))) {
         stop("\nIn the `", arg, "` argument, you've included a colon. ",
              "This is not allowed in `lizfit`, so please just use an asterisk to ",
              "specify interactive effects.", call. = FALSE)
@@ -290,7 +290,7 @@ proper_formula <- function(formula, arg) {
     if (allow_inter) allowed_chars <- c(allowed_chars, "\\*")
     if (allow_bars) allowed_chars <- c(allowed_chars, "\\(", "\\)", "\\|")
     grep_str <- paste0(c(paste0("(?!", allowed_chars, ")"), "[[:punct:]]"), collapse = "")
-    if (grepl(grep_str, deparse(formula), perl = TRUE)) {
+    if (grepl(grep_str, deparse(formula, 5000L), perl = TRUE)) {
         stop("\nIn the `", arg, "` argument, you're only allowed the following ",
              "characters: ", paste(gsub("\\\\", "", allowed_chars), collapse = ", "), ".",
              call. = FALSE)
@@ -300,7 +300,7 @@ proper_formula <- function(formula, arg) {
         if (length(formula[[2]]) != 3 || !identical(quote(`|`), formula[[2]][[1]]) ||
             length(formula[[2]][[2]]) != 1 ||
             any(grepl("(?!\\.)(?!\\_)(?!\\+)[[:punct:]]",
-                      deparse(formula[[2]][[3]]), perl = TRUE))) {
+                      deparse(formula[[2]][[3]], 5000L), perl = TRUE))) {
         stop("\nThe `time_form` argument must be a one-sided formula ",
              "with a bar separating the time variable from the variable(s) ",
              "separating time series (e.g., `~ time | species + site`). ",
@@ -503,12 +503,12 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bou
         out$x <- model.matrix(formula, data = data)
         out$n_coef <- ncol(out$x)
         out$g_per_ff <- rep(0, out$n_coef)
-        out$lev_per_g <- integer(0)
+        out$lev_per_g <- structure(integer(0), .Dim = 0)
         out$b_groups <- matrix(0L, nrow = nrow(start_end_mat), ncol = 0)
 
     } else {
 
-        ff_form <- reformulate(fixed, deparse(formula[[2]]))
+        ff_form <- reformulate(fixed, deparse(formula[[2]], 5000L))
 
         out <- form_info_w_rand(formula, fixed, rand_chunks, data, start_end_mat)
         out$x <- model.matrix(ff_form, data = data)
