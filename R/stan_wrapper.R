@@ -119,8 +119,7 @@ make_check_rand <- function(fixed, rand_chunks, data) {
 #' @noRd
 #'
 n_cols_per_cov <- function(fixed, formula, data) {
-    # Number of columns in model matrix for each covariate.
-    # This will always be 1 unless the covariate is a factor.
+
     ncpc <- f_apply(fixed,
                              function(v) {
                                  if (v == "0") return(0L)
@@ -333,17 +332,23 @@ proper_formula <- function(form, arg) {
 initial_input_checks <- function(formula,
                                  time_form,
                                  data,
-                                 ar_form) {
+                                 ar_form,
+                                 ar_bound) {
 
     if (!inherits(data, "environment")) {
-        stop("\nThe `data` argument to the `initial_input_checks` function must be an ",
-             " environment.", call. = FALSE)
+        stop("\nIn `lizard`, the `data` argument must be a list, data frame, or ",
+             "environment.", call. = FALSE)
     }
 
     # Checking structure of the formulas:
     proper_formula(formula, "formula")
     proper_formula(time_form, "time_form")
     proper_formula(ar_form, "ar_form")
+
+    if (!inherits(ar_bound,"logical") || length(ar_bound) != 1) {
+        stop("\nIn `lizard`, the `ar_bound` argument must be a logical ",
+             "of length 1.", call. = FALSE)
+    }
 
     # Check that all variables specified in formulas are found in `data`:
     if (!all(all.vars(formula) %in% ls(envir = data))) {
@@ -471,10 +476,10 @@ check_len_sort_data <- function(formula,
 #' - `lev_per_g`:   number of levels per group (repeated by fixed effect)
 #' - `b_groups`:    grouping structure for betas
 #' - `x`:           predictor variables
-
+#'
 #' @noRd
 #'
-make_coef_objects <- function(formula, data, obs_per, time_form, ar_form) {
+make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bound) {
 
     # Starting and ending positions for each time series
     # (this will be useful for later functions):
@@ -530,6 +535,10 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form) {
     out$obs_per <- obs_per
     out$time <- eval(time_form[[2]][[2]], envir = data)
 
+    if (ar_bound) {
+        out$ar_bound <- 1
+    } else out$ar_bound <- Inf
+
     return(out)
 
 }
@@ -547,6 +556,9 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form) {
 #'     should separate the name of the fixed effect from the grouping variables.
 #'     All grouping variables must be factors without any missing levels.
 #'     Example: `y ~ x1 + (x2 | g1 + g2) + (x3 | g1 + g3)`.
+#'     _Note:_ If you do not explicitly specify a random effect for the intercept,
+#'     `lizard` will not include one. This differs from `lmer`.
+#'     In the above example, the intercept will not have a random effect.
 #' @param time_form A required, one-sided formula specifying the structure of
 #'     the time series (e.g., `~ time | species + site + rep`).
 #'     On the left side of the bar there should be the object indicating the actual
@@ -555,7 +567,7 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form) {
 #'     No time series should ever span multiples of these variables.
 #' @param data An optional list, data frame, or environment that contains
 #'     the dependent, independent, and grouping variables.
-#'     By default, it uses the environment the function was execute in.
+#'     By default, it uses the environment the function was executed in.
 #' @param ar_form An optional formula specifying the grouping to use for
 #'     the autoregressive parameter(s).
 #'     All groups present here should also be present in the grouping part of the
@@ -564,8 +576,9 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form) {
 #'     is nested within (e.g., using genus here and species in `time_form`),
 #'     just insert the higher-level variable (genus in the example) in `time_form`,
 #'     as it won't effect the results.
-#'     The left-hand side of this formula is ignored.
 #'     Defaults to no grouping, which results in a single parameter estimate.
+#' @param ar_bound An optional logical for whether to bound the autoregressive
+#'     parameter(s) <= 1. Defaults to `FALSE`.
 #' @param rstan_control A list of arguments passed to `rstan::sampling`
 #'     (e.g., `iter`, `chains`, `cores`). See \code{\link[rstan]{sampling}}.
 #'
@@ -595,12 +608,13 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form) {
 #'            function(i) x2_coefs[i])
 #'
 #' liz <- lizard(formula, time_form, data, ar_form,
-#'               list(chains = 1, iter = 100))
+#'               rstan_control = list(chains = 1, iter = 100))
 #'
 lizard <- function(formula,
                    time_form,
-                   data,
-                   ar_form,
+                   data = parent.frame(1L),
+                   ar_form = ~ 1,
+                   ar_bound = FALSE,
                    rstan_control = list()) {
 
     call_ = match.call()
@@ -613,25 +627,21 @@ lizard <- function(formula,
         stop("\nThe `lizard` function requires the `time_form` argument.",
              call. = FALSE)
     }
-    if (missing(data)) {
-        data <- parent.frame(1L)
-    } else if (inherits(data, "list") || inherits(data, "data.frame")) {
+    if (inherits(data, c("data.frame", "list"))) {
         data <- list2env(data)
     }
-    if (missing(ar_form)) {
-        ar_form <- ~ 1
-    }
+
     if (!inherits(rstan_control, "list")) {
         stop("\n`rstan_control` must be a list.", call. = FALSE)
     }
 
     # Check for proper inputs:
-    initial_input_checks(formula, time_form, data, ar_form)
+    initial_input_checks(formula, time_form, data, ar_form, ar_bound)
     # Checks for variables being same length and reorders by time if necessary
     obs_per <- check_len_sort_data(formula, time_form, data, ar_form)
 
     # Create the data to input to the stan model:
-    stan_data <- make_coef_objects(formula, data, obs_per, time_form, ar_form)
+    stan_data <- make_coef_objects(formula, data, obs_per, time_form, ar_form, ar_bound)
 
     rstan_control <- c(rstan_control, list(object = stanmodels[["lizard"]],
                                            data = stan_data))

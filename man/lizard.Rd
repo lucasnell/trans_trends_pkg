@@ -4,7 +4,8 @@
 \alias{lizard}
 \title{Mixed-effects, autoregressive model.}
 \usage{
-lizard(formula, time_form, data, ar_form, rstan_control = list())
+lizard(formula, time_form, data = parent.frame(1L), ar_form = ~1,
+  ar_bound = FALSE, rstan_control = list())
 }
 \arguments{
 \item{formula}{A required, two-sided, linear formula specifying both fixed
@@ -13,7 +14,10 @@ The structure is similar to that in the \code{lme4} package, but more restrictiv
 Random effects should be contained inside parentheses, and a bar (\code{|})
 should separate the name of the fixed effect from the grouping variables.
 All grouping variables must be factors without any missing levels.
-Example: \code{y ~ x1 + (x2 | g1 + g2) + (x3 | g1 + g3)}.}
+Example: \code{y ~ x1 + (x2 | g1 + g2) + (x3 | g1 + g3)}.
+\emph{Note:} If you do not explicitly specify a random effect for the intercept,
+\code{lizard} will not include one. This differs from \code{lmer}.
+In the above example, the intercept will not have a random effect.}
 
 \item{time_form}{A required, one-sided formula specifying the structure of
 the time series (e.g., \code{~ time | species + site + rep}).
@@ -24,7 +28,7 @@ No time series should ever span multiples of these variables.}
 
 \item{data}{An optional list, data frame, or environment that contains
 the dependent, independent, and grouping variables.
-By default, it uses the environment the function was execute in.}
+By default, it uses the environment the function was executed in.}
 
 \item{ar_form}{An optional formula specifying the grouping to use for
 the autoregressive parameter(s).
@@ -34,8 +38,10 @@ If you want to use a grouping variable here that a variable in \code{time_form}
 is nested within (e.g., using genus here and species in \code{time_form}),
 just insert the higher-level variable (genus in the example) in \code{time_form},
 as it won't effect the results.
-The left-hand side of this formula is ignored.
 Defaults to no grouping, which results in a single parameter estimate.}
+
+\item{ar_bound}{An optional logical for whether to bound the autoregressive
+parameter(s) <= 1. Defaults to \code{FALSE}.}
 
 \item{rstan_control}{A list of arguments passed to \code{rstan::sampling}
 (e.g., \code{iter}, \code{chains}, \code{cores}). See \code{\link[rstan]{sampling}}.}
@@ -68,6 +74,6 @@ data$y <- data$y + data$x2 *
            function(i) x2_coefs[i])
 
 liz <- lizard(formula, time_form, data, ar_form,
-              list(chains = 1, iter = 100))
+              rstan_control = list(chains = 1, iter = 100))
 
 }
