@@ -12,11 +12,12 @@ data {
     real y[n_obs];                      // response variables
     real x[n_obs, n_coef];              // predictor variables
     real<lower=0> time[n_obs];          // response variable times
+    real<lower=0> p_bound;              // upper bound for phis
 }
 parameters {
     real alpha[n_coef];                         // fixed effects and intercepts
     real z[sum(lev_per_g)];                     // standardized variates for group levels
-    real<lower=0, upper=1> phi[max(p_groups)];  // autoregressive parameter for each
+    real<lower=0, upper=p_bound> phi[max(p_groups)];  // autoregressive parameter for each
     real<lower=0> sig_beta[sum(g_per_ff)];      // group standard deviations
     real<lower=0> sig_res;                      // residual standard deviation
 }
@@ -59,9 +60,11 @@ model {
     // priors:
     alpha ~ normal(0, 1);
     z ~ normal(0, 1);
-    phi ~ uniform(0, 1);
     for (i in 1:sum(g_per_ff)){
         sig_beta[i] ~ normal(0, 1) T[0, ];
+    }
+    for (i in 1:max(p_groups)){
+        phi[i] ~ normal(0, 0.5) T[0, p_bound];
     }
     sig_res ~ normal(0, 1) T[0, ];
     // model:
