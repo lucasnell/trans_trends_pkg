@@ -75,16 +75,14 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP _rcpp_module_boot_stan_fit4fit_ts_mod();
-RcppExport SEXP _rcpp_module_boot_stan_fit4lmm_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4lizard_mod();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_lizard_sim_pops_ar", (DL_FUNC) &_lizard_sim_pops_ar, 8},
     {"_lizard_melt_cube", (DL_FUNC) &_lizard_melt_cube, 1},
     {"_lizard_generate_pars", (DL_FUNC) &_lizard_generate_pars, 12},
     {"_lizard_sim_pops", (DL_FUNC) &_lizard_sim_pops, 5},
-    {"_rcpp_module_boot_stan_fit4fit_ts_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4fit_ts_mod, 0},
-    {"_rcpp_module_boot_stan_fit4lmm_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4lmm_mod, 0},
+    {"_rcpp_module_boot_stan_fit4lizard_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4lizard_mod, 0},
     {NULL, NULL, 0}
 };
 
