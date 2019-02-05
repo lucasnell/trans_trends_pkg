@@ -25,7 +25,7 @@ myv_arth2 = myv_arth %>%
     arrange(series, year)
 
 # fit model
-m = lizfit(formula = y ~ midges_z + time_z + dist_z + (1 + midges_z | taxon),
+m = lizfit(formula = y ~ midges_z + time_z + dist_z + (1 + midges_z + time_z + dist_z | taxon),
            time_form = ~  time | trans + distf + taxon,
            ar_form = ~ taxon,
            data = myv_arth2)

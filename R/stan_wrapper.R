@@ -217,6 +217,13 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
                                      function(xx) cbind(get(xx, envir = data)))
                          return(do.call(cbind, rep(z, ncpc[[x]])))
                      }, bind_fxn = base::cbind)
+    # Because we're mapping to a vector of all groups combined, we need to
+    # add the max level from previous columns for columns >1
+    if (ncol(g_mat) > 1) {
+        for (i in 2:ncol(g_mat)) {
+            g_mat[,i] <- g_mat[,i] + max(g_mat[,(i-1)])
+        }
+    }
     b_groups <- get_ts_info(g_mat, start_end_mat,
                             "Random effects-grouping variables")
 
