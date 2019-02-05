@@ -5,7 +5,6 @@
 # load packages
 library(tidyverse)
 library(rstan)
-library(GGally)
 
 # load data
 load("data/myv_arth.rda")
@@ -25,11 +24,11 @@ myv_arth2 = myv_arth %>%
     arrange(trans, dist, taxon, year) %>%
     group_by(taxon) %>%
     mutate(y = log1p(count),
-           y = (y - mean(y))/(2*sd(y)),
-           midges_z = log1p(midges),
-           midges_z = (midges_z - mean(midges_z))/(2*sd(midges_z))) %>%
+           y = (y - mean(y))/(2*sd(y))) %>%
     ungroup() %>%
     mutate(series = paste0(trans, dist, taxon) %>% as.factor() %>% as.integer(),
+           midges_z = log1p(midges),
+           midges_z = (midges_z - mean(midges_z))/(2*sd(midges_z)),
            time = factor(year, levels = c(1:max(year))) %>% as.numeric(),
            time = time - min(time),
            time_z = (time - mean(time))/(2*sd(time)),
@@ -58,22 +57,28 @@ obs_per = {myv_arth2 %>% group_by(series) %>% summarize(n = length(y))}$n
 n_coef = ncol(x)
 
 # groups per fixed effect
-g_per_ff = c(0, 1, 1, 1)
+g_per_ff = c(2, 1, 1, 1)
 
 # grouping structure for beta's
 b_groups_verbose = myv_arth2 %>%
     group_by(series) %>%
-    summarize(taxon = unique(taxon)) %>%
+    summarize(taxon = unique(taxon),
+              trans = unique(trans)) %>%
     ungroup() %>%
     mutate(group1 = as.factor(taxon) %>% as.numeric(),
-           group2 = as.factor(taxon) %>% as.numeric(),
-           group3 = as.factor(taxon) %>% as.numeric())
+           group2 = as.factor(trans) %>% as.numeric(),
+           group3 = as.factor(taxon) %>% as.numeric(),
+           group4 = as.factor(taxon) %>% as.numeric(),
+           group5 = as.factor(taxon) %>% as.numeric())
 b_groups = b_groups_verbose %>%
-    select(group1, group2, group3) %>%
+    select(group1, group2, group3, group4, group5) %>%
     as.matrix()
 
 # levels per fixed effect
 lev_per_g = apply(b_groups, 2, function(x){x %>% unique() %>% length()})
+
+# b_groups2
+b_groups2 = apply(b_groups, 1, function(x){x + cumsum(c(0,lev_per_g[1:(length(lev_per_g )-1)]))}) %>% t()
 
 # grouping for phi's
 p_groups_verbose = myv_arth2 %>%
@@ -82,7 +87,7 @@ p_groups_verbose = myv_arth2 %>%
     ungroup() %>%
     mutate(group = as.factor(taxon) %>% as.numeric())
 p_groups = {b_groups_verbose %>%
-    select(group)}$group
+    select(group1)}$group1
 
 # package data
 data_list = list(n_obs = n_obs,
@@ -91,8 +96,9 @@ data_list = list(n_obs = n_obs,
             n_coef = n_coef,
             g_per_ff = g_per_ff,
             lev_per_g = lev_per_g,
-            b_groups = b_groups,
+            b_groups = b_groups2,
             p_groups = p_groups,
+            p_bound = 1,
             y = y,
             x = x,
             time = time)
@@ -110,8 +116,8 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores()-2)
 
 # specificaionts
-chains = 4
-iter = 2000
+chains = 1
+iter = 1000
 
 # fit_lizard model
 fit_lizard = stan(file = "under_constr/lizard.stan", data = data_list, seed=1, chains = chains, iter = iter)
@@ -147,9 +153,10 @@ coefs = lapply(1:n_coef, function(b){
          mutate(series = 1:n_ts) %>%
          select(var, series, lower, middle, upper) %>%
          left_join(data_frame(series = b_groups_verbose$series,
-                             taxon = b_groups_verbose$taxon)) %>%
+                             taxon = b_groups_verbose$taxon,
+                             trans = b_groups_verbose$trans)) %>%
          select(-var, -series) %>%
-         group_by(taxon) %>%
+         group_by(taxon, trans) %>%
          summarize_all(unique) %>%
          mutate(beta = colnames(x)[b])
 }) %>%
@@ -173,7 +180,7 @@ alphas = fit_lizard_summary %>%
 
 # plot coefs
 coefs %>%
-    ggplot(aes(taxon, middle))+
+    ggplot(aes(taxon, middle, color))+
     facet_wrap(~beta)+
     geom_hline(yintercept = 0, size = 0.3, alpha = 0.5)+
     geom_point(size = 2)+
@@ -240,7 +247,7 @@ myv_arth2 %>%
     theme_bw()
 
 # sd's
-fixed_par_v = paste0("sig_beta[",1:3,"]")
+fixed_par_v = paste0("sig_beta[",1:5,"]")
 fixed_pars = rstan::extract(fit_lizard, pars=fixed_par_v) %>%
     lapply(as_data_frame) %>%
     bind_cols() %>%
@@ -250,8 +257,9 @@ fixed_pars %>%
     gather(par, value, -chain, -step) %>%
     filter(par != "lp__") %>%
     ggplot(aes(value))+
-    facet_wrap(~par, ncol=1)+
+    facet_wrap(~par, ncol=1, scales = "free_y")+
     stat_density(alpha=0.5, geom = "line")+
+    scale_x_continuous(limits=c(0,0.7))+
     theme_bw()
 
 # alpha's
@@ -269,12 +277,32 @@ fixed_pars %>%
     stat_density(alpha=0.5, geom = "line")+
     theme_bw()
 
+library(lme4)
 m = lmer(y ~ midges_z + dist_z + time_z + (midges_z + dist_z + time_z|taxon), myv_arth2, REML = F,
          lmerControl(optimizer ="bobyqa"))
-coef(m)
-summary(m)
+coef(m)$taxon[,"midges_z"]
+
+vars = c("midges_z","time_z","dist_z")
+var = vars[1]
+comp = coefs %>% filter(beta == var) %>% group_by(taxon) %>% summarize(middle = unique(middle)) %>%
+mutate(lmer = coef(m)$taxon[,var])
+comp
+plot(lmer ~ middle, comp)
+abline(a = 0, b = 1)
+
 library(car)
 Anova(m)
+summary(m)
 
+m = lm(y ~ midges_z*taxon + dist_z*taxon + time_z*taxon, myv_arth2)
+Anova(m, type = 2)
 
+fixed_pars$`sig_beta[3]` %>% median()
+fixed_pars$`sig_beta[4]` %>% median()
+fixed_pars$`sig_beta[5]` %>% median()
 
+summary(m)
+
+apply(fixed_pars %>% select(-chain, -step), 2, sd)
+
+rstan::extract(fit_lizard, pars="sig_phi")$sig_res %>% median
