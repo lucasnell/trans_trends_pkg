@@ -235,7 +235,7 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
 #' This is only used to create error messages, so this function invisibly returns `NULL`.
 #'
 #' @param form Formula
-#' @param arg Which argument in `lizard` the formula is for.
+#' @param arg Which argument in `lizfit` the formula is for.
 #'
 #'
 #' @noRd
@@ -265,7 +265,7 @@ proper_formula <- function(form, arg) {
         stop(err_msg, call. = FALSE)
     }
     if (sum(all.names(form) == "~") > 1) {
-        stop("\nYou should never include > 1 tilde (`~`) in any `lizard` argument.",
+        stop("\nYou should never include > 1 tilde (`~`) in any `lizfit` argument.",
              call. = TRUE)
     }
 
@@ -279,7 +279,7 @@ proper_formula <- function(form, arg) {
     # First check for colons to provide more useful error message for this case:
     if (grepl("\\:", deparse(formula))) {
         stop("\nIn the `", arg, "` argument, you've included a colon. ",
-             "This is not allowed in `lizard`, so please just use an asterisk to ",
+             "This is not allowed in `lizfit`, so please just use an asterisk to ",
              "specify interactive effects.", call. = FALSE)
     }
     # Do the same for double bars:
@@ -323,9 +323,9 @@ proper_formula <- function(form, arg) {
 
 
 
-#' Do initial checks for inputs to `lizard`.
+#' Do initial checks for inputs to `lizfit`.
 #'
-#' @inheritParams lizard
+#' @inheritParams lizfit
 #'
 #' @noRd
 #'
@@ -336,7 +336,7 @@ initial_input_checks <- function(formula,
                                  ar_bound) {
 
     if (!inherits(data, "environment")) {
-        stop("\nIn `lizard`, the `data` argument must be a list, data frame, or ",
+        stop("\nIn `lizfit`, the `data` argument must be a list, data frame, or ",
              "environment.", call. = FALSE)
     }
 
@@ -346,7 +346,7 @@ initial_input_checks <- function(formula,
     proper_formula(ar_form, "ar_form")
 
     if (!inherits(ar_bound,"logical") || length(ar_bound) != 1) {
-        stop("\nIn `lizard`, the `ar_bound` argument must be a logical ",
+        stop("\nIn `lizfit`, the `ar_bound` argument must be a logical ",
              "of length 1.", call. = FALSE)
     }
 
@@ -557,7 +557,7 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bou
 #'     All grouping variables must be factors without any missing levels.
 #'     Example: `y ~ x1 + (x2 | g1 + g2) + (x3 | g1 + g3)`.
 #'     _Note:_ If you do not explicitly specify a random effect for the intercept,
-#'     `lizard` will not include one. This differs from `lmer`.
+#'     `lizfit` will not include one. This differs from `lmer`.
 #'     In the above example, the intercept will not have a random effect.
 #' @param time_form A required, one-sided formula specifying the structure of
 #'     the time series (e.g., `~ time | species + site + rep`).
@@ -607,10 +607,10 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bou
 #'     sapply(as.integer(interaction(data$g1, data$g2)),
 #'            function(i) x2_coefs[i])
 #'
-#' liz <- lizard(formula, time_form, data, ar_form,
+#' liz <- lizfit(formula, time_form, data, ar_form,
 #'               rstan_control = list(chains = 1, iter = 100))
 #'
-lizard <- function(formula,
+lizfit <- function(formula,
                    time_form,
                    data = parent.frame(1L),
                    ar_form = ~ 1,
@@ -620,11 +620,11 @@ lizard <- function(formula,
     call_ = match.call()
 
     if (missing(formula)) {
-        stop("\nThe `lizard` function requires the `formula` argument.",
+        stop("\nThe `lizfit` function requires the `formula` argument.",
              call. = FALSE)
     }
     if (missing(time_form)) {
-        stop("\nThe `lizard` function requires the `time_form` argument.",
+        stop("\nThe `lizfit` function requires the `time_form` argument.",
              call. = FALSE)
     }
     if (inherits(data, c("data.frame", "list"))) {
