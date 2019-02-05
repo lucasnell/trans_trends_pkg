@@ -299,7 +299,8 @@ proper_formula <- function(form, arg) {
     if (arg == "time_form") {
         if (length(form[[2]]) != 3 || !identical(quote(`|`), form[[2]][[1]]) ||
             length(form[[2]][[2]]) != 1 ||
-            any(grepl("(?!\\+)[[:punct:]]", deparse(form[[2]][[3]]), perl = TRUE))) {
+            any(grepl("(?!\\.)(?!\\_)(?!\\+)[[:punct:]]",
+                      deparse(form[[2]][[3]]), perl = TRUE))) {
         stop("\nThe `time_form` argument must be a one-sided formula ",
              "with a bar separating the time variable from the variable(s) ",
              "separating time series (e.g., `~ time | species + site`). ",
