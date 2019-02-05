@@ -234,13 +234,13 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
 #'
 #' This is only used to create error messages, so this function invisibly returns `NULL`.
 #'
-#' @param form Formula
+#' @param formula Formula
 #' @param arg Which argument in `lizfit` the formula is for.
 #'
 #'
 #' @noRd
 #'
-proper_formula <- function(form, arg) {
+proper_formula <- function(formula, arg) {
 
     arg <- match.arg(arg, c("formula", "time_form", "ar_form"))
 
@@ -260,17 +260,17 @@ proper_formula <- function(form, arg) {
         allow_inter <- FALSE
     }
 
-    if (!inherits(form, "formula") || !identical(quote(`~`), form[[1]])) {
+    if (!inherits(formula, "formula") || !identical(quote(`~`), formula[[1]])) {
         err_msg <- paste("\nArgument", arg, "is not a formula.")
         stop(err_msg, call. = FALSE)
     }
-    if (sum(all.names(form) == "~") > 1) {
+    if (sum(all.names(formula) == "~") > 1) {
         stop("\nYou should never include > 1 tilde (`~`) in any `lizfit` argument.",
              call. = TRUE)
     }
 
-    if (one_sided && length(form) != 2) err_msg <- "one-sided"
-    if (!one_sided && length(form) != 3) err_msg <- "two-sided"
+    if (one_sided && length(formula) != 2) err_msg <- "one-sided"
+    if (!one_sided && length(formula) != 3) err_msg <- "two-sided"
     if (!is.null(err_msg)) {
         stop(sprintf("\nThe provided `%s` argument is not %s.", arg, err_msg),
              call. = FALSE)
@@ -283,24 +283,24 @@ proper_formula <- function(form, arg) {
              "specify interactive effects.", call. = FALSE)
     }
     # Do the same for double bars:
-    if (sum(all.names(form) == "||") > 0) {
+    if (sum(all.names(formula) == "||") > 0) {
         stop("\nDouble bars (`||`) are not allowed in formulas.", call. = FALSE)
     }
     allowed_chars <- c("\\.", "\\_", "\\~", "\\+")
     if (allow_inter) allowed_chars <- c(allowed_chars, "\\*")
     if (allow_bars) allowed_chars <- c(allowed_chars, "\\(", "\\)", "\\|")
     grep_str <- paste0(c(paste0("(?!", allowed_chars, ")"), "[[:punct:]]"), collapse = "")
-    if (grepl(grep_str, deparse(form), perl = TRUE)) {
+    if (grepl(grep_str, deparse(formula), perl = TRUE)) {
         stop("\nIn the `", arg, "` argument, you're only allowed the following ",
              "characters: ", paste(gsub("\\\\", "", allowed_chars), collapse = ", "), ".",
              call. = FALSE)
     }
 
     if (arg == "time_form") {
-        if (length(form[[2]]) != 3 || !identical(quote(`|`), form[[2]][[1]]) ||
-            length(form[[2]][[2]]) != 1 ||
+        if (length(formula[[2]]) != 3 || !identical(quote(`|`), formula[[2]][[1]]) ||
+            length(formula[[2]][[2]]) != 1 ||
             any(grepl("(?!\\.)(?!\\_)(?!\\+)[[:punct:]]",
-                      deparse(form[[2]][[3]]), perl = TRUE))) {
+                      deparse(formula[[2]][[3]]), perl = TRUE))) {
         stop("\nThe `time_form` argument must be a one-sided formula ",
              "with a bar separating the time variable from the variable(s) ",
              "separating time series (e.g., `~ time | species + site`). ",
@@ -310,7 +310,7 @@ proper_formula <- function(form, arg) {
         }
     }
 
-    if (arg == "formula" && length(form[[2]]) != 1) {
+    if (arg == "formula" && length(formula[[2]]) != 1) {
         stop("\nThe `formula` argument should only have one variable on the ",
              "left-hand side of the formula.",
              call. = FALSE)
@@ -412,7 +412,7 @@ check_len_sort_data <- function(formula,
     len <- len[1]
 
     order_ <- do.call(order, time_vars)
-    do_reorder <- !all.equal(order_, 1L:len)
+    do_reorder <- !isTRUE(all.equal(order_, 1L:len))
 
     # Checking for duplicate times and creating `obs_per`:
     tv_df <- do.call(cbind, time_vars)
@@ -537,8 +537,15 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bou
     out$time <- eval(time_form[[2]][[2]], envir = data)
 
     if (ar_bound) {
-        out$ar_bound <- 1
-    } else out$ar_bound <- Inf
+        out$p_bound <- 1
+    } else out$p_bound <- Inf
+
+    # This fixes the issue of when a parameter is defined in stan as an array,
+    # but only a single number is input.
+    # Even though this is a vector in R, stan returns an error in this case.
+    for (x in c("g_per_ff", "lev_per_g")) {
+        if (length(out[[x]]) == 1) out[[x]] <- structure(out[[x]], .Dim = 1)
+    }
 
     return(out)
 

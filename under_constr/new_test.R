@@ -1,6 +1,8 @@
 # load packages and data
 library(lizard)
+library(tidyverse)
 load("data/myv_arth.rda")
+
 
 # prepare data
 myv_arth = myv_arth %>% tbl_df
