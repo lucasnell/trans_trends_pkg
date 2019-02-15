@@ -262,6 +262,8 @@ proper_formula <- function(formula, arg) {
 
     arg <- match.arg(arg, c("formula", "time_form", "ar_form"))
 
+    if (arg == "ar_form" && is.null(formula)) return(NULL)
+
     err_msg <- NULL
 
     if (arg == "formula") {
@@ -350,8 +352,8 @@ proper_formula <- function(formula, arg) {
 #'
 initial_input_checks <- function(formula,
                                  time_form,
-                                 data,
                                  ar_form,
+                                 data,
                                  ar_bound) {
 
     if (!inherits(data, "environment")) {
@@ -384,19 +386,20 @@ initial_input_checks <- function(formula,
                    collapse = ", "),
              call. = FALSE)
     }
-    if (!all(all.vars(ar_form) %in% ls(envir = data))) {
-        stop("\nThe following variables in `ar_form` are not present in the `data` ",
-             "object:\n  ",
-             paste(all.vars(ar_form)[!all.vars(ar_form) %in% ls(envir = data)],
-                   collapse = ", "),
-             call. = FALSE)
-    }
-
-    # Check that all items in `ar_form` are in `time_form`
-    if (length(all.vars(ar_form)) != 0 &&
-        !all(all.vars(ar_form) %in% all.vars(time_form[[2]][[3]]))) {
-        stop("\nAll variables in `ar_form` must be present in the part of `time_form` ",
-             "to the right of the bar.", call. = FALSE)
+    if (!is.null(ar_form)) {
+        if (!all(all.vars(ar_form) %in% ls(envir = data))) {
+            stop("\nThe following variables in `ar_form` are not present in the `data` ",
+                 "object:\n  ",
+                 paste(all.vars(ar_form)[!all.vars(ar_form) %in% ls(envir = data)],
+                       collapse = ", "),
+                 call. = FALSE)
+        }
+        # Check that all items in `ar_form` are in `time_form`
+        if (length(all.vars(ar_form)) != 0 &&
+            !all(all.vars(ar_form) %in% all.vars(time_form[[2]][[3]]))) {
+            stop("\nAll variables in `ar_form` must be present in the part of `time_form` ",
+                 "to the right of the bar.", call. = FALSE)
+        }
     }
 
     invisible(NULL)
@@ -415,8 +418,8 @@ initial_input_checks <- function(formula,
 #'
 check_len_sort_data <- function(formula,
                                 time_form,
-                                data,
-                                ar_form) {
+                                ar_form,
+                                data) {
 
     time_vars <- all.vars(time_form)
     if (length(time_vars) > 1) time_vars <- c(time_vars[-1], time_vars[1])
@@ -498,7 +501,7 @@ check_len_sort_data <- function(formula,
 #'
 #' @noRd
 #'
-make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bound) {
+make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bound) {
 
     # Starting and ending positions for each time series
     # (this will be useful for later functions):
@@ -591,10 +594,7 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bou
 #'     time point (e.g., day, hour), and on the right side there should be the
 #'     variables that, together, separate all time series.
 #'     No time series should ever span multiples of these variables.
-#' @param data An optional list, data frame, or environment that contains
-#'     the dependent, independent, and grouping variables.
-#'     By default, it uses the environment the function was executed in.
-#' @param ar_form An optional formula specifying the grouping to use for
+#' @param ar_form A required, one-sided formula specifying the grouping to use for
 #'     the autoregressive parameter(s).
 #'     All groups present here should also be present in the grouping part of the
 #'     `time_form` argument; an error is thrown otherwise.
@@ -602,7 +602,11 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bou
 #'     is nested within (e.g., using genus here and species in `time_form`),
 #'     just insert the higher-level variable (genus in the example) in `time_form`,
 #'     as it won't effect the results.
-#'     Defaults to no grouping, which results in a single parameter estimate.
+#'     Providing `NULL` for this argument causes `lizfit` to use a model that does
+#'     not account for temporal autocorrelation. This can be useful for testing.
+#' @param data An optional list, data frame, or environment that contains
+#'     the dependent, independent, and grouping variables.
+#'     By default, it uses the environment the function was executed in.
 #' @param ar_bound An optional logical for whether to bound the autoregressive
 #'     parameter(s) <= 1. Defaults to `FALSE`.
 #' @param rstan_control A list of arguments passed to `rstan::sampling`
@@ -633,13 +637,13 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bou
 #'     sapply(as.integer(interaction(data$g1, data$g2)),
 #'            function(i) x2_coefs[i])
 #'
-#' liz <- lizfit(formula, time_form, data, ar_form,
+#' liz <- lizfit(formula, time_form, ar_form, data,
 #'               rstan_control = list(chains = 1, iter = 100))
 #'
 lizfit <- function(formula,
                    time_form,
+                   ar_form,
                    data = parent.frame(1L),
-                   ar_form = ~ 1,
                    ar_bound = FALSE,
                    rstan_control = list()) {
 
@@ -653,6 +657,10 @@ lizfit <- function(formula,
         stop("\nThe `lizfit` function requires the `time_form` argument.",
              call. = FALSE)
     }
+    if (missing(ar_form)) {
+        stop("\nThe `lizfit` function requires the `ar_form` argument.",
+             call. = FALSE)
+    }
     if (inherits(data, c("data.frame", "list"))) {
         data <- list2env(data)
     }
@@ -662,15 +670,20 @@ lizfit <- function(formula,
     }
 
     # Check for proper inputs:
-    initial_input_checks(formula, time_form, data, ar_form, ar_bound)
+    initial_input_checks(formula, time_form, ar_form, data, ar_bound)
     # Checks for variables being same length and reorders by time if necessary
-    obs_per <- check_len_sort_data(formula, time_form, data, ar_form)
+    obs_per <- check_len_sort_data(formula, time_form, ar_form, data)
 
     # Create the data to input to the stan model:
-    stan_data <- make_coef_objects(formula, data, obs_per, time_form, ar_form, ar_bound)
+    stan_data <- make_coef_objects(formula, time_form, ar_form, data, obs_per, ar_bound)
 
-    rstan_control <- c(rstan_control, list(object = stanmodels[["lizard"]],
-                                           data = stan_data))
+    if (!is.null(ar_form)) {
+        rstan_control <- c(rstan_control, list(object = stanmodels[["lizard"]],
+                                               data = stan_data))
+    } else {
+        rstan_control <- c(rstan_control, list(object = stanmodels[["snake"]],
+                                               data = stan_data))
+    }
 
     stan_fit <- do.call(rstan::sampling, rstan_control)
 

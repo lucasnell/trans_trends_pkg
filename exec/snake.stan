@@ -12,6 +12,7 @@ data {
     real y[n_obs];                      // response variables
     real x[n_obs, n_coef];              // predictor variables
     real<lower=0> time[n_obs];          // response variable times
+    real<lower=0> p_bound;              // upper bound for phis
 }
 parameters {
     real alpha[n_coef];                         // fixed effects and intercepts

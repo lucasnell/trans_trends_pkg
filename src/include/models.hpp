@@ -908,7 +908,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_snake");
-    reader.add_event(67, 65, "end", "model_snake");
+    reader.add_event(68, 66, "end", "model_snake");
     return reader;
 }
 
@@ -925,6 +925,7 @@ private:
     vector<double> y;
     vector<vector<double> > x;
     vector<double> time;
+    double p_bound;
 public:
     model_snake(stan::io::var_context& context__,
         std::ostream* pstream__ = 0)
@@ -1066,11 +1067,17 @@ public:
             for (size_t i_0__ = 0; i_0__ < time_limit_0__; ++i_0__) {
                 time[i_0__] = vals_r__[pos__++];
             }
+            context__.validate_dims("data initialization", "p_bound", "double", context__.to_vec());
+            p_bound = double(0);
+            vals_r__ = context__.vals_r("p_bound");
+            pos__ = 0;
+            p_bound = vals_r__[pos__++];
 
             // validate, data variables
             for (int k0__ = 0; k0__ < n_obs; ++k0__) {
                 check_greater_or_equal(function__,"time[k0__]",time[k0__],0);
             }
+            check_greater_or_equal(function__,"p_bound",p_bound,0);
             // initialize data variables
 
 
