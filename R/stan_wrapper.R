@@ -9,6 +9,17 @@ f_apply <- function(X, FUN, bind_fxn = base::c, ...) {
     return(x)
 }
 
+#' Deparse a formula to a single string.
+#'
+#' @noRd
+#'
+f_deparse <- function(form) {
+    ss <- deparse(form, 500L)
+    if (length(ss) > 1) ss <- paste(ss, collapse = "")
+    return(ss)
+}
+
+
 #' Expand interactions for a formula, part of a formula, or a formula string.
 #'
 #' @param x The input formula, part of a formula, or a formula string.
@@ -17,7 +28,7 @@ f_apply <- function(X, FUN, bind_fxn = base::c, ...) {
 #'
 expand_inters <- function(x) {
     if (inherits(x, "call") || inherits(x, "name") || inherits(x, "formula")) {
-        fs <- deparse(x)
+        fs <- f_deparse(x)
     } else if (isTRUE(x == 1)) {
         return("1")
     } else if (!inherits(x, "character")) {
@@ -39,15 +50,15 @@ make_check_rand <- function(fixed, rand_chunks, data) {
     # Check strings for weird characters:
     # ----------------------*
     if (any(f_apply(rand_chunks, function(x)
-        sum(gregexpr("|", deparse(x), fixed=TRUE)[[1]] > 0) > 1))) {
+        sum(gregexpr("|", f_deparse(x), fixed=TRUE)[[1]] > 0) > 1))) {
         stop("\nWhen using bars to represent random effects, use parentheses ",
              "around each random effect and don't use multiple bars.",
              call. = FALSE)
     }
     # The variables being grouped into random effects:
-    rand <- f_apply(rand_chunks, function(x) deparse(x[[2]], 5000L))
+    rand <- f_apply(rand_chunks, function(x) f_deparse(x[[2]]))
     # The variables grouping the random effects:
-    rand_g <- f_apply(rand_chunks, function(x) deparse(x[[3]], 5000L))
+    rand_g <- f_apply(rand_chunks, function(x) f_deparse(x[[3]]))
     # Checking for weird chars in LHS (`rand`)
     if (any(grepl("[\\||\\(|\\)|~]", rand))) {
         stop("\nNone of the following characters should be on the left side of ",
@@ -124,7 +135,7 @@ n_cols_per_cov <- function(fixed, formula, data) {
                              function(v) {
                                  if (v == "0") return(0L)
                                  if (v == "1") return(1L)
-                                 f <- reformulate(v, deparse(formula[[2]], 5000L),
+                                 f <- reformulate(v, f_deparse(formula[[2]]),
                                                   intercept = FALSE)
                                  z <- model.matrix(f, data = data)
                                  return(ncol(z))
@@ -284,7 +295,7 @@ proper_formula <- function(formula, arg) {
     }
 
     # First check for colons to provide more useful error message for this case:
-    if (grepl("\\:", deparse(formula, 5000L))) {
+    if (grepl("\\:", f_deparse(formula))) {
         stop("\nIn the `", arg, "` argument, you've included a colon. ",
              "This is not allowed in `lizfit`, so please just use an asterisk to ",
              "specify interactive effects.", call. = FALSE)
@@ -297,7 +308,7 @@ proper_formula <- function(formula, arg) {
     if (allow_inter) allowed_chars <- c(allowed_chars, "\\*")
     if (allow_bars) allowed_chars <- c(allowed_chars, "\\(", "\\)", "\\|")
     grep_str <- paste0(c(paste0("(?!", allowed_chars, ")"), "[[:punct:]]"), collapse = "")
-    if (grepl(grep_str, deparse(formula, 5000L), perl = TRUE)) {
+    if (grepl(grep_str, f_deparse(formula), perl = TRUE)) {
         stop("\nIn the `", arg, "` argument, you're only allowed the following ",
              "characters: ", paste(gsub("\\\\", "", allowed_chars), collapse = ", "), ".",
              call. = FALSE)
@@ -307,7 +318,7 @@ proper_formula <- function(formula, arg) {
         if (length(formula[[2]]) != 3 || !identical(quote(`|`), formula[[2]][[1]]) ||
             length(formula[[2]][[2]]) != 1 ||
             any(grepl("(?!\\.)(?!\\_)(?!\\+)[[:punct:]]",
-                      deparse(formula[[2]][[3]], 5000L), perl = TRUE))) {
+                      f_deparse(formula[[2]][[3]]), perl = TRUE))) {
         stop("\nThe `time_form` argument must be a one-sided formula ",
              "with a bar separating the time variable from the variable(s) ",
              "separating time series (e.g., `~ time | species + site`). ",
@@ -515,7 +526,7 @@ make_coef_objects <- function(formula, data, obs_per, time_form, ar_form, ar_bou
 
     } else {
 
-        ff_form <- reformulate(fixed, deparse(formula[[2]], 5000L))
+        ff_form <- reformulate(fixed, f_deparse(formula[[2]]))
 
         out <- form_info_w_rand(formula, fixed, rand_chunks, data, start_end_mat)
         out$x <- model.matrix(ff_form, data = data)
