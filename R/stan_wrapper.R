@@ -34,9 +34,14 @@ expand_inters <- function(x) {
     } else if (!inherits(x, "character")) {
         stop("Must be character, formula, name, call, or 1.")
     }
-    if (!grepl("~", fs)) fs <- paste("1~", fs)
+    if (!grepl("~", fs)) fs <- paste("DEPENDENT_VARIABLE ~", fs)
     f <- as.formula(fs)
-    return(attr(terms.formula(f), "term.labels"))
+    fo <- attr(terms.formula(f), "term.labels")
+    # Add back intercept if necessary:
+    if ("1" %in% trimws(strsplit(fs, "[\\+|\\*|\\~]")[[1]])) {
+        fo <- c("1", fo)
+    }
+    return(fo)
 }
 
 
