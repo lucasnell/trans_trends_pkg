@@ -170,7 +170,7 @@ get_ts_info <- function(x, start_end_mat, err_msg_arg) {
         if (length(dim(x)) != 2) stop("get_ts_info not for non-2D arrays");
         get_info <- function(i) {
             z <- x[start_end_mat[i,1]:start_end_mat[i,2],,drop=FALSE]
-            if (any(apply(z, 2, sd) != 0)) stop(err_msg, call. = FALSE)
+            if (nrow(z) > 1 && any(apply(z, 2, sd) != 0)) stop(err_msg, call. = FALSE)
             return(z[1,,drop=FALSE])
         }
         Z <- f_apply(1:nrow(start_end_mat), get_info, base::rbind)
@@ -421,9 +421,11 @@ check_len_sort_data <- function(formula,
                                 ar_form,
                                 data) {
 
-    time_vars <- all.vars(time_form)
-    if (length(time_vars) > 1) time_vars <- c(time_vars[-1], time_vars[1])
-    time_vars <- lapply(time_vars, get, envir = data)
+    time_var_names <- all.vars(time_form)
+    if (length(time_var_names) > 1) {
+        time_var_names <- c(time_var_names[-1], time_var_names[1])
+    }
+    time_vars <- lapply(time_var_names, get, envir = data)
 
     len <- sapply(time_vars, length)
     if (length(unique(len)) != 1) {
@@ -439,7 +441,7 @@ check_len_sort_data <- function(formula,
     tv_df <- do.call(cbind, time_vars)
     tv_df <- as.data.frame(tv_df[order_,])
     # split by grouping variables to make looking for repeats easier:
-    tv_list <- split(tv_df, interaction(tv_df[, 1:(ncol(tv_df)-1)], drop = TRUE))
+    tv_list <- split(tv_df, interaction(tv_df[, (ncol(tv_df)-1):1], drop = TRUE))
     obs_per <- integer(length(tv_list))
     for (i in 1:length(tv_list)) {
         tv <- tv_list[[i]]
@@ -506,7 +508,7 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bou
     # Starting and ending positions for each time series
     # (this will be useful for later functions):
     start_end_mat <- cbind(c(1, cumsum(head(obs_per, -1)) + 1),
-                           c(cumsum(obs_per[-1]), sum(obs_per)))
+                           cumsum(obs_per))
 
     rand_chunks <- lme4::findbars(formula)
     fixed <- expand_inters(lme4::nobars(formula)[[3]])
