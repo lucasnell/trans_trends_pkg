@@ -4,7 +4,7 @@
 \alias{lizfit}
 \title{Mixed-effects, autoregressive model.}
 \usage{
-lizfit(formula, time_form, data = parent.frame(1L), ar_form = ~1,
+lizfit(formula, time_form, ar_form, data = parent.frame(1L),
   ar_bound = FALSE, rstan_control = list())
 }
 \arguments{
@@ -26,11 +26,7 @@ time point (e.g., day, hour), and on the right side there should be the
 variables that, together, separate all time series.
 No time series should ever span multiples of these variables.}
 
-\item{data}{An optional list, data frame, or environment that contains
-the dependent, independent, and grouping variables.
-By default, it uses the environment the function was executed in.}
-
-\item{ar_form}{An optional formula specifying the grouping to use for
+\item{ar_form}{A required, one-sided formula specifying the grouping to use for
 the autoregressive parameter(s).
 All groups present here should also be present in the grouping part of the
 \code{time_form} argument; an error is thrown otherwise.
@@ -38,7 +34,12 @@ If you want to use a grouping variable here that a variable in \code{time_form}
 is nested within (e.g., using genus here and species in \code{time_form}),
 just insert the higher-level variable (genus in the example) in \code{time_form},
 as it won't effect the results.
-Defaults to no grouping, which results in a single parameter estimate.}
+Providing \code{NULL} for this argument causes \code{lizfit} to use a model that does
+not account for temporal autocorrelation. This can be useful for testing.}
+
+\item{data}{An optional list, data frame, or environment that contains
+the dependent, independent, and grouping variables.
+By default, it uses the environment the function was executed in.}
 
 \item{ar_bound}{An optional logical for whether to bound the autoregressive
 parameter(s) <= 1. Defaults to \code{FALSE}.}
@@ -73,7 +74,7 @@ data$y <- data$y + data$x2 *
     sapply(as.integer(interaction(data$g1, data$g2)),
            function(i) x2_coefs[i])
 
-liz <- lizfit(formula, time_form, data, ar_form,
+liz <- lizfit(formula, time_form, ar_form, data,
               rstan_control = list(chains = 1, iter = 100))
 
 }
