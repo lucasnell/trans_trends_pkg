@@ -182,7 +182,6 @@ sim_data <- function(formula,
     determ <- stan_data$x * betas
     determ <- rowSums(determ)
     names(determ) <- NULL
-    head(determ)
 
     Y <- f_apply(1:nrow(start_end_mat),
                  function(k) {
@@ -191,13 +190,14 @@ sim_data <- function(formula,
                      N_ <- end - start + 1
                      phi <- phis[k]
                      time <- stan_data$time[start:end]
-                     resids <- rnorm(N_) * resid_sd
+                     determ_ <- determ[start:end]
+                     resids <- rnorm(N_, sd = resid_sd)
                      y <- numeric(N_)
-                     y[1] <- determ[start] + resids[1]
+                     y[1] <- determ_[1] + resids[1]
                      if (N_ == 1) return(y)
                      for (t in 2:N_) {
-                         y[t] <- determ[t] +
-                             phi^(time[t] - time[t-1]) * (y[t-1] - determ[t-1]) +
+                         y[t] <- determ_[t] +
+                             phi^(time[t] - time[t-1]) * (y[t-1] - determ_[t-1]) +
                              resids[t]
                      }
                      return(y)
