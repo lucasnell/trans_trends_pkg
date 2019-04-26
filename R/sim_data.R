@@ -135,6 +135,7 @@ sim_data <- function(formula,
                     coef[[f]][[i]][[1]] <- 0
                 } else if (inherits(coef[[f]][[i]], "numeric")) {
                     fixed_betas[f] <- fixed_betas[f] + mean(coef[[f]][[i]])
+                    coef[[f]][[i]] <- coef[[f]][[i]] - mean(coef[[f]][[i]])
                 } else {
                     stop("All terminal items inside coef must be numerics or lists")
                 }
@@ -146,27 +147,29 @@ sim_data <- function(formula,
     # Generate random effects:
     random_betas <- rep(list(NA), length(rand))
     names(random_betas) <- rand
+    k <- 1
     for (i in 1:length(rand)) {
         x <- rand[[i]]
         random_betas[[i]] <- rep(list(NA), length(rand_g[[x]]))
         names(random_betas[[i]]) <- rand_g[[x]]
         for (j in 1:length(random_betas[[i]])) {
             g <- rand_g[[x]][j]
-            n <- diff(range(stan_data$b_groups[,i+(j-1)])) + 1
+            n <- diff(range(stan_data$b_groups[,k])) + 1
             if (inherits(coef[[x]][[g]], "list")) {
                 random_betas[[i]][[g]] <- rnorm(n,
-                                coef[[x]][[g]][[1]],
-                                coef[[x]][[g]][[2]])
+                                                coef[[x]][[g]][[1]],
+                                                coef[[x]][[g]][[2]])
             } else if (inherits(coef[[x]][[g]], "numeric")) {
                 if (length(coef[[x]][[g]]) != n) {
-                    stop("\nIn `coef` for coefficient ", x, ", group ", g, ", its length ",
-                         "must be ", n, ", not ", length(coef[[x]][[g]]), ".")
+                    stop("\nIn `coef` for coefficient `", x, "`, group `", g, "`, ",
+                         "its length must be ", n, ", not ", length(coef[[x]][[g]]), ".")
                 }
                 random_betas[[i]][[g]] <- coef[[x]][[g]]
             } else {
                 stop("\nIn `coef` for coefficient ", x, ", group ", g, ", the object ",
                      "must be of class list or numeric.")
             }
+            k <- k + 1
         }
     }
 
