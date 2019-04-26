@@ -1,4 +1,6 @@
 
+
+
 #' Version of lapply that returns the list flattened to a vector or array.
 #'
 #' @noRd
@@ -265,7 +267,7 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
 #'
 proper_formula <- function(formula, arg) {
 
-    arg <- match.arg(arg, c("formula", "time_form", "ar_form"))
+    arg <- match.arg(arg, c("formula", "time_form", "ar_form", "y_scale"))
 
     if (arg == "ar_form" && is.null(formula)) return(NULL)
 
@@ -279,7 +281,7 @@ proper_formula <- function(formula, arg) {
         allow_bars <- TRUE
         one_sided <- TRUE
         allow_inter <- FALSE
-    } else {
+    } else {  # ar_form and y_scale
         allow_bars <- FALSE
         one_sided <- TRUE
         allow_inter <- FALSE
@@ -341,11 +343,16 @@ proper_formula <- function(formula, arg) {
              call. = FALSE)
     }
 
+    if (arg == "y_scale") {
+        if (length(all.vars(formula)) > 1) {
+            stop("\nThe `y_scale` argument, if a formula, should only include ",
+                 "one variable.", call. = FALSE)
+        }
+    }
+
     invisible(NULL)
 
 }
-
-
 
 
 
@@ -358,8 +365,10 @@ proper_formula <- function(formula, arg) {
 initial_input_checks <- function(formula,
                                  time_form,
                                  ar_form,
+                                 y_scale,
                                  data,
-                                 ar_bound) {
+                                 ar_bound,
+                                 x_scale) {
 
     if (!inherits(data, "environment")) {
         stop("\nIn `liz_fit`, the `data` argument must be a list, data frame, or ",
@@ -370,9 +379,20 @@ initial_input_checks <- function(formula,
     proper_formula(formula, "formula")
     proper_formula(time_form, "time_form")
     proper_formula(ar_form, "ar_form")
-
-    if (!inherits(ar_bound,"logical") || length(ar_bound) != 1) {
+    if (!is.null(y_scale)) {
+        if (!inherits(y_scale, c("formula", "character")) ||
+            (inherits(y_scale, "character") && length(y_scale) != 1)) {
+            stop("\nIn `liz_fit`, argument `y_scale` should be NULL, a formula, or a ",
+                 "single string.", call. = FALSE)
+        }
+        if (inherits(y_scale, "formula")) proper_formula(y_scale, "y_scale")
+    }
+    if (!inherits(ar_bound, "logical") || length(ar_bound) != 1) {
         stop("\nIn `liz_fit`, the `ar_bound` argument must be a logical ",
+             "of length 1.", call. = FALSE)
+    }
+    if (!inherits(x_scale, "logical") || length(x_scale) != 1) {
+        stop("\nIn `liz_fit`, the `x_scale` argument must be a logical ",
              "of length 1.", call. = FALSE)
     }
 
@@ -505,10 +525,12 @@ check_len_sort_data <- function(formula,
 #' - `lev_per_g`:   number of levels per group (repeated by fixed effect)
 #' - `b_groups`:    grouping structure for betas
 #' - `x`:           predictor variables
+#' - `x_means_sds`: (optional) means and SDs of x variables if they were scaled
 #'
 #' @noRd
 #'
-make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bound) {
+make_coef_objects <- function(formula, time_form, ar_form, data, obs_per,
+                              ar_bound, x_scale) {
 
     # Starting and ending positions for each time series
     # (this will be useful for later functions):
@@ -525,9 +547,33 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bou
         fixed <- c("1", fixed[-i])
     }
 
+    # Scale x variables if desired:
+    x_means_sds <- NULL
+    if (x_scale) {
+        x_vars <- unique(fixed[!(grepl(":", fixed) | fixed %in% 0:1)])
+        x_means_sds <- data.frame(name = x_vars, stringsAsFactors = FALSE)
+        x_means_sds$mean  <- NA_real_
+        x_means_sds$sd  <- NA_real_
+        for (i in 1:nrow(x_means_sds)) {
+            x_name  <- x_means_sds$name[i]
+            x <- get(x_name, data)
+            # Don't scale factors:
+            if (inherits(x, "factor")) next
+            .mean <- mean(x, na.rm = TRUE)
+            .sd <- sd(x, na.rm = TRUE)
+            x <- (x - .mean) / .sd
+            assign(x_name, x, envir = data)
+            x_means_sds$mean[i]  <- .mean
+            x_means_sds$sd[i]  <- .sd
+        }
+
+    }
+
+
+    out <- list()
+
     if (is.null(rand_chunks)) {
 
-        out <- list()
         out$x <- model.matrix(formula, data = data)
         out$n_coef <- ncol(out$x)
         out$g_per_ff <- rep(0, out$n_coef)
@@ -563,6 +609,7 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bou
     out$n_ts <- length(obs_per)
     out$obs_per <- obs_per
     out$time <- eval(time_form[[2]][[2]], envir = data)
+    out$x_means_sds <- x_means_sds
 
     if (ar_bound) {
         out$p_bound <- 1
@@ -627,6 +674,7 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bou
 #' formula <- y ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2)
 #' time_form <- ~ t | tg + g1
 #' ar_form <- ~ g1
+#' y_scale <- ~ g1
 #'
 #' set.seed(1)
 #' x1_coef <- 1.5
@@ -644,15 +692,17 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bou
 #'     sapply(as.integer(interaction(data$g1, data$g2)),
 #'            function(i) x2_coefs[i])
 #'
-#' liz <- liz_fit(formula, time_form, ar_form, data,
+#' liz <- liz_fit(formula, time_form, ar_form, y_scale, data,
 #'               rstan_control = list(chains = 1, iter = 100))
 #'
 liz_fit <- function(formula,
-                   time_form,
-                   ar_form,
-                   data = parent.frame(1L),
-                   ar_bound = FALSE,
-                   rstan_control = list()) {
+                    time_form,
+                    ar_form,
+                    y_scale,
+                    data = parent.frame(1L),
+                    x_scale = TRUE,
+                    ar_bound = FALSE,
+                    rstan_control = list()) {
 
     call_ = match.call()
 
@@ -668,6 +718,10 @@ liz_fit <- function(formula,
         stop("\nThe `liz_fit` function requires the `ar_form` argument.",
              call. = FALSE)
     }
+    if (missing(y_scale)) {
+        stop("\nThe `liz_fit` function requires the `y_scale` argument.",
+             call. = FALSE)
+    }
     if (inherits(data, c("data.frame", "list"))) {
         data <- list2env(data)
     }
@@ -677,12 +731,51 @@ liz_fit <- function(formula,
     }
 
     # Check for proper inputs:
-    initial_input_checks(formula, time_form, ar_form, data, ar_bound)
+    initial_input_checks(formula, time_form, ar_form, y_scale, data, ar_bound, x_scale)
     # Checks for variables being same length and reorders by time if necessary
     obs_per <- check_len_sort_data(formula, time_form, ar_form, data)
 
     # Create the data to input to the stan model:
-    stan_data <- make_coef_objects(formula, time_form, ar_form, data, obs_per, ar_bound)
+    stan_data <- make_coef_objects(formula, time_form, ar_form, data, obs_per,
+                                   ar_bound, x_scale)
+
+    # Deal with potential scaling of x variables that may or may not have been done
+    # inside `make_coef_objects`:
+    x_means_sds <- stan_data$x_means_sds
+    stan_data$x_means_sds <- NULL
+
+    # Now scale y variables if desired:
+    y_means_sds <- NULL
+    if (!is.null(y_scale)) {
+        if (inherits(y_scale, "formula")) y_scale <- all.vars(y_scale)
+        y_scale_var_vec <- tryCatch(
+            eval(parse(text = y_scale), data),
+            error = function(e) stop("\nIn `liz_fit`, the `y_scale` argument ",
+                                     "provided is not found in the `data` argument."))
+        if (!inherits(y_scale_var_vec, "factor")) {
+            stop("\nIn `liz_fit`, the `y_scale` argument is being parsed to ",
+                 "an object of class \"", class(y_scale_var_vec), "\", but it needs ",
+                 "to be a factor.")
+        }
+        y_means_sds <- data.frame(level = sort(unique(y_scale_var_vec)))
+        y_means_sds$mean  <- NA_real_
+        y_means_sds$sd  <- NA_real_
+        for (i in 1:nrow(y_means_sds)) {
+            l <- y_means_sds$level[i]
+            yy <- stan_data$y[y_scale_var_vec == l]
+            if (length(yy) == 0) {
+                stop("\nIn `liz_fit`, there is at least one level in the factor ",
+                     "that's been input to the `y_scale` argument that is missing.")
+            }
+            .mean <- mean(yy, na.rm = TRUE)
+            .sd <- sd(yy, na.rm = TRUE)
+            stan_data$y[y_scale_var_vec == l] <- (yy - .mean) / .sd
+            y_means_sds$mean[y_means_sds$level == l] <- .mean
+            y_means_sds$sd[y_means_sds$level == l] <- .sd
+        }
+
+    }
+
 
     if (!is.null(ar_form)) {
         rstan_control <- c(rstan_control, list(object = stanmodels[["lizard"]],

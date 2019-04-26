@@ -4,8 +4,8 @@
 \alias{liz_fit}
 \title{Mixed-effects, autoregressive model.}
 \usage{
-liz_fit(formula, time_form, ar_form, data = parent.frame(1L),
-  ar_bound = FALSE, rstan_control = list())
+liz_fit(formula, time_form, ar_form, y_scale, data = parent.frame(1L),
+  x_scale = TRUE, ar_bound = FALSE, rstan_control = list())
 }
 \arguments{
 \item{formula}{A required, two-sided, linear formula specifying both fixed
@@ -57,6 +57,7 @@ Mixed-effects, autoregressive model.
 formula <- y ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2)
 time_form <- ~ t | tg + g1
 ar_form <- ~ g1
+y_scale <- ~ g1
 
 set.seed(1)
 x1_coef <- 1.5
@@ -74,7 +75,7 @@ data$y <- data$y + data$x2 *
     sapply(as.integer(interaction(data$g1, data$g2)),
            function(i) x2_coefs[i])
 
-liz <- liz_fit(formula, time_form, ar_form, data,
+liz <- liz_fit(formula, time_form, ar_form, y_scale, data,
               rstan_control = list(chains = 1, iter = 100))
 
 }

@@ -13,14 +13,14 @@
 #'            x2 = rep(list(runif(20)), n())) %>%
 #'     unnest()
 #'
-#' formula <- y ~ x1 + x2 + (x1 | g1 + g2) + (1 | g2)
+#' formula <- y ~ x1 + x2 + (x1 | g1) + (1 | g1 + g2)
 #' time_form <- ~ t | g1+g2
 #' ar_form <- ~ g1
 #' ar_bound <- FALSE
 #'
-#' coef = list(x1 = list(g1 = list(0, 0.5), g2 = runif(8)),
+#' coef = list(x1 = list(g1 = runif(5)),
 #'             x2 = 2,
-#'             `1` = list(g2 = list(3, 1.2)))
+#'             `1` = list(g1 = runif(5), g2 = runif(8)))
 #' auto_regr = list(0.1, 0.2)
 #' resid_sd = 0.5
 #'
@@ -53,11 +53,12 @@ sim_data <- function(formula,
     data_ <- list2env(data)
 
     # Check for proper inputs:
-    initial_input_checks(formula, time_form, ar_form, data_, ar_bound)
+    initial_input_checks(formula, time_form, ar_form, NULL, data_, ar_bound, FALSE)
     # Checks for variables being same length and reorders by time if necessary
     obs_per <- check_len_sort_data(formula, time_form, ar_form, data_)
 
-    stan_data <- make_coef_objects(formula, time_form, ar_form, data_, obs_per, ar_bound)
+    stan_data <- make_coef_objects(formula, time_form, ar_form, data_, obs_per,
+                                   ar_bound, FALSE)
 
     # Autoregressive parameters for each time series
     if (!is.null(ar_form)) {
