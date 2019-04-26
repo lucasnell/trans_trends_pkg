@@ -18,10 +18,10 @@
 #' ar_form <- ~ g1
 #' ar_bound <- FALSE
 #'
-#' coef = list(x1 = list(g1 = c(0, 0.5), g2 = c(1, 0.6)),
+#' coef = list(x1 = list(g1 = list(0, 0.5), g2 = runif(8)),
 #'             x2 = 2,
-#'             `1` = list(g2 = c(3, 1.2)))
-#' auto_regr = c(0.1, 0.2)
+#'             `1` = list(g2 = list(3, 1.2)))
+#' auto_regr = list(0.1, 0.2)
 #' resid_sd = 0.5
 #'
 #' lizard:::sim_data(formula, time_form, ar_form, coef, auto_regr, resid_sd,
@@ -37,13 +37,14 @@ sim_data <- function(formula,
                      coef,
                      auto_regr,
                      resid_sd,
-                     data = parent.frame(1L),
+                     data,
                      ar_bound = FALSE) {
 
     call_ = match.call()
 
     stopifnot(inherits(coef, "list"))
-    stopifnot(inherits(auto_regr, "numeric") && length(auto_regr) == 2)
+    stopifnot((inherits(auto_regr, "list") && length(auto_regr) == 2) ||
+                  inherits(auto_regr, "numeric"))
     stopifnot(is.numeric(resid_sd) && resid_sd >= 0 && length(resid_sd) == 1)
 
     if (!inherits(data, "data.frame")) stop("data must be a data frame.")
@@ -60,10 +61,18 @@ sim_data <- function(formula,
 
     # Autoregressive parameters for each time series
     if (!is.null(ar_form)) {
-        if (ar_bound && auto_regr[[2]] > 1) auto_regr[[2]] <- 1
-        stopifnot(auto_regr[[1]] >= 0)
-        ar_phis <- runif(length(unique(stan_data$p_groups)),
-                         auto_regr[[1]], auto_regr[[2]])
+        n <- length(unique(stan_data$p_groups))
+        if (inherits(auto_regr, "list")) {
+            if (ar_bound && auto_regr[[2]] > 1) auto_regr[[2]] <- 1
+            stopifnot(auto_regr[[1]] >= 0)
+            ar_phis <- runif(n, auto_regr[[1]], auto_regr[[2]])
+        } else {
+            if (length(auto_regr) != n) {
+                stop("The length of auto_regr, if a numeric vector, must be ", n)
+            }
+            ar_phis <- auto_regr
+            if (ar_bound) ar_phis[ar_phis > 1] <- 1
+        }
         phis <- sapply(stan_data$p_groups, function(i) ar_phis[i])
     } else phis <- rep(0, length(stan_data$p_groups))
 
@@ -116,32 +125,50 @@ sim_data <- function(formula,
                 stop(paste("\nFor", f, "in the `coef` object, it doesn't specify an",
                            "object for each grouping variable."))
             }
-            if (!all(sapply(v, inherits, what = "numeric"))) {
+            if (!all(sapply(v, inherits, what = c("numeric", "list")))) {
                 stop(paste("\nFor", f, "in the `coef` object, not all inner objects",
-                           "are of class `numeric`."))
+                           "are of class `numeric` or `list`."))
             }
-            fixed_betas[f] <- sum(sapply(v, function(x) x[[1]]))
-            for (i in 1:length(v)) coef[[f]][[i]][[1]] <- 0
+            for (i in 1:length(v)) {
+                if (inherits(coef[[f]][[i]], "list")) {
+                    fixed_betas[f] <- fixed_betas[f] + coef[[f]][[i]][[1]]
+                    coef[[f]][[i]][[1]] <- 0
+                } else if (inherits(coef[[f]][[i]], "numeric")) {
+                    fixed_betas[f] <- fixed_betas[f] + mean(coef[[f]][[i]])
+                } else {
+                    stop("All terminal items inside coef must be numerics or lists")
+                }
+            }
         }
     }
 
 
     # Generate random effects:
-    random_betas <- lapply(1:length(rand),
-                           function(i) {
-                               x <- rand[[i]]
-                               z <- rep(list(NA), length(rand_g[[x]]))
-                               names(z) <- rand_g[[x]]
-                               for (j in 1:length(z)) {
-                                   g <- rand_g[[x]][j]
-                                   n <- diff(range(stan_data$b_groups[,i+(j-1)])) + 1
-                                   z[[g]] <- rnorm(n,
-                                                   coef[[x]][[g]][[1]],
-                                                   coef[[x]][[g]][[2]])
-                               }
-                               return(z)
-                           })
+    random_betas <- rep(list(NA), length(rand))
     names(random_betas) <- rand
+    for (i in 1:length(rand)) {
+        x <- rand[[i]]
+        random_betas[[i]] <- rep(list(NA), length(rand_g[[x]]))
+        names(random_betas[[i]]) <- rand_g[[x]]
+        for (j in 1:length(random_betas[[i]])) {
+            g <- rand_g[[x]][j]
+            n <- diff(range(stan_data$b_groups[,i+(j-1)])) + 1
+            if (inherits(coef[[x]][[g]], "list")) {
+                random_betas[[i]][[g]] <- rnorm(n,
+                                coef[[x]][[g]][[1]],
+                                coef[[x]][[g]][[2]])
+            } else if (inherits(coef[[x]][[g]], "numeric")) {
+                if (length(coef[[x]][[g]]) != n) {
+                    stop("\nIn `coef` for coefficient ", x, ", group ", g, ", its length ",
+                         "must be ", n, ", not ", length(coef[[x]][[g]]), ".")
+                }
+                random_betas[[i]][[g]] <- coef[[x]][[g]]
+            } else {
+                stop("\nIn `coef` for coefficient ", x, ", group ", g, ", the object ",
+                     "must be of class list or numeric.")
+            }
+        }
+    }
 
     # Make matrix of final coefficients
     betas <- matrix(0, stan_data$n_obs, stan_data$n_coef)
