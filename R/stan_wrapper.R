@@ -258,7 +258,7 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
 #' This is only used to create error messages, so this function invisibly returns `NULL`.
 #'
 #' @param formula Formula
-#' @param arg Which argument in `lizfit` the formula is for.
+#' @param arg Which argument in `liz_fit` the formula is for.
 #'
 #'
 #' @noRd
@@ -290,7 +290,7 @@ proper_formula <- function(formula, arg) {
         stop(err_msg, call. = FALSE)
     }
     if (sum(all.names(formula) == "~") > 1) {
-        stop("\nYou should never include > 1 tilde (`~`) in any `lizfit` argument.",
+        stop("\nYou should never include > 1 tilde (`~`) in any `liz_fit` argument.",
              call. = TRUE)
     }
 
@@ -304,7 +304,7 @@ proper_formula <- function(formula, arg) {
     # First check for colons to provide more useful error message for this case:
     if (grepl("\\:", f_deparse(formula))) {
         stop("\nIn the `", arg, "` argument, you've included a colon. ",
-             "This is not allowed in `lizfit`, so please just use an asterisk to ",
+             "This is not allowed in `liz_fit`, so please just use an asterisk to ",
              "specify interactive effects.", call. = FALSE)
     }
     # Do the same for double bars:
@@ -349,9 +349,9 @@ proper_formula <- function(formula, arg) {
 
 
 
-#' Do initial checks for inputs to `lizfit`.
+#' Do initial checks for inputs to `liz_fit`.
 #'
-#' @inheritParams lizfit
+#' @inheritParams liz_fit
 #'
 #' @noRd
 #'
@@ -362,7 +362,7 @@ initial_input_checks <- function(formula,
                                  ar_bound) {
 
     if (!inherits(data, "environment")) {
-        stop("\nIn `lizfit`, the `data` argument must be a list, data frame, or ",
+        stop("\nIn `liz_fit`, the `data` argument must be a list, data frame, or ",
              "environment.", call. = FALSE)
     }
 
@@ -372,7 +372,7 @@ initial_input_checks <- function(formula,
     proper_formula(ar_form, "ar_form")
 
     if (!inherits(ar_bound,"logical") || length(ar_bound) != 1) {
-        stop("\nIn `lizfit`, the `ar_bound` argument must be a logical ",
+        stop("\nIn `liz_fit`, the `ar_bound` argument must be a logical ",
              "of length 1.", call. = FALSE)
     }
 
@@ -593,7 +593,7 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bou
 #'     All grouping variables must be factors without any missing levels.
 #'     Example: `y ~ x1 + (x2 | g1 + g2) + (x3 | g1 + g3)`.
 #'     _Note:_ If you do not explicitly specify a random effect for the intercept,
-#'     `lizfit` will not include one. This differs from `lmer`.
+#'     `liz_fit` will not include one. This differs from `lmer`.
 #'     In the above example, the intercept will not have a random effect.
 #' @param time_form A required, one-sided formula specifying the structure of
 #'     the time series (e.g., `~ time | species + site + rep`).
@@ -609,7 +609,7 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bou
 #'     is nested within (e.g., using genus here and species in `time_form`),
 #'     just insert the higher-level variable (genus in the example) in `time_form`,
 #'     as it won't effect the results.
-#'     Providing `NULL` for this argument causes `lizfit` to use a model that does
+#'     Providing `NULL` for this argument causes `liz_fit` to use a model that does
 #'     not account for temporal autocorrelation. This can be useful for testing.
 #' @param data An optional list, data frame, or environment that contains
 #'     the dependent, independent, and grouping variables.
@@ -644,10 +644,10 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per, ar_bou
 #'     sapply(as.integer(interaction(data$g1, data$g2)),
 #'            function(i) x2_coefs[i])
 #'
-#' liz <- lizfit(formula, time_form, ar_form, data,
+#' liz <- liz_fit(formula, time_form, ar_form, data,
 #'               rstan_control = list(chains = 1, iter = 100))
 #'
-lizfit <- function(formula,
+liz_fit <- function(formula,
                    time_form,
                    ar_form,
                    data = parent.frame(1L),
@@ -657,15 +657,15 @@ lizfit <- function(formula,
     call_ = match.call()
 
     if (missing(formula)) {
-        stop("\nThe `lizfit` function requires the `formula` argument.",
+        stop("\nThe `liz_fit` function requires the `formula` argument.",
              call. = FALSE)
     }
     if (missing(time_form)) {
-        stop("\nThe `lizfit` function requires the `time_form` argument.",
+        stop("\nThe `liz_fit` function requires the `time_form` argument.",
              call. = FALSE)
     }
     if (missing(ar_form)) {
-        stop("\nThe `lizfit` function requires the `ar_form` argument.",
+        stop("\nThe `liz_fit` function requires the `ar_form` argument.",
              call. = FALSE)
     }
     if (inherits(data, c("data.frame", "list"))) {
