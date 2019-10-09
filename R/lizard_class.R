@@ -1,6 +1,6 @@
 
 
-new_lizard <- function(.stan, .call, .x_means_sds, .y_means_sds) {
+new_lizard <- function(.stan, .call, .x_means_sds, .y_means_sds, .stan_data) {
 
     stopifnot(inherits(.stan, "stanfit"))
     stopifnot(inherits(.call, "call"))
@@ -14,7 +14,8 @@ new_lizard <- function(.stan, .call, .x_means_sds, .y_means_sds) {
 
     liz_obj <- structure(list(stan = .stan, call = .call,
                               x_means_sds = .x_means_sds,
-                              y_means_sds = .y_means_sds),
+                              y_means_sds = .y_means_sds,
+                              stan_data = .stan_data),
                          class = "lizard")
 
     return(liz_obj)

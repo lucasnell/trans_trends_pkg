@@ -787,7 +787,7 @@ liz_fit <- function(formula,
 
     stan_fit <- do.call(rstan::sampling, rstan_control)
 
-    lizard_obj <- new_lizard(stan_fit, call_, x_means_sds, y_means_sds)
+    lizard_obj <- new_lizard(stan_fit, call_, x_means_sds, y_means_sds, stan_data)
 
     return(lizard_obj)
 }
