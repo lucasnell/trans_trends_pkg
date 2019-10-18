@@ -437,6 +437,9 @@ initial_input_checks <- function(formula,
 #'
 #' This function also checks for duplicate times and for "bad" factors (those with
 #' missing levels or just one level).
+#'
+#' It also checks for NAs.
+#'
 #' Changes made to `data` are in place.
 #'
 #' @noRd
@@ -487,6 +490,10 @@ check_len_sort_data <- function(formula,
             stop("\nThe following variable in one of the input formulas isn't the ",
                  "same length as others: `", v, "`.",
                  call. = FALSE)
+        }
+        if (any(is.na(x))) {
+            stop("\nNAs are not allowed in `liz_fit`. The following variable in one of ",
+                 "the input formulas has them: `", v, "`.", call. = FALSE)
         }
         if (inherits(x, "factor")) {
             if (length(levels(x)) < length(unique(x))) {
