@@ -663,12 +663,25 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per,
 #'     By default, it uses the environment the function was executed in.
 #' @param ar_bound An optional logical for whether to bound the autoregressive
 #'     parameter(s) <= 1. Defaults to `FALSE`.
+#' @param hmc An optional logical for whether to use Hamiltonian Monte Carlo
+#'     sampling for the model fit.
+#'     This is `stan`'s default, and it gives samples from a posterior distribution
+#'     as output.
+#'     When `FALSE`, `liz_fit` will obtain point estimates by maximizing the
+#'     joint posterior from the model;
+#'     it also returns standard errors based on the Hessian.
+#'     Defaults to `FALSE`.
 #' @param rstan_control A list of arguments passed to `rstan::sampling`
-#'     (e.g., `iter`, `chains`, `cores`). See \code{\link[rstan]{sampling}}.
+#'     or `rstan::optimizing`
+#'     (e.g., `iter`, `chains`, `cores`, `algorithm`).
+#'     See \code{\link[rstan]{sampling}} or \code{\link[rstan]{optimizing}}.
 #'
 #' @return A list containing, among other things, a `stanfit` object with the model fit.
 #'
 #' @export
+#'
+#' @importFrom rstan sampling
+#' @importFrom rstan optimizing
 #'
 #' @examples
 #' formula <- y ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2)
@@ -702,6 +715,7 @@ liz_fit <- function(formula,
                     data = parent.frame(1L),
                     x_scale = TRUE,
                     ar_bound = FALSE,
+                    hmc = FALSE,
                     rstan_control = list()) {
 
     call_ = match.call()
@@ -726,6 +740,9 @@ liz_fit <- function(formula,
         data <- list2env(data)
     }
 
+    if (!inherits(hmc, "logical") || length(hmc) != 1) {
+        stop("\n`hmc` must be a single logical.", call. = FALSE)
+    }
     if (!inherits(rstan_control, "list")) {
         stop("\n`rstan_control` must be a list.", call. = FALSE)
     }
@@ -785,7 +802,12 @@ liz_fit <- function(formula,
                                                data = stan_data))
     }
 
-    stan_fit <- do.call(rstan::sampling, rstan_control)
+    if (hmc) {
+        stan_fit <- do.call(sampling, rstan_control)
+    } else {
+        if (!isTRUE(rstan_control$hessian)) rstan_control$hessian <- TRUE
+        stan_fit <- do.call(optimizing, rstan_control)
+    }
 
     lizard_obj <- new_lizard(stan_fit, call_, x_means_sds, y_means_sds, stan_data)
 
