@@ -1,9 +1,9 @@
 
 
-new_lizard <- function(.stan, .call, .x_means_sds, .y_means_sds, .stan_data) {
+new_lizard <- function(.stan, .call, .hmc, .x_means_sds, .y_means_sds, .stan_data) {
 
-    stopifnot(inherits(.stan, "stanfit"))
     stopifnot(inherits(.call, "call"))
+    stopifnot(inherits(.hmc, "logical"))
     stopifnot(is.null(.x_means_sds) || inherits(.x_means_sds, "data.frame"))
     stopifnot(is.null(.y_means_sds) || inherits(.y_means_sds, "data.frame"))
 
@@ -13,6 +13,7 @@ new_lizard <- function(.stan, .call, .x_means_sds, .y_means_sds, .stan_data) {
     }
 
     liz_obj <- structure(list(stan = .stan, call = .call,
+                              hmc = .hmc,
                               x_means_sds = .x_means_sds,
                               y_means_sds = .y_means_sds,
                               stan_data = .stan_data),
