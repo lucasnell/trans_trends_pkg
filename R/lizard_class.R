@@ -34,7 +34,7 @@ print.lizard <- function(x, digits = max(3, getOption("digits") - 3), ...) {
 
     cat("\nCall to liz_fit:\n")
     cat(paste(trimws(deparse(x$call)), collapse = " "), "\n\n")
-    cat(sprintf("  * Standardized X: %s\n", is.null(x$x_means_sds)))
-    cat(sprintf("  * Standardized Y: %s\n", is.null(x$y_means_sds)))
+    cat(sprintf("  * Standardized X: %s\n", !is.null(x$x_means_sds)))
+    cat(sprintf("  * Standardized Y: %s\n", !is.null(x$y_means_sds)))
 
 }
