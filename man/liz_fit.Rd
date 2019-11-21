@@ -4,15 +4,24 @@
 \alias{liz_fit}
 \title{Mixed-effects, autoregressive model.}
 \usage{
-liz_fit(formula, time_form, ar_form, y_scale, data = parent.frame(1L),
-  x_scale = TRUE, ar_bound = FALSE, hmc = FALSE,
-  rstan_control = list())
+liz_fit(
+  formula,
+  time_form,
+  ar_form,
+  y_scale,
+  data = parent.frame(1L),
+  x_scale = TRUE,
+  ar_bound = FALSE,
+  hmc = FALSE,
+  priors = NULL,
+  rstan_control = list()
+)
 }
 \arguments{
 \item{formula}{A required, two-sided, linear formula specifying both fixed
 and random effects of the model.
 The structure is similar to that in the \code{lme4} package, but more restrictive.
-Random effects should be contained inside parentheses, and a bar (\code{|})
+Random effects should be contained inside parentheses, and a bar (\verb{|})
 should separate the name of the fixed effect from the grouping variables.
 All grouping variables must be factors without any missing levels.
 Example: \code{y ~ x1 + (x2 | g1 + g2) + (x3 | g1 + g3)}.
@@ -38,9 +47,13 @@ as it won't effect the results.
 Providing \code{NULL} for this argument causes \code{liz_fit} to use a model that does
 not account for temporal autocorrelation. This can be useful for testing.}
 
+\item{y_scale}{}
+
 \item{data}{An optional list, data frame, or environment that contains
 the dependent, independent, and grouping variables.
 By default, it uses the environment the function was executed in.}
+
+\item{x_scale}{}
 
 \item{ar_bound}{An optional logical for whether to bound the autoregressive
 parameter(s) <= 1. Defaults to \code{FALSE}.}

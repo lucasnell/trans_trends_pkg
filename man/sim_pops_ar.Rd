@@ -4,15 +4,23 @@
 \alias{sim_pops_ar}
 \title{Multiple populations simulated using AR1 process.}
 \usage{
-sim_pops_ar(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma,
-  n_cores = 1L)
+sim_pops_ar(
+  X,
+  N0_mat,
+  b0_mat,
+  b1_mat,
+  rho_mat,
+  vcv_cube,
+  obs_sigma,
+  n_cores = 1L
+)
 }
 \arguments{
 \item{X}{Matrix of environmental variable.
 It should have rows associated with a given time point and
 columns associated with a given location.}
 
-\item{N0_mat}{Matrix of starting population abundances (\code{log(# individuals)})
+\item{N0_mat}{Matrix of starting population abundances (\verb{log(# individuals)})
 by species and location.}
 
 \item{b0_mat}{Matrix of \eqn{\beta_0} (the population-abundance intercept) values

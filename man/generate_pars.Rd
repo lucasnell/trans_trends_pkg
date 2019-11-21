@@ -4,8 +4,20 @@
 \alias{generate_pars}
 \title{Generate parameter values for simulations.}
 \usage{
-generate_pars(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0,
-  sigma_b1, sigma_rho, sigma_eps, sigma_obs = 0, corr_method = "none")
+generate_pars(
+  n_time,
+  n_loc,
+  n_spp,
+  mean_b0,
+  mean_b1,
+  mean_rho,
+  sigma_b0,
+  sigma_b1,
+  sigma_rho,
+  sigma_eps,
+  sigma_obs = 0,
+  corr_method = "none"
+)
 }
 \arguments{
 \item{n_time}{Number of time steps.}
