@@ -722,6 +722,33 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 # start doc ------
 #' Mixed-effects, autoregressive model.
 #'
+#'
+#' @section Setting priors:
+#' Priors are for the hyperparameters for the normal distributions of
+#' fixed-effect coefficients and intercepts, random-effect standard deviations,
+#' autoregressive parameters, and residual standard deviations.
+#' Autoregressive parametes and standard deviation sampling distributions are
+#' truncated above zero.
+#' By default, most have priors of $\mu = 0$ and $\sigma = 1$, except for
+#' the autoregressive parameters that have priors of $\mu = 0$ and $\sigma = 0.5$.
+#'
+#' To pass priors, you must provide a named list.
+#' Each item in the list must be a 2-column matrix, with the first column
+#' containing priors for $\mu$ and the second containing those for $\sigma$.
+#' The possible names in the list are the following:
+#' \describe{
+#'     \item{alpha}{ Fixed effects and intercepts }
+#'     \item{phi}{ Autoregressive parameters }
+#'     \item{sig_beta}{ Random effect group standard deviations }
+#'     \item{sig_res}{ Residual standard deviation }
+#' }
+#'
+#'
+#' If scaling is not done on either the x or y variables, then the user must pass
+#' *all* priors to replace these defaults.
+#'
+#'
+#'
 #' @param formula A required, two-sided, linear formula specifying both fixed
 #'     and random effects of the model.
 #'     The structure is similar to that in the `lme4` package, but more restrictive.
@@ -767,9 +794,12 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #'     joint posterior from the model;
 #'     it also returns standard errors based on the Hessian.
 #'     Defaults to `FALSE`.
-#'
-#' @param priors Defaults to `NULL`.
-#'
+#' @param priors Named list specifying priors.
+#'     `NULL` results in the default priors being used.
+#'     An error is returned if this argument is not provided when not scaling x or y
+#'     variables.
+#'     See "Setting Priors" section for more information.
+#'     Defaults to `NULL`.
 #' @param rstan_control A list of arguments passed to `rstan::sampling`
 #'     or `rstan::optimizing`
 #'     (e.g., `iter`, `chains`, `cores`, `algorithm`).

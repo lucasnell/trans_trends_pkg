@@ -67,6 +67,13 @@ joint posterior from the model;
 it also returns standard errors based on the Hessian.
 Defaults to \code{FALSE}.}
 
+\item{priors}{Named list specifying priors.
+\code{NULL} results in the default priors being used.
+An error is returned if this argument is not provided when not scaling x or y
+variables.
+See "Setting Priors" section for more information.
+Defaults to \code{NULL}.}
+
 \item{rstan_control}{A list of arguments passed to \code{rstan::sampling}
 or \code{rstan::optimizing}
 (e.g., \code{iter}, \code{chains}, \code{cores}, \code{algorithm}).
@@ -78,6 +85,31 @@ A list containing, among other things, a \code{stanfit} object with the model fi
 \description{
 Mixed-effects, autoregressive model.
 }
+\section{Setting priors}{
+
+Priors are for the hyperparameters for the normal distributions of
+fixed-effect coefficients and intercepts, random-effect standard deviations,
+autoregressive parameters, and residual standard deviations.
+Autoregressive parametes and standard deviation sampling distributions are
+truncated above zero.
+By default, most have priors of $\mu = 0$ and $\sigma = 1$, except for
+the autoregressive parameters that have priors of $\mu = 0$ and $\sigma = 0.5$.
+
+To pass priors, you must provide a named list.
+Each item in the list must be a 2-column matrix, with the first column
+containing priors for $\mu$ and the second containing those for $\sigma$.
+The possible names in the list are the following:
+\describe{
+\item{alpha}{ Fixed effects and intercepts }
+\item{phi}{ Autoregressive parameters }
+\item{sig_beta}{ Random effect group standard deviations }
+\item{sig_res}{ Residual standard deviation }
+}
+
+If scaling is not done on either the x or y variables, then the user must pass
+\emph{all} priors to replace these defaults.
+}
+
 \examples{
 formula <- y ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2)
 time_form <- ~ t | tg + g1
