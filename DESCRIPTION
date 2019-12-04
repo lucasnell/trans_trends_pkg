@@ -8,7 +8,7 @@ Authors@R: as.person(c(
     "Lucas A Nell <lucas@lucasnell.com> [aut, cre]"
   ))
 Description: Some day, more details about what the package does will go here.
-License: MIT + file LICENSE
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 ByteCompile: true
