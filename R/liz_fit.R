@@ -544,8 +544,8 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per,
     start_end_mat <- cbind(c(1, cumsum(head(obs_per, -1)) + 1),
                            cumsum(obs_per))
 
-    rand_chunks <- lme4::findbars(formula)
-    fixed <- expand_inters(lme4::nobars(formula)[[3]])
+    rand_chunks <- findbars(formula)
+    fixed <- expand_inters(nobars(formula)[[3]])
 
     # Make sure intercept is explicitly included in fixed if not already:
     if (!any(c("0","1") %in% fixed)) fixed <- c("1", fixed)

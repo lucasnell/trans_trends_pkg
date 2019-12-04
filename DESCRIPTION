@@ -20,8 +20,7 @@ Imports:
     Rcpp (>= 0.12.16),
     methods,
     rstan (>= 2.18.1),
-    rstantools (>= 1.5.0),
-    lme4
+    rstantools (>= 1.5.0)
 LinkingTo:
     StanHeaders (>= 2.18.0),
     rstan (>= 2.18.1),
