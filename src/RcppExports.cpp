@@ -8,6 +8,18 @@
 
 using namespace Rcpp;
 
+// hpdi
+NumericMatrix hpdi(const arma::mat& input, const double& prob);
+RcppExport SEXP _lizard_hpdi(SEXP inputSEXP, SEXP probSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< const double& >::type prob(probSEXP);
+    rcpp_result_gen = Rcpp::wrap(hpdi(input, prob));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sim_pops_ar
 arma::cube sim_pops_ar(const arma::mat& X, const arma::mat& N0_mat, const arma::mat& b0_mat, const arma::mat& b1_mat, const arma::mat& rho_mat, const arma::cube& vcv_cube, const arma::vec& obs_sigma, const uint32& n_cores);
 RcppExport SEXP _lizard_sim_pops_ar(SEXP XSEXP, SEXP N0_matSEXP, SEXP b0_matSEXP, SEXP b1_matSEXP, SEXP rho_matSEXP, SEXP vcv_cubeSEXP, SEXP obs_sigmaSEXP, SEXP n_coresSEXP) {
@@ -79,6 +91,7 @@ RcppExport SEXP _rcpp_module_boot_stan_fit4lizard_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4snake_mod();
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_lizard_hpdi", (DL_FUNC) &_lizard_hpdi, 2},
     {"_lizard_sim_pops_ar", (DL_FUNC) &_lizard_sim_pops_ar, 8},
     {"_lizard_melt_cube", (DL_FUNC) &_lizard_melt_cube, 1},
     {"_lizard_generate_pars", (DL_FUNC) &_lizard_generate_pars, 12},
