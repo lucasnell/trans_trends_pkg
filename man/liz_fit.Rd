@@ -92,12 +92,12 @@ fixed-effect coefficients and intercepts, random-effect standard deviations,
 autoregressive parameters, and residual standard deviations.
 Autoregressive parametes and standard deviation sampling distributions are
 truncated above zero.
-By default, most have priors of $\mu = 0$ and $\sigma = 1$, except for
-the autoregressive parameters that have priors of $\mu = 0$ and $\sigma = 0.5$.
+By default, most have priors of \eqn{\mu = 0} and \eqn{\sigma = 1}, except for
+the autoregressive parameters that have priors of \eqn{\mu = 0} and \eqn{\sigma = 0.5}.
 
 To pass priors, you must provide a named list.
 Each item in the list must be a 2-column matrix, with the first column
-containing priors for $\mu$ and the second containing those for $\sigma$.
+containing priors for \eqn{\mu} and the second containing those for \eqn{\sigma}.
 The possible names in the list are the following:
 \describe{
 \item{alpha}{ Fixed effects and intercepts }
