@@ -8,7 +8,7 @@ data {
     int lev_per_g[sum(g_per_ff)];       // # levels per group (repeated by fixed effect)
     int b_groups[n_ts, sum(g_per_ff)];  // grouping structure for betas
     int p_groups[n_ts];                 // grouping structure for phis
-    int<lower=0, upper=1> change;
+    int<lower=0, upper=1> change;       // logical for parameterization (0 = predict mean; 1 = predict change);
     // data
     real y[n_obs];                      // response variables
     real x[n_obs, n_coef];              // predictor variables
