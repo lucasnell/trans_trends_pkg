@@ -8,6 +8,7 @@ data {
     int lev_per_g[sum(g_per_ff)];       // # levels per group (repeated by fixed effect)
     int b_groups[n_ts, sum(g_per_ff)];  // grouping structure for betas
     int p_groups[n_ts];                 // grouping structure for phis
+    int<lower=0, upper=1> diff;
     // data
     real y[n_obs];                      // response variables
     real x[n_obs, n_coef];              // predictor variables
@@ -47,11 +48,18 @@ transformed parameters {
                 }
             } // c
             // predicted values:
-            y_pred[xy_pos] = dot_product(beta[ts,], x[xy_pos,]);
-            for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
-                    y_pred[t] = dot_product(beta[ts,], x[t,]) +
-                        phi[p_groups[ts]]^(time[t] - time[t-1]) * (y[t-1] - dot_product(beta[ts,], x[t-1,]));
-           } // t
+            if (diff == 1) {
+                y_pred[xy_pos] = y[xy_pos];
+                    for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
+                        y_pred[t] = dot_product(beta[ts,], x[t,]) + phi[p_groups[ts]]^(time[t] - time[t-1]) * y[t-1];
+                } // t
+            } else {
+                y_pred[xy_pos] = dot_product(beta[ts,], x[xy_pos,]);
+                    for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
+                        y_pred[t] = dot_product(beta[ts,], x[t,]) +
+                            phi[p_groups[ts]]^(time[t] - time[t-1]) * (y[t-1] - dot_product(beta[ts,], x[t-1,]));
+                } // t
+            }
            xy_pos += obs_per[ts];
         } // ts
     }
