@@ -14,6 +14,7 @@ liz_fit(
   ar_bound = FALSE,
   hmc = FALSE,
   priors = NULL,
+  change = TRUE,
   rstan_control = list()
 )
 }
@@ -21,7 +22,7 @@ liz_fit(
 \item{formula}{A required, two-sided, linear formula specifying both fixed
 and random effects of the model.
 The structure is similar to that in the \code{lme4} package, but more restrictive.
-Random effects should be contained inside parentheses, and a bar (\verb{|})
+Random effects should be contained inside parentheses, and a bar (\code{|})
 should separate the name of the fixed effect from the grouping variables.
 All grouping variables must be factors without any missing levels.
 Example: \code{y ~ x1 + (x2 | g1 + g2) + (x3 | g1 + g3)}.
@@ -73,6 +74,12 @@ An error is returned if this argument is not provided when not scaling x or y
 variables.
 See "Setting Priors" section for more information.
 Defaults to \code{NULL}.}
+
+\item{change}{An optional logical for whether predictors model the change
+in the response variable between time points.
+The alternative is for predictors to model the mean in the stationary
+distribution of the response variable.
+Defaults to \code{TRUE}.}
 
 \item{rstan_control}{A list of arguments passed to \code{rstan::sampling}
 or \code{rstan::optimizing}

@@ -794,6 +794,11 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #'     joint posterior from the model;
 #'     it also returns standard errors based on the Hessian.
 #'     Defaults to `FALSE`.
+#' @param change An optional logical for whether predictors model the change
+#'     in the response variable between time points.
+#'     The alternative is for predictors to model the mean in the stationary
+#'     distribution of the response variable.
+#'     Defaults to `TRUE`.
 #' @param priors Named list specifying priors.
 #'     `NULL` results in the default priors being used.
 #'     An error is returned if this argument is not provided when not scaling x or y
@@ -846,6 +851,7 @@ liz_fit <- function(formula,
                     ar_bound = FALSE,
                     hmc = FALSE,
                     priors = NULL,
+                    change = TRUE,
                     rstan_control = list()) {
 
     call_ = match.call()
@@ -871,7 +877,11 @@ liz_fit <- function(formula,
     }
 
     if (!inherits(hmc, "logical") || length(hmc) != 1) {
-        stop("\n`hmc` must be a single logical.", call. = FALSE)
+        stop("\nThe `liz_fit` argument `hmc` must be a single logical.", call. = FALSE)
+    }
+    if (!inherits(change, "logical") || length(change) != 1) {
+        stop("\nThe `liz_fit` argument `change` must be a single logical.",
+             call. = FALSE)
     }
     if (!inherits(rstan_control, "list")) {
         stop("\n`rstan_control` must be a list.", call. = FALSE)
@@ -885,6 +895,7 @@ liz_fit <- function(formula,
     # Create the data to input to the stan model:
     stan_data <- make_coef_objects(formula, time_form, ar_form, data, obs_per,
                                    ar_bound, x_scale)
+    stan_data$change <- as.integer(change)
 
     # Deal with potential scaling of x variables that may or may not have been done
     # inside `make_coef_objects`:
