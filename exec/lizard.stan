@@ -76,7 +76,14 @@ model {
     }
     sig_res ~ normal(0, 1) T[0, ];
     // model:
-    y ~ normal(y_pred, sig_res);
+    {
+        int xy_pos = 1;         // position in x and y vectors
+        // loop over time series:
+        for (ts in 1:n_ts){
+            y[(xy_pos + 1):(xy_pos + obs_per[ts] - 1)] ~ normal(y_pred[(xy_pos + 1):(xy_pos + obs_per[ts] - 1)], sig_res);
+            xy_pos += obs_per[ts];
+        } // ts
+    }
 }
 generated quantities {
   real log_lik[n_obs];
