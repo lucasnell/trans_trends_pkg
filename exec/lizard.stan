@@ -49,7 +49,7 @@ transformed parameters {
             } // c
             // predicted values:
             if (change == 1) {
-                y_pred[xy_pos] = y[xy_pos];
+                y_pred[xy_pos] = dot_product(beta[ts,], x[xy_pos,]);
                     for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
                         y_pred[t] = dot_product(beta[ts,], x[t,]) + phi[p_groups[ts]]^(time[t] - time[t-1]) * y[t-1];
                 } // t
@@ -75,15 +75,8 @@ model {
         phi[i] ~ normal(0, 0.5) T[0, p_bound];
     }
     sig_res ~ normal(0, 1) T[0, ];
-    // model:
-    {
-        int xy_pos = 1;         // position in x and y vectors
-        // loop over time series:
-        for (ts in 1:n_ts){
-            y[(xy_pos + 1):(xy_pos + obs_per[ts] - 1)] ~ normal(y_pred[(xy_pos + 1):(xy_pos + obs_per[ts] - 1)], sig_res);
-            xy_pos += obs_per[ts];
-        } // ts
-    }
+    // observations:
+    y ~ normal(y_pred, sig_res);
 }
 generated quantities {
   real log_lik[n_obs];
