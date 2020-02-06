@@ -11,12 +11,12 @@ test_that("hpdi produces accurate output",
 
     for (i in 1:100) {
         n <- as.integer(runif(1, 100, 500))
-        p <- as.integer(runif(1, 2, 11))
-        x <- matrix(runif(n * p), n, p)
+        z <- runif(n)
+        x <- matrix(z, n, 1)
         class(x) <- "mcmc"
         pr <- runif(1)
         r <- HPDinterval(x, prob = pr)
-        cpp <- lizard:::hpdi(x, pr)
+        cpp <- lizard:::hpdi(z, pr)
         expect_equivalent(r, cpp)
     }
 

@@ -36,7 +36,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_lizard");
-    reader.add_event(82, 80, "end", "model_lizard");
+    reader.add_event(90, 88, "end", "model_lizard");
     return reader;
 }
 
@@ -50,6 +50,7 @@ private:
         std::vector<int> lev_per_g;
         std::vector<std::vector<int> > b_groups;
         std::vector<int> p_groups;
+        int change;
         std::vector<double> y;
         std::vector<std::vector<double> > x;
         std::vector<double> time;
@@ -161,6 +162,14 @@ public:
             for (size_t k_0__ = 0; k_0__ < p_groups_k_0_max__; ++k_0__) {
                 p_groups[k_0__] = vals_i__[pos__++];
             }
+
+            context__.validate_dims("data initialization", "change", "int", context__.to_vec());
+            change = int(0);
+            vals_i__ = context__.vals_i("change");
+            pos__ = 0;
+            change = vals_i__[pos__++];
+            check_greater_or_equal(function__, "change", change, 0);
+            check_less_or_equal(function__, "change", change, 1);
 
             validate_non_negative_index("y", "n_obs", n_obs);
             context__.validate_dims("data initialization", "y", "double", context__.to_vec(n_obs));
@@ -486,16 +495,32 @@ public:
                         }
                     }
                 }
-                stan::model::assign(y_pred, 
-                            stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::nil_index_list()), 
-                            dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")), 
-                            "assigning variable y_pred");
-                for (int t = (xy_pos + 1); t <= ((xy_pos + get_base1(obs_per, ts, "obs_per", 1)) - 1); ++t) {
+                if (as_bool(logical_eq(change, 1))) {
 
                     stan::model::assign(y_pred, 
-                                stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list()), 
-                                (dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")) + (pow(get_base1(phi, get_base1(p_groups, ts, "p_groups", 1), "phi", 1), (get_base1(time, t, "time", 1) - get_base1(time, (t - 1), "time", 1))) * (get_base1(y, (t - 1), "y", 1) - dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni((t - 1)), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x"))))), 
+                                stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::nil_index_list()), 
+                                dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")), 
                                 "assigning variable y_pred");
+                    for (int t = (xy_pos + 1); t <= ((xy_pos + get_base1(obs_per, ts, "obs_per", 1)) - 1); ++t) {
+
+                        stan::model::assign(y_pred, 
+                                    stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list()), 
+                                    (dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")) + (pow(get_base1(phi, get_base1(p_groups, ts, "p_groups", 1), "phi", 1), (get_base1(time, t, "time", 1) - get_base1(time, (t - 1), "time", 1))) * get_base1(y, (t - 1), "y", 1))), 
+                                    "assigning variable y_pred");
+                    }
+                } else {
+
+                    stan::model::assign(y_pred, 
+                                stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::nil_index_list()), 
+                                dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")), 
+                                "assigning variable y_pred");
+                    for (int t = (xy_pos + 1); t <= ((xy_pos + get_base1(obs_per, ts, "obs_per", 1)) - 1); ++t) {
+
+                        stan::model::assign(y_pred, 
+                                    stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list()), 
+                                    (dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")) + (pow(get_base1(phi, get_base1(p_groups, ts, "p_groups", 1), "phi", 1), (get_base1(time, t, "time", 1) - get_base1(time, (t - 1), "time", 1))) * (get_base1(y, (t - 1), "y", 1) - dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni((t - 1)), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x"))))), 
+                                    "assigning variable y_pred");
+                    }
                 }
                 stan::math::assign(xy_pos, (xy_pos + get_base1(obs_per, ts, "obs_per", 1)));
                 }
@@ -757,16 +782,32 @@ public:
                         }
                     }
                 }
-                stan::model::assign(y_pred, 
-                            stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::nil_index_list()), 
-                            dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")), 
-                            "assigning variable y_pred");
-                for (int t = (xy_pos + 1); t <= ((xy_pos + get_base1(obs_per, ts, "obs_per", 1)) - 1); ++t) {
+                if (as_bool(logical_eq(change, 1))) {
 
                     stan::model::assign(y_pred, 
-                                stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list()), 
-                                (dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")) + (pow(get_base1(phi, get_base1(p_groups, ts, "p_groups", 1), "phi", 1), (get_base1(time, t, "time", 1) - get_base1(time, (t - 1), "time", 1))) * (get_base1(y, (t - 1), "y", 1) - dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni((t - 1)), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x"))))), 
+                                stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::nil_index_list()), 
+                                dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")), 
                                 "assigning variable y_pred");
+                    for (int t = (xy_pos + 1); t <= ((xy_pos + get_base1(obs_per, ts, "obs_per", 1)) - 1); ++t) {
+
+                        stan::model::assign(y_pred, 
+                                    stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list()), 
+                                    (dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")) + (pow(get_base1(phi, get_base1(p_groups, ts, "p_groups", 1), "phi", 1), (get_base1(time, t, "time", 1) - get_base1(time, (t - 1), "time", 1))) * get_base1(y, (t - 1), "y", 1))), 
+                                    "assigning variable y_pred");
+                    }
+                } else {
+
+                    stan::model::assign(y_pred, 
+                                stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::nil_index_list()), 
+                                dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(xy_pos), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")), 
+                                "assigning variable y_pred");
+                    for (int t = (xy_pos + 1); t <= ((xy_pos + get_base1(obs_per, ts, "obs_per", 1)) - 1); ++t) {
+
+                        stan::model::assign(y_pred, 
+                                    stan::model::cons_list(stan::model::index_uni(t), stan::model::nil_index_list()), 
+                                    (dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni(t), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x")) + (pow(get_base1(phi, get_base1(p_groups, ts, "p_groups", 1), "phi", 1), (get_base1(time, t, "time", 1) - get_base1(time, (t - 1), "time", 1))) * (get_base1(y, (t - 1), "y", 1) - dot_product(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_uni(ts), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "beta"), stan::model::rvalue(x, stan::model::cons_list(stan::model::index_uni((t - 1)), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "x"))))), 
+                                    "assigning variable y_pred");
+                    }
                 }
                 stan::math::assign(xy_pos, (xy_pos + get_base1(obs_per, ts, "obs_per", 1)));
                 }

@@ -22,31 +22,34 @@ typedef arma::uword uint_t;
 
 */
 //[[Rcpp::export]]
-NumericMatrix hpdi(const arma::mat& input, const double& prob = 0.95) {
+NumericVector hpdi(NumericVector input, const double& prob = 0.95) {
 
-    if (input.n_rows <= 1) stop("Number of rows in matrix must be > 1.");
+    if (input.size() <= 1) stop("Number of items in vector must be > 1.");
 
-    arma::mat vals = arma::sort(input);
+    NumericVector vals = input.sort();
 
-    uint_t n = vals.n_rows;
-    uint_t p = vals.n_cols;
+    uint_t n = input.size();
 
-    uint_t gap = std::round(n * prob);
+    uint_t gap = std::round(static_cast<double>(n) * prob);
     if (gap > (n - 1)) gap = n - 1;
     if (gap < 1) gap = 1;
 
     arma::uvec init = arma::regspace<arma::uvec>(0, n - gap - 1);
 
-    arma::mat init_mat = vals.rows(init + gap) - vals.rows(init);
+    double min_d = vals[init(0) + gap] - vals[init(0)];
+    uint_t ind = 0;
 
-    arma::urowvec inds = arma::index_min(init_mat);
-
-    NumericMatrix out(p, 2);
-    for (uint_t i = 0; i < p; i++) {
-        out(i, 0) = vals(inds(i), i);
-        out(i, 1) = vals(inds(i) + gap, i);
+    for (uint_t i = 1; i < init.n_elem; i++) {
+        double d = vals[init(i) + gap] - vals[init(i)];
+        if (d < min_d) {
+            min_d = d;
+            ind = i;
+        }
     }
-    colnames(out) = CharacterVector::create("lower", "upper");
+
+    NumericVector out = {vals[ind], vals[ind + gap]};
+
+    out.names() = CharacterVector({"lower", "upper"});
 
     out.attr("Probability") = static_cast<double>(gap) / static_cast<double>(n);
 

@@ -9,12 +9,12 @@
 using namespace Rcpp;
 
 // hpdi
-NumericMatrix hpdi(const arma::mat& input, const double& prob);
+NumericVector hpdi(NumericVector input, const double& prob);
 RcppExport SEXP _lizard_hpdi(SEXP inputSEXP, SEXP probSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type input(inputSEXP);
     Rcpp::traits::input_parameter< const double& >::type prob(probSEXP);
     rcpp_result_gen = Rcpp::wrap(hpdi(input, prob));
     return rcpp_result_gen;
