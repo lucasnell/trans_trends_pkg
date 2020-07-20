@@ -58,9 +58,9 @@ model {
     alpha ~ normal(0, 1);
     z ~ normal(0, 1);
     for (i in 1:sum(g_per_ff)){
-        sig_beta[i] ~ normal(0, 1) T[0, ];
+        sig_beta[i] ~ gamma(1.5, 3);
     }
-    sig_res ~ normal(0, 1) T[0, ];
+    sig_res ~ gamma(1.5, 3);
     // model:
     y ~ normal(y_pred, sig_res);
 }
