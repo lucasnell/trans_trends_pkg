@@ -2,7 +2,7 @@
 % Please edit documentation in R/armm.R
 \name{armm}
 \alias{armm}
-\title{Mixed-effects, autoregressive model.}
+\title{Autoregressive mixed model.}
 \usage{
 armm(
   formula,
@@ -54,7 +54,8 @@ not account for temporal autocorrelation. This can be useful for testing.}
 the dependent, independent, and grouping variables.
 By default, it uses the environment the function was executed in.}
 
-\item{x_scale}{}
+\item{x_scale}{Logical for whether to scale the independent variable(s).
+Defaults to \code{TRUE}.}
 
 \item{ar_bound}{An optional logical for whether to bound the autoregressive
 parameter(s) <= 1. Defaults to \code{FALSE}.}
@@ -70,8 +71,8 @@ Defaults to \code{FALSE}.}
 
 \item{priors}{Named list specifying priors.
 \code{NULL} results in the default priors being used.
-An error is returned if this argument is not provided when not scaling x or y
-variables.
+An error is returned if this argument is not provided when not scaling
+x or y variables.
 See "Setting Priors" section for more information.
 Defaults to \code{NULL}.}
 
@@ -90,21 +91,23 @@ See \code{\link[rstan]{sampling}} or \code{\link[rstan]{optimizing}}.}
 A list containing, among other things, a \code{stanfit} object with the model fit.
 }
 \description{
-Mixed-effects, autoregressive model.
+Autoregressive mixed model.
 }
 \section{Setting priors}{
 
 Priors are for the hyperparameters for the normal distributions of
 fixed-effect coefficients and intercepts, random-effect standard deviations,
 autoregressive parameters, and residual standard deviations.
-Autoregressive parametes and standard deviation sampling distributions are
+Autoregressive parameters and standard deviation sampling distributions are
 truncated above zero.
-By default, most have priors of \eqn{\mu = 0} and \eqn{\sigma = 1}, except for
-the autoregressive parameters that have priors of \eqn{\mu = 0} and \eqn{\sigma = 0.5}.
+By default, most have priors of \eqn{\mu = 0} and \eqn{\sigma = 1}, except
+for the autoregressive parameters that have priors of \eqn{\mu = 0} and
+\eqn{\sigma = 0.5}.
 
 To pass priors, you must provide a named list.
 Each item in the list must be a 2-column matrix, with the first column
-containing priors for \eqn{\mu} and the second containing those for \eqn{\sigma}.
+containing priors for \eqn{\mu} and the second containing those for
+\eqn{\sigma}.
 The possible names in the list are the following:
 \describe{
 \item{alpha}{ Fixed effects and intercepts }
@@ -113,8 +116,8 @@ The possible names in the list are the following:
 \item{sig_res}{ Residual standard deviation }
 }
 
-If scaling is not done on either the x or y variables, then the user must pass
-\emph{all} priors to replace these defaults.
+If scaling is not done on either the x or y variables, then the user must
+pass \emph{all} priors to replace these defaults.
 }
 
 \examples{

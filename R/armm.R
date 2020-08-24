@@ -720,21 +720,23 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 
 
 # start doc ------
-#' Mixed-effects, autoregressive model.
+#' Autoregressive mixed model.
 #'
 #'
 #' @section Setting priors:
 #' Priors are for the hyperparameters for the normal distributions of
 #' fixed-effect coefficients and intercepts, random-effect standard deviations,
 #' autoregressive parameters, and residual standard deviations.
-#' Autoregressive parametes and standard deviation sampling distributions are
+#' Autoregressive parameters and standard deviation sampling distributions are
 #' truncated above zero.
-#' By default, most have priors of \eqn{\mu = 0} and \eqn{\sigma = 1}, except for
-#' the autoregressive parameters that have priors of \eqn{\mu = 0} and \eqn{\sigma = 0.5}.
+#' By default, most have priors of \eqn{\mu = 0} and \eqn{\sigma = 1}, except
+#' for the autoregressive parameters that have priors of \eqn{\mu = 0} and
+#' \eqn{\sigma = 0.5}.
 #'
 #' To pass priors, you must provide a named list.
 #' Each item in the list must be a 2-column matrix, with the first column
-#' containing priors for \eqn{\mu} and the second containing those for \eqn{\sigma}.
+#' containing priors for \eqn{\mu} and the second containing those for
+#' \eqn{\sigma}.
 #' The possible names in the list are the following:
 #' \describe{
 #'     \item{alpha}{ Fixed effects and intercepts }
@@ -744,8 +746,8 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #' }
 #'
 #'
-#' If scaling is not done on either the x or y variables, then the user must pass
-#' *all* priors to replace these defaults.
+#' If scaling is not done on either the x or y variables, then the user must
+#' pass *all* priors to replace these defaults.
 #'
 #'
 #'
@@ -781,9 +783,8 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #' @param data An optional list, data frame, or environment that contains
 #'     the dependent, independent, and grouping variables.
 #'     By default, it uses the environment the function was executed in.
-#'
-#' @param x_scale
-#'
+#' @param x_scale Logical for whether to scale the independent variable(s).
+#'     Defaults to `TRUE`.
 #' @param ar_bound An optional logical for whether to bound the autoregressive
 #'     parameter(s) <= 1. Defaults to `FALSE`.
 #' @param hmc An optional logical for whether to use Hamiltonian Monte Carlo
@@ -801,8 +802,8 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #'     Defaults to `TRUE`.
 #' @param priors Named list specifying priors.
 #'     `NULL` results in the default priors being used.
-#'     An error is returned if this argument is not provided when not scaling x or y
-#'     variables.
+#'     An error is returned if this argument is not provided when not scaling
+#'     x or y variables.
 #'     See "Setting Priors" section for more information.
 #'     Defaults to `NULL`.
 #' @param rstan_control A list of arguments passed to `rstan::sampling`
