@@ -4,7 +4,8 @@
 \name{myv_arth}
 \alias{myv_arth}
 \title{Lake Myvatn arthropods.}
-\format{A data frame with 1120 rows and 6 variables:
+\format{
+A data frame with 1120 rows and 6 variables:
 \describe{
 \item{trans}{}
 \item{dist}{}
@@ -12,7 +13,8 @@
 \item{taxon}{}
 \item{count}{}
 \item{midges}{}
-}}
+}
+}
 \source{
 \url{https://lter.limnology.wisc.edu/project/ltreb-myvatn-iceland}
 }

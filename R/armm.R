@@ -260,7 +260,7 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
 #' This is only used to create error messages, so this function invisibly returns `NULL`.
 #'
 #' @param formula Formula
-#' @param arg Which argument in `liz_fit` the formula is for.
+#' @param arg Which argument in `armm` the formula is for.
 #'
 #'
 #' @noRd
@@ -292,7 +292,7 @@ proper_formula <- function(formula, arg) {
         stop(err_msg, call. = FALSE)
     }
     if (sum(all.names(formula) == "~") > 1) {
-        stop("\nYou should never include > 1 tilde (`~`) in any `liz_fit` argument.",
+        stop("\nYou should never include > 1 tilde (`~`) in any `armm` argument.",
              call. = TRUE)
     }
 
@@ -306,7 +306,7 @@ proper_formula <- function(formula, arg) {
     # First check for colons to provide more useful error message for this case:
     if (grepl("\\:", f_deparse(formula))) {
         stop("\nIn the `", arg, "` argument, you've included a colon. ",
-             "This is not allowed in `liz_fit`, so please just use an asterisk to ",
+             "This is not allowed in `armm`, so please just use an asterisk to ",
              "specify interactive effects.", call. = FALSE)
     }
     # Do the same for double bars:
@@ -356,9 +356,9 @@ proper_formula <- function(formula, arg) {
 
 
 
-#' Do initial checks for inputs to `liz_fit`.
+#' Do initial checks for inputs to `armm`.
 #'
-#' @inheritParams liz_fit
+#' @inheritParams armm
 #'
 #' @noRd
 #'
@@ -371,7 +371,7 @@ initial_input_checks <- function(formula,
                                  x_scale) {
 
     if (!inherits(data, "environment")) {
-        stop("\nIn `liz_fit`, the `data` argument must be a list, data frame, or ",
+        stop("\nIn `armm`, the `data` argument must be a list, data frame, or ",
              "environment.", call. = FALSE)
     }
 
@@ -382,17 +382,17 @@ initial_input_checks <- function(formula,
     if (!is.null(y_scale)) {
         if (!inherits(y_scale, c("formula", "character")) ||
             (inherits(y_scale, "character") && length(y_scale) != 1)) {
-            stop("\nIn `liz_fit`, argument `y_scale` should be NULL, a formula, or a ",
+            stop("\nIn `armm`, argument `y_scale` should be NULL, a formula, or a ",
                  "single string.", call. = FALSE)
         }
         if (inherits(y_scale, "formula")) proper_formula(y_scale, "y_scale")
     }
     if (!inherits(ar_bound, "logical") || length(ar_bound) != 1) {
-        stop("\nIn `liz_fit`, the `ar_bound` argument must be a logical ",
+        stop("\nIn `armm`, the `ar_bound` argument must be a logical ",
              "of length 1.", call. = FALSE)
     }
     if (!inherits(x_scale, "logical") || length(x_scale) != 1) {
-        stop("\nIn `liz_fit`, the `x_scale` argument must be a logical ",
+        stop("\nIn `armm`, the `x_scale` argument must be a logical ",
              "of length 1.", call. = FALSE)
     }
 
@@ -492,7 +492,7 @@ check_len_sort_data <- function(formula,
                  call. = FALSE)
         }
         if (any(is.na(x))) {
-            stop("\nNAs are not allowed in `liz_fit`. The following variable in one of ",
+            stop("\nNAs are not allowed in `armm`. The following variable in one of ",
                  "the input formulas has them: `", v, "`.", call. = FALSE)
         }
         if (inherits(x, "factor")) {
@@ -757,7 +757,7 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #'     All grouping variables must be factors without any missing levels.
 #'     Example: `y ~ x1 + (x2 | g1 + g2) + (x3 | g1 + g3)`.
 #'     _Note:_ If you do not explicitly specify a random effect for the intercept,
-#'     `liz_fit` will not include one. This differs from `lmer`.
+#'     `armm` will not include one. This differs from `lmer`.
 #'     In the above example, the intercept will not have a random effect.
 #' @param time_form A required, one-sided formula specifying the structure of
 #'     the time series (e.g., `~ time | species + site + rep`).
@@ -773,7 +773,7 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #'     is nested within (e.g., using genus here and species in `time_form`),
 #'     just insert the higher-level variable (genus in the example) in `time_form`,
 #'     as it won't effect the results.
-#'     Providing `NULL` for this argument causes `liz_fit` to use a model that does
+#'     Providing `NULL` for this argument causes `armm` to use a model that does
 #'     not account for temporal autocorrelation. This can be useful for testing.
 #'
 #' @param y_scale
@@ -790,7 +790,7 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #'     sampling for the model fit.
 #'     This is `stan`'s default, and it gives samples from a posterior distribution
 #'     as output.
-#'     When `FALSE`, `liz_fit` will obtain point estimates by maximizing the
+#'     When `FALSE`, `armm` will obtain point estimates by maximizing the
 #'     joint posterior from the model;
 #'     it also returns standard errors based on the Hessian.
 #'     Defaults to `FALSE`.
@@ -839,10 +839,10 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #'     sapply(as.integer(interaction(data$g1, data$g2)),
 #'            function(i) x2_coefs[i])
 #'
-#' liz <- liz_fit(formula, time_form, ar_form, y_scale, data,
+#' mod <- armm(formula, time_form, ar_form, y_scale, data,
 #'               rstan_control = list(chains = 1, iter = 100))
 #'
-liz_fit <- function(formula,
+armm <- function(formula,
                     time_form,
                     ar_form,
                     y_scale,
@@ -857,19 +857,19 @@ liz_fit <- function(formula,
     call_ = match.call()
 
     if (missing(formula)) {
-        stop("\nThe `liz_fit` function requires the `formula` argument.",
+        stop("\nThe `armm` function requires the `formula` argument.",
              call. = FALSE)
     }
     if (missing(time_form)) {
-        stop("\nThe `liz_fit` function requires the `time_form` argument.",
+        stop("\nThe `armm` function requires the `time_form` argument.",
              call. = FALSE)
     }
     if (missing(ar_form)) {
-        stop("\nThe `liz_fit` function requires the `ar_form` argument.",
+        stop("\nThe `armm` function requires the `ar_form` argument.",
              call. = FALSE)
     }
     if (missing(y_scale)) {
-        stop("\nThe `liz_fit` function requires the `y_scale` argument.",
+        stop("\nThe `armm` function requires the `y_scale` argument.",
              call. = FALSE)
     }
     if (inherits(data, c("data.frame", "list"))) {
@@ -877,10 +877,10 @@ liz_fit <- function(formula,
     }
 
     if (!inherits(hmc, "logical") || length(hmc) != 1) {
-        stop("\nThe `liz_fit` argument `hmc` must be a single logical.", call. = FALSE)
+        stop("\nThe `armm` argument `hmc` must be a single logical.", call. = FALSE)
     }
     if (!inherits(change, "logical") || length(change) != 1) {
-        stop("\nThe `liz_fit` argument `change` must be a single logical.",
+        stop("\nThe `armm` argument `change` must be a single logical.",
              call. = FALSE)
     }
     if (!inherits(rstan_control, "list")) {
@@ -908,10 +908,10 @@ liz_fit <- function(formula,
         if (inherits(y_scale, "formula")) y_scale <- all.vars(y_scale)
         y_scale_var_vec <- tryCatch(
             eval(parse(text = y_scale), data),
-            error = function(e) stop("\nIn `liz_fit`, the `y_scale` argument ",
+            error = function(e) stop("\nIn `armm`, the `y_scale` argument ",
                                      "provided is not found in the `data` argument."))
         if (!inherits(y_scale_var_vec, "factor")) {
-            stop("\nIn `liz_fit`, the `y_scale` argument is being parsed to ",
+            stop("\nIn `armm`, the `y_scale` argument is being parsed to ",
                  "an object of class \"", class(y_scale_var_vec), "\", but it needs ",
                  "to be a factor.")
         }
@@ -922,7 +922,7 @@ liz_fit <- function(formula,
             l <- y_means_sds$level[i]
             yy <- stan_data$y[y_scale_var_vec == l]
             if (length(yy) == 0) {
-                stop("\nIn `liz_fit`, there is at least one level in the factor ",
+                stop("\nIn `armm`, there is at least one level in the factor ",
                      "that's been input to the `y_scale` argument that is missing.")
             }
             .mean <- mean(yy, na.rm = TRUE)
@@ -955,8 +955,9 @@ liz_fit <- function(formula,
         stan_fit <- do.call(optimizing, rstan_control)
     }
 
-    lizard_obj <- new_lizard(stan_fit, call_, hmc, x_means_sds, y_means_sds, stan_data)
+    armmMod_obj <- new_armmMod(stan_fit, call_, hmc, x_means_sds,
+                               y_means_sds, stan_data)
 
-    return(lizard_obj)
+    return(armmMod_obj)
 }
 
