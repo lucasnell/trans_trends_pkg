@@ -1,11 +1,11 @@
-#' The 'lizard' package.
+#' The 'armmr' package.
 #'
 #' @description A DESCRIPTION OF THE PACKAGE
 #'
 #' @docType package
-#' @name lizard-package
-#' @aliases lizard
-#' @useDynLib lizard, .registration = TRUE
+#' @name armmr-package
+#' @aliases armmr
+#' @useDynLib armmr, .registration = TRUE
 #' @import methods
 #' @import Rcpp
 #' @import rstantools

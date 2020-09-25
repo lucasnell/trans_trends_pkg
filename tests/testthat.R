@@ -1,4 +1,4 @@
 library(testthat)
-library(lizard)
+library(armmr)
 
-test_check("lizard")
+test_check("armmr")

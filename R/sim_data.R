@@ -1,5 +1,5 @@
 
-#' Simulate data for a lizard call.
+#' Simulate data for an `armm` call.
 #'
 #'
 #' @examples
@@ -24,7 +24,7 @@
 #' auto_regr = list(0.1, 0.2)
 #' resid_sd = 0.5
 #'
-#' lizard:::sim_data(formula, time_form, ar_form, coef, auto_regr, resid_sd,
+#' armmr:::sim_data(formula, time_form, ar_form, coef, auto_regr, resid_sd,
 #'                   data, ar_bound)
 #'
 #'
@@ -241,7 +241,7 @@ sim_data <- function(formula,
                     ar_terms = phis, resid_sd = resid_sd,
                     call = call_)
 
-    class(out_obj) <- "lizard_data"
+    class(out_obj) <- "armmr_data"
 
     return(out_obj)
 }

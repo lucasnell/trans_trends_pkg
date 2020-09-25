@@ -1,5 +1,5 @@
-#ifndef REPTS_TYPES_H_
-#define REPTS_TYPES_H_
+#ifndef ARMMR_TYPES_H_
+#define ARMMR_TYPES_H_
 
 
 #include <RcppArmadillo.h>

@@ -12,14 +12,14 @@ new_armmMod <- function(.stan, .call, .hmc, .x_means_sds, .y_means_sds, .stan_da
         .call[1] <- as.call(quote(armm()))
     }
 
-    liz_obj <- structure(list(stan = .stan, call = .call,
+    armm_obj <- structure(list(stan = .stan, call = .call,
                               hmc = .hmc,
                               x_means_sds = .x_means_sds,
                               y_means_sds = .y_means_sds,
                               stan_data = .stan_data),
                          class = "armmMod")
 
-    return(liz_obj)
+    return(armm_obj)
 
 }
 

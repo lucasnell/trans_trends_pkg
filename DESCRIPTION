@@ -1,4 +1,4 @@
-Package: lizard
+Package: armmr
 Type: Package
 Title: Simulate and analyze replicate time series.
 Version: 0.0.0.9000

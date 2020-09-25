@@ -6,7 +6,7 @@
 #include <omp.h>  // OpenMP
 #endif
 
-#include "lizard_types.h"
+#include "armmr_types.h"
 #include "pcg.h"  // pcg seeding
 
 using namespace Rcpp;
