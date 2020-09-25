@@ -2,7 +2,7 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 hpdi <- function(input, prob = 0.95) {
-    .Call(`_lizard_hpdi`, input, prob)
+    .Call(`_armmr_hpdi`, input, prob)
 }
 
 #' Multiple populations simulated using AR1 process.
@@ -54,7 +54,7 @@ hpdi <- function(input, prob = 0.95) {
 #' sim_pops_ar(X, N0, b0, b1, rho, vcv, obs)
 #'
 sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores = 1L) {
-    .Call(`_lizard_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores)
+    .Call(`_armmr_sim_pops_ar`, X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma, n_cores)
 }
 
 #' Melt a cube into a single data frame.
@@ -67,7 +67,7 @@ sim_pops_ar <- function(X, N0_mat, b0_mat, b1_mat, rho_mat, vcv_cube, obs_sigma,
 #' @noRd
 #'
 melt_cube <- function(C) {
-    .Call(`_lizard_melt_cube`, C)
+    .Call(`_armmr_melt_cube`, C)
 }
 
 #' Generate parameter values for simulations.
@@ -106,7 +106,7 @@ melt_cube <- function(C) {
 #'
 #'
 generate_pars <- function(n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs = 0, corr_method = "none") {
-    .Call(`_lizard_generate_pars`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
+    .Call(`_armmr_generate_pars`, n_time, n_loc, n_spp, mean_b0, mean_b1, mean_rho, sigma_b0, sigma_b1, sigma_rho, sigma_eps, sigma_obs, corr_method)
 }
 
 #' Simulate populations with competition.
@@ -138,6 +138,6 @@ NULL
 #' sim_pops(10, c(10, 10), c(0.5, 0.5), matrix(rep(1e-3, 4), 2, 2), 0.25)
 #'
 sim_pops <- function(max_t, N0, r, alpha, sigma) {
-    .Call(`_lizard_sim_pops`, max_t, N0, r, alpha, sigma)
+    .Call(`_armmr_sim_pops`, max_t, N0, r, alpha, sigma)
 }
 

@@ -7,7 +7,7 @@
 #include "pcg/pcg_extras.hpp"  // pcg 128-bit integer type
 #include <pcg/pcg_random.hpp> // pcg prng
 
-#include "lizard_types.h" // integer types
+#include "armmr_types.h" // integer types
 
 
 using namespace Rcpp;
