@@ -68,7 +68,7 @@ generated quantities {
   real log_lik[n_obs];
   real log_lik_sum;
   for(i in 1:n_obs){
-    log_lik[i] = normal_lpdf(y[i]|y_pred[i], sig_res);
+    log_lik[i] = normal_lpdf(y[i] | y_pred[i], sig_res);
   }
   log_lik_sum = sum(log_lik);
 }
