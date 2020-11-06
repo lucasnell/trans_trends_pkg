@@ -21,7 +21,7 @@ parameters {
     real z[sum(lev_per_g)];                     // standardized variates for group levels
     real<lower=0, upper=p_bound> phi[max(p_groups)];  // autoregressive parameter for each
     real<lower=0> sig_beta[sum(g_per_ff)];      // group standard deviations
-    real ze[n_obs];                      // randoom deviates for proc. error
+    real ze[n_obs - n_ts];                      // random deviates for proc. error
     real<lower=0> sig_proc;                     // process error standard deviation
     real<lower=0> sig_obs;                      // observation error standard deviation
 }
@@ -56,7 +56,7 @@ transformed parameters {
                     for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
                         y_pred[t] = dot_product(beta[ts,], x[t,]) +
                             phi[p_groups[ts]]^(time[t] - time[t-1]) * y_pred[t-1]+
-                                sig_proc * ze[t - 1];
+                                sig_proc * ze[t - ts];
                 } // t
             } else {
                 y_pred[xy_pos] = dot_product(beta[ts,], x[xy_pos,]);
@@ -64,7 +64,7 @@ transformed parameters {
                         y_pred[t] = dot_product(beta[ts,], x[t,]) +
                             phi[p_groups[ts]]^(time[t] - time[t-1]) *
                                 (y_pred[t-1] - dot_product(beta[ts,], x[t-1,]))+
-                                sig_proc * ze[t - 1];
+                                sig_proc * ze[t - ts];
                 } // t
             }
            xy_pos += obs_per[ts];
@@ -91,7 +91,7 @@ generated quantities {
   real log_lik[n_obs];
   real log_lik_sum;
   for(i in 1:n_obs){
-    log_lik[i] = normal_lpdf(y[i]|y_pred[i], sig_obs);
+    log_lik[i] = normal_lpdf(y[i] | y_pred[i], sig_obs);
   }
   log_lik_sum = sum(log_lik);
 }
