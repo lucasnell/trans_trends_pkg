@@ -14,7 +14,7 @@ armm(
   distr = "normal",
   x_scale = TRUE,
   ar_bound = FALSE,
-  hmc = FALSE,
+  hmc = TRUE,
   priors = NULL,
   change = TRUE,
   rstan_control = list()
@@ -66,7 +66,7 @@ By default, it uses the environment the function was executed in.}
 Defaults to \code{FALSE}.}
 
 \item{distr}{String specifying the error distribution used.
-Options are \code{"normal"} or \code{"poisson"}. Defaults to \code{"normal"}.}
+Options are \code{"normal"} or \code{"lnorm_poisson"}. Defaults to \code{"normal"}.}
 
 \item{x_scale}{Logical for whether to scale the independent variable(s).
 Defaults to \code{TRUE}.}
@@ -79,9 +79,11 @@ sampling for the model fit.
 This is \code{stan}'s default, and it gives samples from a posterior distribution
 as output.
 When \code{FALSE}, \code{armm} will obtain point estimates by maximizing the
-joint posterior from the model;
-it also returns standard errors based on the Hessian.
-Defaults to \code{FALSE}.}
+joint posterior from the model and
+returns standard errors based on the Hessian.
+Note that this direct optimization has not been tested and may
+perform poorly; use at your own risk.
+Defaults to \code{TRUE}.}
 
 \item{priors}{Named list specifying priors.
 \code{NULL} results in the default priors being used.

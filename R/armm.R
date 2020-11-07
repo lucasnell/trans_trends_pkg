@@ -813,7 +813,7 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #' @param obs_error Logical for whether to include observation error.
 #'     Defaults to `FALSE`.
 #' @param distr String specifying the error distribution used.
-#'     Options are `"normal"` or `"poisson"`. Defaults to `"normal"`.
+#'     Options are `"normal"` or `"lnorm_poisson"`. Defaults to `"normal"`.
 #' @param x_scale Logical for whether to scale the independent variable(s).
 #'     Defaults to `TRUE`.
 #' @param ar_bound An optional logical for whether to bound the autoregressive
@@ -823,9 +823,11 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #'     This is `stan`'s default, and it gives samples from a posterior distribution
 #'     as output.
 #'     When `FALSE`, `armm` will obtain point estimates by maximizing the
-#'     joint posterior from the model;
-#'     it also returns standard errors based on the Hessian.
-#'     Defaults to `FALSE`.
+#'     joint posterior from the model and
+#'     returns standard errors based on the Hessian.
+#'     Note that this direct optimization has not been tested and may
+#'     perform poorly; use at your own risk.
+#'     Defaults to `TRUE`.
 #' @param change An optional logical for whether predictors model the change
 #'     in the response variable between time points.
 #'     The alternative is for predictors to model the mean in the stationary
@@ -883,7 +885,7 @@ armm <- function(formula,
                     distr = "normal",
                     x_scale = TRUE,
                     ar_bound = FALSE,
-                    hmc = FALSE,
+                    hmc = TRUE,
                     priors = NULL,
                     change = TRUE,
                     rstan_control = list()) {
@@ -914,7 +916,7 @@ armm <- function(formula,
     initial_input_checks(formula, time_form, ar_form, y_scale, data, obs_error,
                          distr, ar_bound, x_scale, hmc, change, rstan_control)
 
-    distr <- match.arg(tolower(distr), c("normal", "poisson"))
+    distr <- match.arg(tolower(distr), c("normal", "lnorm_poisson"))
     if (distr != "normal") y_scale <- NULL # never scale if distr isn't normal
 
     # Checks for variables being same length and reorders by time if necessary
@@ -925,10 +927,10 @@ armm <- function(formula,
                                    ar_bound, x_scale)
     stan_data$change <- as.integer(change)
 
-    # Checks for integers if using poisson
-    if (distr == "poisson") {
+    # Checks for integers if using lnorm_poisson
+    if (distr == "lnorm_poisson") {
         if (any(stan_data$y != round(stan_data$y))) {
-            stop("\nIn `armmr`, if using a Poisson distribution, the ",
+            stop("\nIn `armmr`, if using a lognormal Poisson distribution, the ",
                  "response variable must be integers.")
         }
     }
@@ -972,7 +974,7 @@ armm <- function(formula,
 
 
     # UNCOMMENT BELOW ONCE STAN FILES CAN ACCEPT THE PRIORS
-    # ALSO ADJUST BELOW FUNCTION FOR IF `distr == "poisson"`
+    # ALSO ADJUST BELOW FUNCTION FOR IF `distr == "lnorm_poisson"`
     # # Adding priors to stan_data
     # prior_list <- set_priors(priors, stan_data, x_scale, y_scale)
     # for (n in names(prior_list)) stan_data[[n]] <- prior_list[[n]]
@@ -980,7 +982,7 @@ armm <- function(formula,
     # Assemble file name for stan file
     fn_chunks <- c(if (is.null(ar_form)) "mm" else "armm",
                    if (obs_error) "ss" else NULL,
-                   switch(distr, poisson = "lnp", normal = NULL))
+                   switch(distr, lnorm_poisson = "lnp", normal = NULL))
     stan_file <- paste(fn_chunks, collapse = "_")
     if (!stan_file %in% names(stanmodels)) {
         stop("\nYour specifications for autoregression, observation error, ",
