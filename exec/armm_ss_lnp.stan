@@ -93,7 +93,7 @@ generated quantities {
   real log_lik[n_obs];
   real log_lik_sum;
   for(i in 1:n_obs){
-    log_lik[i] = poisson_log_lpmf(y[i] | y_pred[i]) +
+    log_lik[i] = poisson_lpmf(y[i] | y_pred[i]) +
                   lognormal_lpdf(y_pred[i] | ly_pred[i], sig_obs);
   }
   log_lik_sum = sum(log_lik);
