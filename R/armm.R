@@ -367,8 +367,13 @@ initial_input_checks <- function(formula,
                                  ar_form,
                                  y_scale,
                                  data,
+                                 obs_error,
+                                 distr,
                                  ar_bound,
-                                 x_scale) {
+                                 x_scale,
+                                 hmc,
+                                 change,
+                                 rstan_control) {
 
     if (!inherits(data, "environment")) {
         stop("\nIn `armm`, the `data` argument must be a list, data frame, or ",
@@ -387,6 +392,14 @@ initial_input_checks <- function(formula,
         }
         if (inherits(y_scale, "formula")) proper_formula(y_scale, "y_scale")
     }
+    if (!inherits(obs_error, "logical") || length(obs_error) != 1) {
+        stop("\nIn `armm`, the `obs_error` argument must be a logical ",
+             "of length 1.", call. = FALSE)
+    }
+    if (!inherits(distr, "character") || length(distr) != 1) {
+        stop("\nIn `armm`, the `distr` argument must be a character ",
+             "of length 1.", call. = FALSE)
+    }
     if (!inherits(ar_bound, "logical") || length(ar_bound) != 1) {
         stop("\nIn `armm`, the `ar_bound` argument must be a logical ",
              "of length 1.", call. = FALSE)
@@ -394,6 +407,16 @@ initial_input_checks <- function(formula,
     if (!inherits(x_scale, "logical") || length(x_scale) != 1) {
         stop("\nIn `armm`, the `x_scale` argument must be a logical ",
              "of length 1.", call. = FALSE)
+    }
+    if (!inherits(hmc, "logical") || length(hmc) != 1) {
+        stop("\nThe `armm` argument `hmc` must be a single logical.", call. = FALSE)
+    }
+    if (!inherits(change, "logical") || length(change) != 1) {
+        stop("\nThe `armm` argument `change` must be a single logical.",
+             call. = FALSE)
+    }
+    if (!inherits(rstan_control, "list")) {
+        stop("\n`rstan_control` must be a list.", call. = FALSE)
     }
 
     # Check that all variables specified in formulas are found in `data`:
@@ -783,6 +806,10 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #' @param data An optional list, data frame, or environment that contains
 #'     the dependent, independent, and grouping variables.
 #'     By default, it uses the environment the function was executed in.
+#' @param obs_error Logical for whether to include observation error.
+#'     Defaults to `FALSE`.
+#' @param distr String specifying the error distribution used.
+#'     Options are `"normal"` or `"poisson"`. Defaults to `"normal"`.
 #' @param x_scale Logical for whether to scale the independent variable(s).
 #'     Defaults to `TRUE`.
 #' @param ar_bound An optional logical for whether to bound the autoregressive
@@ -848,6 +875,8 @@ armm <- function(formula,
                     ar_form,
                     y_scale,
                     data = parent.frame(1L),
+                    obs_error = FALSE,
+                    distr = "normal",
                     x_scale = TRUE,
                     ar_bound = FALSE,
                     hmc = FALSE,
@@ -877,19 +906,13 @@ armm <- function(formula,
         data <- list2env(data)
     }
 
-    if (!inherits(hmc, "logical") || length(hmc) != 1) {
-        stop("\nThe `armm` argument `hmc` must be a single logical.", call. = FALSE)
-    }
-    if (!inherits(change, "logical") || length(change) != 1) {
-        stop("\nThe `armm` argument `change` must be a single logical.",
-             call. = FALSE)
-    }
-    if (!inherits(rstan_control, "list")) {
-        stop("\n`rstan_control` must be a list.", call. = FALSE)
-    }
-
     # Check for proper inputs:
-    initial_input_checks(formula, time_form, ar_form, y_scale, data, ar_bound, x_scale)
+    initial_input_checks(formula, time_form, ar_form, y_scale, data, obs_error,
+                         distr, ar_bound, x_scale, hmc, change, rstan_control)
+
+    distr <- match.arg(tolower(distr), c("normal", "poisson"))
+    if (distr != "normal") y_scale <- NULL # never scale if distr isn't normal
+
     # Checks for variables being same length and reorders by time if necessary
     obs_per <- check_len_sort_data(formula, time_form, ar_form, data)
 
@@ -898,14 +921,22 @@ armm <- function(formula,
                                    ar_bound, x_scale)
     stan_data$change <- as.integer(change)
 
+    # Checks for integers if using poisson
+    if (distr == "poisson") {
+        if (any(stan_data$y != round(stan_data$y))) {
+            stop("\nIn `armmr`, if using a Poisson distribution, the ",
+                 "response variable must be integers.")
+        }
+    }
+
     # Deal with potential scaling of x variables that may or may not have been done
     # inside `make_coef_objects`:
     x_means_sds <- stan_data$x_means_sds
     stan_data$x_means_sds <- NULL
 
-    # Now scale y variables if desired:
+    # Now scale y variables if desired (only done for normal distribution):
     y_means_sds <- NULL
-    if (!is.null(y_scale)) {
+    if (!is.null(y_scale) && distr == "normal") {
         if (inherits(y_scale, "formula")) y_scale <- all.vars(y_scale)
         y_scale_var_vec <- tryCatch(
             eval(parse(text = y_scale), data),
@@ -937,17 +968,24 @@ armm <- function(formula,
 
 
     # UNCOMMENT BELOW ONCE STAN FILES CAN ACCEPT THE PRIORS
+    # ALSO ADJUST BELOW FUNCTION FOR IF `distr == "poisson"`
     # # Adding priors to stan_data
     # prior_list <- set_priors(priors, stan_data, x_scale, y_scale)
     # for (n in names(prior_list)) stan_data[[n]] <- prior_list[[n]]
 
-    if (!is.null(ar_form)) {
-        rstan_control <- c(rstan_control, list(object = stanmodels[["lizard"]],
-                                               data = stan_data))
-    } else {
-        rstan_control <- c(rstan_control, list(object = stanmodels[["snake"]],
-                                               data = stan_data))
+    # Assemble file name for stan file
+    fn_chunks <- c(if (is.null(ar_form)) "mm" else "armm",
+                   if (obs_error) "ss" else NULL,
+                   switch(distr, poisson = "lnp", normal = NULL))
+    stan_file <- paste(fn_chunks, collapse = "_")
+    if (!stan_file %in% names(stanmodels)) {
+        stop("\nYour specifications for autoregression, observation error, ",
+             "and error distribution have not yet been programmed.")
     }
+
+    rstan_control <- c(rstan_control, list(object = stanmodels[[stan_file]],
+                                           data = stan_data))
+
 
     if (hmc) {
         stan_fit <- do.call(sampling, rstan_control)

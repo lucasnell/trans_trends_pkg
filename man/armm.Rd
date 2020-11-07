@@ -10,6 +10,8 @@ armm(
   ar_form,
   y_scale,
   data = parent.frame(1L),
+  obs_error = FALSE,
+  distr = "normal",
   x_scale = TRUE,
   ar_bound = FALSE,
   hmc = FALSE,
@@ -53,6 +55,12 @@ not account for temporal autocorrelation. This can be useful for testing.}
 \item{data}{An optional list, data frame, or environment that contains
 the dependent, independent, and grouping variables.
 By default, it uses the environment the function was executed in.}
+
+\item{obs_error}{Logical for whether to include observation error.
+Defaults to \code{FALSE}.}
+
+\item{distr}{String specifying the error distribution used.
+Options are \code{"normal"} or \code{"poisson"}. Defaults to \code{"normal"}.}
 
 \item{x_scale}{Logical for whether to scale the independent variable(s).
 Defaults to \code{TRUE}.}
