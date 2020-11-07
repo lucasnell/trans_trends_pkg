@@ -25,7 +25,7 @@ script:
     travis_wait 59 R CMD check armmr*tar.gz
 
 after_script:
-  - tar -ztvf lizard_*.tar.gz
+  - tar -ztvf armmr_*.tar.gz
   - echo ${NOT_CRAN}
 
 after_success:

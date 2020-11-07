@@ -50,7 +50,13 @@ as it won't effect the results.
 Providing \code{NULL} for this argument causes \code{armm} to use a model that does
 not account for temporal autocorrelation. This can be useful for testing.}
 
-\item{y_scale}{}
+\item{y_scale}{One-sided formula or character vector specifying the grouping
+variable for scaling the response variable.
+Scaling is done within each level of the grouping variable,
+and this variable must be a factor.
+Only one variable is allowed.
+If \code{NULL}, no scaling is done for the y variable.
+This argument is ignored if the error distribution is not normal.}
 
 \item{data}{An optional list, data frame, or environment that contains
 the dependent, independent, and grouping variables.

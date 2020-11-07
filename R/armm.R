@@ -800,9 +800,13 @@ set_priors <- function(stan_data, priors, x_scale, y_scale) {
 #'     as it won't effect the results.
 #'     Providing `NULL` for this argument causes `armm` to use a model that does
 #'     not account for temporal autocorrelation. This can be useful for testing.
-#'
-#' @param y_scale
-#'
+#' @param y_scale One-sided formula or character vector specifying the grouping
+#'     variable for scaling the response variable.
+#'     Scaling is done within each level of the grouping variable,
+#'     and this variable must be a factor.
+#'     Only one variable is allowed.
+#'     If `NULL`, no scaling is done for the y variable.
+#'     This argument is ignored if the error distribution is not normal.
 #' @param data An optional list, data frame, or environment that contains
 #'     the dependent, independent, and grouping variables.
 #'     By default, it uses the environment the function was executed in.

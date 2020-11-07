@@ -87,8 +87,10 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP _rcpp_module_boot_stan_fit4lizard_mod();
-RcppExport SEXP _rcpp_module_boot_stan_fit4snake_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4armm_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4armm_ss_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4armm_ss_lnp_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4mm_mod();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_armmr_hpdi", (DL_FUNC) &_armmr_hpdi, 2},
@@ -96,8 +98,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_armmr_melt_cube", (DL_FUNC) &_armmr_melt_cube, 1},
     {"_armmr_generate_pars", (DL_FUNC) &_armmr_generate_pars, 12},
     {"_armmr_sim_pops", (DL_FUNC) &_armmr_sim_pops, 5},
-    {"_rcpp_module_boot_stan_fit4lizard_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4lizard_mod, 0},
-    {"_rcpp_module_boot_stan_fit4snake_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4snake_mod, 0},
+    {"_rcpp_module_boot_stan_fit4armm_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4armm_mod, 0},
+    {"_rcpp_module_boot_stan_fit4armm_ss_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4armm_ss_mod, 0},
+    {"_rcpp_module_boot_stan_fit4armm_ss_lnp_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4armm_ss_lnp_mod, 0},
+    {"_rcpp_module_boot_stan_fit4mm_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4mm_mod, 0},
     {NULL, NULL, 0}
 };
 
