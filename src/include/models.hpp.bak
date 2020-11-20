@@ -1,16 +1,16 @@
 /*
-    armmr is free software: you can redistribute it and/or modify
+    TransTrendsPkg is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    armmr is distributed in the hope that it will be useful,
+    TransTrendsPkg is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with armmr.  If not, see <http://www.gnu.org/licenses/>.
+    along with TransTrendsPkg.  If not, see <http://www.gnu.org/licenses/>.
 */
 #ifndef MODELS_HPP
 #define MODELS_HPP
@@ -3399,7 +3399,7 @@ public:
                 current_statement_begin__ = 96;
                 stan::model::assign(log_lik, 
                             stan::model::cons_list(stan::model::index_uni(i), stan::model::nil_index_list()), 
-                            (poisson_log_log(get_base1(y, i, "y", 1), get_base1(y_pred, i, "y_pred", 1)) + lognormal_log(get_base1(y_pred, i, "y_pred", 1), get_base1(ly_pred, i, "ly_pred", 1), sig_obs)), 
+                            (poisson_log(get_base1(y, i, "y", 1), get_base1(y_pred, i, "y_pred", 1)) + lognormal_log(get_base1(y_pred, i, "y_pred", 1), get_base1(ly_pred, i, "ly_pred", 1), sig_obs)), 
                             "assigning variable log_lik");
             }
             current_statement_begin__ = 99;

@@ -2,12 +2,9 @@
 
 S3method(print,armmMod)
 export(armm)
-export(generate_pars)
-export(sim_pops)
-export(sim_pops_ar)
 import(Rcpp)
 import(methods)
 import(rstantools)
 importFrom(rstan,optimizing)
 importFrom(rstan,sampling)
-useDynLib(armmr, .registration = TRUE)
+useDynLib(TransTrendsPkg, .registration = TRUE)

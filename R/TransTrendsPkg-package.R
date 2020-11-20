@@ -1,11 +1,11 @@
-#' The 'armmr' package.
+#' The 'TransTrendsPkg' package.
 #'
 #' @description A DESCRIPTION OF THE PACKAGE
 #'
 #' @docType package
-#' @name armmr-package
-#' @aliases armmr
-#' @useDynLib armmr, .registration = TRUE
+#' @name TransTrendsPkg-package
+#' @aliases TransTrendsPkg
+#' @useDynLib TransTrendsPkg, .registration = TRUE
 #' @import methods
 #' @import Rcpp
 #' @import rstantools

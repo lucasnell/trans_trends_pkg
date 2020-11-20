@@ -930,7 +930,7 @@ armm <- function(formula,
     # Checks for integers if using lnorm_poisson
     if (distr == "lnorm_poisson") {
         if (any(stan_data$y != round(stan_data$y))) {
-            stop("\nIn `armmr`, if using a lognormal Poisson distribution, the ",
+            stop("\nIn `armm`, if using a lognormal Poisson distribution, the ",
                  "response variable must be integers.")
         }
     }

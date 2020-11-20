@@ -1,6 +1,6 @@
-Package: armmr
+Package: TransTrendsPkg
 Type: Package
-Title: Simulate and analyze replicate time series.
+Title: Simulate replicate time series for trans_trends
 Version: 0.0.0.9000
 Date: 2018-02-26
 Authors@R: as.person(c(
@@ -26,8 +26,7 @@ LinkingTo:
     rstan (>= 2.18.1),
     BH (>= 1.66.0-1),
     Rcpp (>= 0.12.16),
-    RcppEigen (>= 0.3.3.4.0),
-    RcppArmadillo
+    RcppEigen (>= 0.3.3.4.0)
 Suggests:
     parallel,
     knitr,
