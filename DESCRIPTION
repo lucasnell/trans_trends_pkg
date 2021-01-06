@@ -1,6 +1,6 @@
 Package: TransTrendsPkg
 Type: Package
-Title: Simulate replicate time series for trans_trends
+Title: Fit models for trans_trends
 Version: 0.0.0.9000
 Date: 2018-02-26
 Authors@R: as.person(c(
