@@ -6,6 +6,18 @@
 
 using namespace Rcpp;
 
+// hpdi
+NumericVector hpdi(NumericVector input, const double& prob);
+RcppExport SEXP _TransTrendsPkg_hpdi(SEXP inputSEXP, SEXP probSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< const double& >::type prob(probSEXP);
+    rcpp_result_gen = Rcpp::wrap(hpdi(input, prob));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 RcppExport SEXP _rcpp_module_boot_stan_fit4armm_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4armm_ss_mod();
@@ -13,6 +25,7 @@ RcppExport SEXP _rcpp_module_boot_stan_fit4armm_ss_lnp_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4mm_mod();
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_TransTrendsPkg_hpdi", (DL_FUNC) &_TransTrendsPkg_hpdi, 2},
     {"_rcpp_module_boot_stan_fit4armm_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4armm_mod, 0},
     {"_rcpp_module_boot_stan_fit4armm_ss_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4armm_ss_mod, 0},
     {"_rcpp_module_boot_stan_fit4armm_ss_lnp_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4armm_ss_lnp_mod, 0},
