@@ -559,6 +559,8 @@ check_len_sort_data <- function(formula,
 #'
 #' @noRd
 #'
+#' @importFrom utils head
+#'
 make_coef_objects <- function(formula, time_form, ar_form, data, obs_per,
                               ar_bound, x_scale) {
 
