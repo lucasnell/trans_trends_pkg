@@ -3,6 +3,7 @@
 S3method(print,armmMod)
 export(armm)
 export(hpdi)
+export(posterior_mode)
 import(Rcpp)
 import(methods)
 import(rstantools)
