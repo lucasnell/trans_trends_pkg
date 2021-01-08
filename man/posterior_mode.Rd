@@ -2,7 +2,7 @@
 % Please edit documentation in R/armm.R
 \name{posterior_mode}
 \alias{posterior_mode}
-\title{Estimates the marginal parameter modes using kernel density estimation}
+\title{Estimates the marginal parameter mode using kernel density estimation}
 \usage{
 posterior_mode(x, adjust = 0.1, ...)
 }
@@ -15,5 +15,5 @@ kernal density}
 \item{...}{other parameters to pass to \code{density}}
 }
 \description{
-Estimates the marginal parameter modes using kernel density estimation
+Estimates the marginal parameter mode using kernel density estimation
 }

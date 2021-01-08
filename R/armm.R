@@ -1,20 +1,4 @@
-#' Estimates the marginal parameter modes using kernel density estimation
-#'
-#' @param x numeric vector of posteriors
-#' @param adjust numeric, passed to density to adjust the bandwidth of the
-#'     kernal density
-#' @param ... other parameters to pass to `density`
-#'
-#' @export
-#'
-posterior_mode <- function (x, adjust = 0.1, ...) {
-    if (is.numeric(x) == FALSE & !is.null(dim(x))) {
-        warning("posterior_mode expects a numeric vector")
-    }
-    dx <- density(x, adjust = adjust, ...)
-    .mode <- dx$x[which.max(dx$y)]
-    return(.mode)
-}
+
 
 
 #' Version of lapply that returns the list flattened to a vector or array.
@@ -683,81 +667,6 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per,
 
 
 
-set_priors <- function(stan_data, priors, x_scale, y_scale) {
-
-    # Defaults:
-    prior_list <- list(alpha = cbind(0, 1),
-                       sig_beta = do.call(rbind, rep(list(cbind(0, 1)),
-                                                     sum(stan_data$g_per_ff))),
-                       phi = do.call(rbind, rep(list(cbind(0, 0.5)),
-                                                max(stan_data$p_groups))),
-                       sig_res = cbind(0, 1))
-
-    # Use defaults if no priors provided, but return error if no scaling done:
-    if (is.null(priors)) {
-        if (!x_scale || is.null(y_scale)) {
-            stop("\nYou must specify all priors when you decide not to scale the ",
-                 "x or y variables. The `priors` argument must therefore contain ",
-                 "all of the following names: ",
-                 paste(sprintf("\"%s\"", names(prior_list)), collapse = ", "), ".",
-                 call. = FALSE)
-        }
-        return(prior_list)
-    }
-
-    # Basic checks on priors:
-    if (!inherits(priors, "list") || is.null(names(priors)) ||
-        !all(sapply(priors, inherits, what = "matrix")) ||
-        !all(sapply(priors, is.numeric))) {
-        stop("\nThe `priors` argument should be a named list of numeric matrices.",
-             call. = FALSE)
-    }
-    if (any(names(priors) == "")) {
-        stop("\nThe `priors` argument should have names for all items within.",
-             call. = FALSE)
-    }
-    if (any(duplicated(names(priors)))) {
-        stop("\nThe `priors` argument should not have duplicate names.",
-             call. = FALSE)
-    }
-    if (!all(names(priors) %in% names(prior_list))) {
-        stop("\nThe `priors` argument should only contain the following names: ",
-             paste(sprintf("\"%s\"", names(prior_list)), collapse = ", "), ".",
-             call. = FALSE)
-    }
-
-    # We are forcing users to provide all priors if they are not scaling
-    # x or y variables:
-    if (!x_scale || is.null(y_scale)) {
-        if (!all(names(prior_list) %in% names(priors))) {
-            stop("\nYou must specify all priors when you decide not to scale the ",
-                 "x or y variables. The `priors` argument must therefore contain ",
-                 "all of the following names: ",
-                 paste(sprintf("\"%s\"", names(prior_list)), collapse = ", "), ".",
-                 call. = FALSE)
-        }
-    }
-
-
-    # Make sure dimensions are correct, then replace defaults
-    for (n in names(priors)) {
-        if (any(dim(prior_list[[n]]) != dim(priors[[n]]))) {
-            stop("\nDimensions for the priors matrix for \"", n, "\" should be ",
-                 nrow(prior_list[[n]]), "x", ncol(prior_list[[n]]), ", not ",
-                 nrow(priors[[n]]), "x", ncol(priors[[n]]), ".",
-                 call. = FALSE)
-        }
-        prior_list[[n]] <- priors[[n]]
-    }
-
-    # So that they don't conflict with current objects in stan file:
-    names(prior_list) <- paste0("prior_", names(prior_list))
-
-    return(prior_list)
-
-}
-
-
 
 
 # start doc ------
@@ -989,13 +898,6 @@ armm <- function(formula,
         }
 
     }
-
-
-    # UNCOMMENT BELOW ONCE STAN FILES CAN ACCEPT THE PRIORS
-    # ALSO ADJUST BELOW FUNCTION FOR IF `distr == "lnorm_poisson"`
-    # # Adding priors to stan_data
-    # prior_list <- set_priors(priors, stan_data, x_scale, y_scale)
-    # for (n in names(prior_list)) stan_data[[n]] <- prior_list[[n]]
 
     # Assemble file name for stan file
     fn_chunks <- c(if (is.null(ar_form)) "mm" else "armm",
