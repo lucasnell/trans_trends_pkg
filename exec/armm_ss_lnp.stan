@@ -19,7 +19,8 @@ data {
 parameters {
     real alpha[n_coef];                         // fixed effects and intercepts
     real z[sum(lev_per_g)];                     // standardized variates for group levels
-    real<lower=0, upper=p_bound> phi[max(p_groups)];  // autoregressive parameter for each
+    // real<lower=0, upper=p_bound> phi[max(p_groups)];  // autoregressive parameter for each
+    real<lower=0, upper=1> phi[max(p_groups)];  // autoregressive parameter for each
     real<lower=0> sig_beta[sum(g_per_ff)];      // group standard deviations
     real ze[n_obs - n_ts];                      // random deviates for proc. error
     real<lower=0> sig_proc;                     // process error standard deviation
@@ -74,13 +75,14 @@ transformed parameters {
 }
 model {
     // priors:
-    alpha ~ normal(0, 1);
+    alpha ~ normal(0, 5);
     z ~ normal(0, 1);
     for (i in 1:sum(g_per_ff)){
         sig_beta[i] ~ gamma(1.5, 3);
     }
     for (i in 1:max(p_groups)){
-        phi[i] ~ normal(0, 0.5) T[0, p_bound];
+        // phi[i] ~ normal(0, 0.5) T[0, p_bound];
+        phi[i] ~ beta(2, 2);
     }
     ze ~ normal(0, 1);
     sig_obs ~ gamma(1.5, 3);
