@@ -36,7 +36,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_armm");
-    reader.add_event(90, 88, "end", "model_armm");
+    reader.add_event(92, 90, "end", "model_armm");
     return reader;
 }
 
@@ -310,7 +310,7 @@ public:
         size_t phi_i_0_max__ = max(p_groups);
         for (size_t i_0__ = 0; i_0__ < phi_i_0_max__; ++i_0__) {
             try {
-                writer__.scalar_lub_unconstrain(0, p_bound, phi[i_0__]);
+                writer__.scalar_lub_unconstrain(0, 1, phi[i_0__]);
             } catch (const std::exception& e) {
                 stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable phi: ") + e.what()), current_statement_begin__, prog_reader__());
             }
@@ -406,9 +406,9 @@ public:
             phi.reserve(phi_d_0_max__);
             for (size_t d_0__ = 0; d_0__ < phi_d_0_max__; ++d_0__) {
                 if (jacobian__)
-                    phi.push_back(in__.scalar_lub_constrain(0, p_bound, lp__));
+                    phi.push_back(in__.scalar_lub_constrain(0, 1, lp__));
                 else
-                    phi.push_back(in__.scalar_lub_constrain(0, p_bound));
+                    phi.push_back(in__.scalar_lub_constrain(0, 1));
             }
 
             std::vector<local_scalar_t__> sig_beta;
@@ -562,10 +562,7 @@ public:
             }
             for (int i = 1; i <= max(p_groups); ++i) {
 
-                lp_accum__.add(normal_log<propto__>(get_base1(phi, i, "phi", 1), 0, 0.5));
-                if (get_base1(phi, i, "phi", 1) < 0) lp_accum__.add(-std::numeric_limits<double>::infinity());
-                else if (get_base1(phi, i, "phi", 1) > p_bound) lp_accum__.add(-std::numeric_limits<double>::infinity());
-                else lp_accum__.add(-log_diff_exp(normal_cdf_log(p_bound, 0, 0.5), normal_cdf_log(0, 0, 0.5)));
+                lp_accum__.add(beta_log<propto__>(get_base1(phi, i, "phi", 1), 2, 2));
             }
             lp_accum__.add(gamma_log<propto__>(sig_res, 1.5, 3));
             lp_accum__.add(normal_log<propto__>(y, y_pred, sig_res));
@@ -680,7 +677,7 @@ public:
         size_t phi_d_0_max__ = max(p_groups);
         phi.reserve(phi_d_0_max__);
         for (size_t d_0__ = 0; d_0__ < phi_d_0_max__; ++d_0__) {
-            phi.push_back(in__.scalar_lub_constrain(0, p_bound));
+            phi.push_back(in__.scalar_lub_constrain(0, 1));
         }
         size_t phi_k_0_max__ = max(p_groups);
         for (size_t k_0__ = 0; k_0__ < phi_k_0_max__; ++k_0__) {
@@ -1058,7 +1055,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_armm_ss");
-    reader.add_event(99, 97, "end", "model_armm_ss");
+    reader.add_event(101, 99, "end", "model_armm_ss");
     return reader;
 }
 
@@ -1335,7 +1332,7 @@ public:
         size_t phi_i_0_max__ = max(p_groups);
         for (size_t i_0__ = 0; i_0__ < phi_i_0_max__; ++i_0__) {
             try {
-                writer__.scalar_lub_unconstrain(0, p_bound, phi[i_0__]);
+                writer__.scalar_lub_unconstrain(0, 1, phi[i_0__]);
             } catch (const std::exception& e) {
                 stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable phi: ") + e.what()), current_statement_begin__, prog_reader__());
             }
@@ -1464,9 +1461,9 @@ public:
             phi.reserve(phi_d_0_max__);
             for (size_t d_0__ = 0; d_0__ < phi_d_0_max__; ++d_0__) {
                 if (jacobian__)
-                    phi.push_back(in__.scalar_lub_constrain(0, p_bound, lp__));
+                    phi.push_back(in__.scalar_lub_constrain(0, 1, lp__));
                 else
-                    phi.push_back(in__.scalar_lub_constrain(0, p_bound));
+                    phi.push_back(in__.scalar_lub_constrain(0, 1));
             }
 
             std::vector<local_scalar_t__> sig_beta;
@@ -1637,10 +1634,7 @@ public:
             }
             for (int i = 1; i <= max(p_groups); ++i) {
 
-                lp_accum__.add(normal_log<propto__>(get_base1(phi, i, "phi", 1), 0, 0.5));
-                if (get_base1(phi, i, "phi", 1) < 0) lp_accum__.add(-std::numeric_limits<double>::infinity());
-                else if (get_base1(phi, i, "phi", 1) > p_bound) lp_accum__.add(-std::numeric_limits<double>::infinity());
-                else lp_accum__.add(-log_diff_exp(normal_cdf_log(p_bound, 0, 0.5), normal_cdf_log(0, 0, 0.5)));
+                lp_accum__.add(beta_log<propto__>(get_base1(phi, i, "phi", 1), 2, 2));
             }
             lp_accum__.add(normal_log<propto__>(ze, 0, 1));
             lp_accum__.add(gamma_log<propto__>(sig_obs, 1.5, 3));
@@ -1764,7 +1758,7 @@ public:
         size_t phi_d_0_max__ = max(p_groups);
         phi.reserve(phi_d_0_max__);
         for (size_t d_0__ = 0; d_0__ < phi_d_0_max__; ++d_0__) {
-            phi.push_back(in__.scalar_lub_constrain(0, p_bound));
+            phi.push_back(in__.scalar_lub_constrain(0, 1));
         }
         size_t phi_k_0_max__ = max(p_groups);
         for (size_t k_0__ = 0; k_0__ < phi_k_0_max__; ++k_0__) {
@@ -2174,7 +2168,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_armm_ss_lnp");
-    reader.add_event(102, 100, "end", "model_armm_ss_lnp");
+    reader.add_event(104, 102, "end", "model_armm_ss_lnp");
     return reader;
 }
 
@@ -2453,7 +2447,7 @@ public:
         size_t phi_i_0_max__ = max(p_groups);
         for (size_t i_0__ = 0; i_0__ < phi_i_0_max__; ++i_0__) {
             try {
-                writer__.scalar_lub_unconstrain(0, p_bound, phi[i_0__]);
+                writer__.scalar_lub_unconstrain(0, 1, phi[i_0__]);
             } catch (const std::exception& e) {
                 stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable phi: ") + e.what()), current_statement_begin__, prog_reader__());
             }
@@ -2602,9 +2596,9 @@ public:
             phi.reserve(phi_d_0_max__);
             for (size_t d_0__ = 0; d_0__ < phi_d_0_max__; ++d_0__) {
                 if (jacobian__)
-                    phi.push_back(in__.scalar_lub_constrain(0, p_bound, lp__));
+                    phi.push_back(in__.scalar_lub_constrain(0, 1, lp__));
                 else
-                    phi.push_back(in__.scalar_lub_constrain(0, p_bound));
+                    phi.push_back(in__.scalar_lub_constrain(0, 1));
             }
 
             std::vector<local_scalar_t__> sig_beta;
@@ -2777,7 +2771,7 @@ public:
 
             // model body
 
-            lp_accum__.add(normal_log<propto__>(alpha, 0, 1));
+            lp_accum__.add(normal_log<propto__>(alpha, 0, 5));
             lp_accum__.add(normal_log<propto__>(z, 0, 1));
             for (int i = 1; i <= sum(g_per_ff); ++i) {
 
@@ -2785,10 +2779,7 @@ public:
             }
             for (int i = 1; i <= max(p_groups); ++i) {
 
-                lp_accum__.add(normal_log<propto__>(get_base1(phi, i, "phi", 1), 0, 0.5));
-                if (get_base1(phi, i, "phi", 1) < 0) lp_accum__.add(-std::numeric_limits<double>::infinity());
-                else if (get_base1(phi, i, "phi", 1) > p_bound) lp_accum__.add(-std::numeric_limits<double>::infinity());
-                else lp_accum__.add(-log_diff_exp(normal_cdf_log(p_bound, 0, 0.5), normal_cdf_log(0, 0, 0.5)));
+                lp_accum__.add(beta_log<propto__>(get_base1(phi, i, "phi", 1), 2, 2));
             }
             lp_accum__.add(normal_log<propto__>(ze, 0, 1));
             lp_accum__.add(gamma_log<propto__>(sig_obs, 1.5, 3));
@@ -2917,7 +2908,7 @@ public:
         size_t phi_d_0_max__ = max(p_groups);
         phi.reserve(phi_d_0_max__);
         for (size_t d_0__ = 0; d_0__ < phi_d_0_max__; ++d_0__) {
-            phi.push_back(in__.scalar_lub_constrain(0, p_bound));
+            phi.push_back(in__.scalar_lub_constrain(0, 1));
         }
         size_t phi_k_0_max__ = max(p_groups);
         for (size_t k_0__ = 0; k_0__ < phi_k_0_max__; ++k_0__) {

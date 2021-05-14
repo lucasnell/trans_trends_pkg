@@ -1,5 +1,5 @@
 
-
+# --------------------------------------
 
 #' Version of lapply that returns the list flattened to a vector or array.
 #'
@@ -204,6 +204,8 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
     rand_info <- make_check_rand(fixed, rand_chunks, data)
     rand <- rand_info$rand
     rand_g <- rand_info$rand_g
+    rand_g <- rand_g[order(match(rand, fixed))]
+    rand <- rand[order(match(rand, fixed))]
 
     # Number of columns in model matrix for each covariate.
     # This will always be 1 unless the covariate is a factor.
@@ -216,6 +218,7 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
                             z <- ifelse(!x %in% rand, 0L, length(rand_g[[x]]))
                             return(rep(z, ncpc[[x]]))
                         })
+
     # levels per group (repeated by fixed effect):
     lev_per_g <- f_apply(fixed,
                          function(x) {
@@ -226,6 +229,7 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
                                           })
                              return(rep(z, ncpc[[x]]))
                          })
+
     # grouping structure for betas:
     # Getting dataset of grouping variables
     g_mat <- f_apply(fixed,
@@ -235,6 +239,7 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
                                      function(xx) cbind(get(xx, envir = data)))
                          return(do.call(cbind, rep(z, ncpc[[x]])))
                      }, bind_fxn = base::cbind)
+
     # Because we're mapping to a vector of all groups combined, we need to
     # add the max level from previous columns for columns >1
     if (ncol(g_mat) > 1) {
@@ -245,11 +250,39 @@ form_info_w_rand <- function(formula, fixed, rand_chunks, data, start_end_mat) {
     b_groups <- get_ts_info(g_mat, start_end_mat,
                             "Random effects-grouping variables")
 
+    ff_form <- reformulate(fixed, f_deparse(formula[[2]]))
+
     info_list <- list(
         g_per_ff = g_per_ff,
         lev_per_g = lev_per_g,
-        b_groups = b_groups
+        b_groups = b_groups,
+        x = model.matrix(ff_form, data = data)
     )
+
+    rnd_names <- f_apply(1:length(rand),
+                         function(j) {
+                             i <- which(names(ncpc) == rand[[j]])
+                             start <- if (i==1) 1 else sum(ncpc[1:(i-1)])+1
+                             end <- start + ncpc[[i]] - 1
+                             vn <- colnames(info_list$x)[start:end]
+                             vg <- rand_g[[j]]
+                             cbind(rep(vn, each = length(vg)),
+                                   rep(vg, length(vn)))
+                         }, rbind)
+    colnames(rnd_names) <- c("Name", "Groups")
+    rnd_names <- as.data.frame(rnd_names, stringsAsFactors = FALSE)
+
+    rnd_lvl_names <- f_apply(1:nrow(rnd_names),
+                             function(i) {
+                                 dd <- rnd_names[i,]
+                                 z <- eval(parse(text = dd$Groups), data)
+                                 rownames(dd) <- NULL
+                                 cbind(dd, Level = levels(z), stringsAsFactors = FALSE)
+                             }, rbind)
+
+    info_list$rnd_names <- rnd_names
+    info_list$rnd_lvl_names <- rnd_lvl_names
+
 
     return(info_list)
 }
@@ -614,25 +647,24 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per,
 
     } else {
 
-        ff_form <- reformulate(fixed, f_deparse(formula[[2]]))
-
         out <- form_info_w_rand(formula, fixed, rand_chunks, data, start_end_mat)
-        out$x <- model.matrix(ff_form, data = data)
         out$n_coef <- ncol(out$x)
-
 
     }
 
     # Set up groups of autoregressive parameters
     if (length(all.vars(ar_form)) == 0) {
         out$p_groups <- rep(1, nrow(start_end_mat))
+        out$ar_names <- "1"
     } else {
         out$p_groups <- do.call(interaction,
-                                      c(lapply(all.vars(ar_form), get, envir = data),
-                                        drop = TRUE))
+                                c(lapply(all.vars(ar_form), get, envir = data),
+                                  drop = TRUE))
         out$p_groups <- as.integer(out$p_groups)
         out$p_groups <- get_ts_info(out$p_groups, start_end_mat,
-                                          "Autoregressive term-grouping variables")
+                                    "Autoregressive term-grouping variables")
+        out$ar_names <- colnames(model.matrix(reformulate(
+            all.vars(ar_form), "y", intercept = FALSE), data))
     }
 
     # Adding other info:
@@ -837,6 +869,10 @@ armm <- function(formula,
     }
     if (inherits(data, c("data.frame", "list"))) {
         data <- list2env(data)
+    } else if (inherits(data, "environment")) {
+        # Clone environment:
+        data <- as.environment(as.list(data, all.names = TRUE))
+        parent.env(data) <- globalenv()
     }
 
     # Check for proper inputs:
@@ -853,6 +889,15 @@ armm <- function(formula,
     stan_data <- make_coef_objects(formula, time_form, ar_form, data, obs_per,
                                    ar_bound, x_scale)
     stan_data$change <- as.integer(change)
+
+    # Extract AR names and (if applicable) random term names, then
+    # remove from `stan_data` because they're only useful in output object.
+    ar_names <- stan_data$ar_names
+    rnd_names <- stan_data$rnd_names
+    rnd_lvl_names <- stan_data$rnd_lvl_names
+    stan_data$ar_names <- NULL
+    stan_data$rnd_names <- NULL
+    stan_data$rnd_lvl_names <- NULL
 
     # Checks for integers if using lnorm_poisson
     if (distr == "lnorm_poisson") {
@@ -920,8 +965,22 @@ armm <- function(formula,
         stan_fit <- do.call(optimizing, rstan_control)
     }
 
+    # Constrain the `data` env to only contain objects inside the formulas
+    pars <- list(formula, time_form, ar_form, y_scale)
+    pars <- lapply(pars, function(x) if (inherits(x, "formula")) all.vars(x) else x)
+    pars <- unique(do.call(c, pars))
+    rm_objs <- ls(envir = data, all.names = TRUE)
+    rm_objs <- rm_objs[!rm_objs %in% pars]
+    rm(list = rm_objs, envir = data)
+    ls(envir = data, all.names = TRUE)
+
     armmMod_obj <- new_armmMod(stan_fit, call_, hmc, x_means_sds,
-                               y_means_sds, stan_data)
+                               y_means_sds, stan_data, data)
+
+    # Add AR and random-term names:
+    armmMod_obj$ar_names <- ar_names
+    armmMod_obj$rnd_names <- rnd_names
+    armmMod_obj$rnd_lvl_names <- rnd_lvl_names
 
     return(armmMod_obj)
 }
