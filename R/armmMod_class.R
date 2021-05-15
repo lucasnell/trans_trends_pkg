@@ -109,9 +109,12 @@ print.armmMod <- function(x, digits = max(3, getOption("digits") - 3), ...) {
 #' Standard errors are based on either quantiles or HPDIs,
 #' and are half the width of the 68% uncertainty interval.
 #'
+#' @param object an object of class `armmMod`, a result of a call to `armm`.
 #' @param se_method A single string, for either using quantiles (`"quantile"`)
 #'     or HPDI (`"hpdi"`) to compute the standard errors.
 #'     Defaults to `"quantile"`.
+#' @param digits the number of significant digits to use when printing.
+#' @param ... Not used.
 #'
 #' @export
 #'
@@ -161,7 +164,7 @@ summary.armmMod <- function(object,
 #' @aliases loo loo.armmMod
 #' @docType methods
 #' @param x A fitted model with class `armmMod`.
-#' @inheritParams rstan:::loo.stanfit
+#' @inheritParams rstan::loo
 #' @importFrom loo loo
 #' @export loo
 #' @method loo armmMod
@@ -173,10 +176,10 @@ loo.armmMod <- function(x,
                         moment_match = FALSE,
                         k_threshold = 0.7,
                         ...) {
-    .loo <- rstan:::loo.stanfit(x$stan, pars = "log_lik_sum",
-                                save_psis = save_psis, cores = cores,
-                                moment_match = moment_match,
-                                k_threshold = k_threshold, ...)
+    .loo <- rstan::loo(x$stan, pars = "log_lik_sum",
+                       save_psis = save_psis, cores = cores,
+                       moment_match = moment_match,
+                       k_threshold = k_threshold, ...)
     return(.loo)
 }
 

@@ -12,9 +12,15 @@
 )
 }
 \arguments{
+\item{object}{an object of class \code{armmMod}, a result of a call to \code{armm}.}
+
 \item{se_method}{A single string, for either using quantiles (\code{"quantile"})
 or HPDI (\code{"hpdi"}) to compute the standard errors.
 Defaults to \code{"quantile"}.}
+
+\item{digits}{the number of significant digits to use when printing.}
+
+\item{...}{Not used.}
 }
 \description{
 Standard errors are based on either quantiles or HPDIs,

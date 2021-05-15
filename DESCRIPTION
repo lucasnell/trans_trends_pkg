@@ -17,21 +17,24 @@ NeedsCompilation: yes
 Depends:
     R (>= 3.4.0)
 Imports:
-    Rcpp (>= 0.12.16),
+    bayesplot,
+    lme4,
+    loo,
     methods,
+    Rcpp (>= 0.12.16),
     rstan (>= 2.18.1),
-    rstantools (>= 1.5.0),
-    stats
+    rstantools (>= 1.5.0)
 LinkingTo:
-    StanHeaders (>= 2.18.0),
-    rstan (>= 2.18.1),
     BH (>= 1.66.0-1),
     Rcpp (>= 0.12.16),
-    RcppEigen (>= 0.3.3.4.0)
+    RcppEigen (>= 0.3.3.4.0),
+    rstan (>= 2.18.1),
+    StanHeaders (>= 2.18.0)
 Suggests:
     parallel,
     knitr,
-    testthat
+    testthat,
+    rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
