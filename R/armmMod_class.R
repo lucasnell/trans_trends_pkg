@@ -1,11 +1,10 @@
 
 
 
-new_armmMod <- function(.stan, .call, .hmc, .x_means_sds, .y_means_sds,
+new_armmMod <- function(.stan, .call, .options, .x_means_sds, .y_means_sds,
                         .stan_data, .orig_data) {
 
     stopifnot(inherits(.call, "call"))
-    stopifnot(inherits(.hmc, "logical"))
     stopifnot(is.null(.x_means_sds) || inherits(.x_means_sds, "data.frame"))
     stopifnot(is.null(.y_means_sds) || inherits(.y_means_sds, "data.frame"))
     stopifnot(inherits(.orig_data, "environment"))
@@ -19,7 +18,7 @@ new_armmMod <- function(.stan, .call, .hmc, .x_means_sds, .y_means_sds,
     }
 
     armm_obj <- structure(list(stan = .stan, call = .call,
-                               hmc = .hmc,
+                               options = .options,
                                x_means_sds = .x_means_sds,
                                y_means_sds = .y_means_sds,
                                stan_data = .stan_data,
@@ -42,14 +41,10 @@ new_armmMod <- function(.stan, .call, .hmc, .x_means_sds, .y_means_sds,
 print.armmMod <- function(x, digits = max(3, getOption("digits") - 3), ...) {
     cat("Autoregressive mixed model\n")
     cat(sprintf("  method:         %s\n",
-                ifelse(x$hmc, "Hamiltonian Monte Carlo",
+                ifelse(x$options$hmc, "Hamiltonian Monte Carlo",
                        "Direct optimization")))
     cat(sprintf("  family:         %s\n", family(x)))
-    form <- if (inherits(x$call$formula, "formula")) {
-        x$call$formula
-    } else {
-        eval(x$call$formula, parent.frame(1L))
-    }
+    form <- x$options$formula
     cat("  formula:       ", paste(trimws(deparse(form)), collapse = " "), "\n")
     cat("  data:          ", paste(trimws(deparse(x$call$data)),
                                    collapse = " "))
@@ -60,9 +55,9 @@ print.armmMod <- function(x, digits = max(3, getOption("digits") - 3), ...) {
         cat(sprintf(" << %s >>\n", paste(scale_strs, collapse = " & ")))
     } else cat("\n")
     cat("  observations:  ", nobs(x), "\n")
-    if (!is.null(x$call$rstan_control)) {
+    if (length(x$options$rstan_control) > 0) {
         cat("  rstan options: ", gsub("list\\(|\\)", "",
-                                      deparse(x$call$rstan_control)), "\n")
+                                      deparse(x$options$rstan_control)), "\n")
     }
     cat(sprintf("  obs. error:     %s\n", "sig_obs" %in% names(x$stan)))
     cat("------\n")
@@ -465,7 +460,7 @@ residuals.armmMod <- function(object,
 #' @method fitted armmMod
 #' @export
 fitted.armmMod <- function(object, ...) {
-    if (!object$hmc) {
+    if (!object$options$hmc) {
         stop("\n`fitted.armmMod` method not yet implemented for direct ",
              "optimization", call. = FALSE)
     }

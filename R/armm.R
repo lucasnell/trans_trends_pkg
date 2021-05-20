@@ -851,6 +851,14 @@ armm <- function(formula,
 
     call_ = match.call()
 
+    # So that all these objects are available later, even if temporary objects
+    # were passed for some arguments:
+    options_ <- as.list(formals(armm))
+    options_$data <- NULL
+    for (n in names(call_)[!names(call_) %in% c("", "data")]) {
+        options_[[n]] <- eval(str2lang(n))
+    }
+
     if (missing(formula)) {
         stop("\nThe `armm` function requires the `formula` argument.",
              call. = FALSE)
@@ -974,7 +982,8 @@ armm <- function(formula,
     rm(list = rm_objs, envir = data)
     ls(envir = data, all.names = TRUE)
 
-    armmMod_obj <- new_armmMod(stan_fit, call_, hmc, x_means_sds,
+
+    armmMod_obj <- new_armmMod(stan_fit, call_, options_, x_means_sds,
                                y_means_sds, stan_data, data)
 
     # Add AR and random-term names:
