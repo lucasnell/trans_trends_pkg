@@ -135,17 +135,18 @@ summary.armmMod <- function(object,
         print(AR, digits = digits)
     } else cat("No autoregressive parameters\n")
 
+    RE <- NULL
     if (any(grepl("^sig_beta", names(object$stan)))) {
         cat("------\n")
         cat("Random effects:\n")
-        print_sigma_betas(object, digits = digits)
+        RE <- print_sigma_betas(object, se_method, digits)
     } else cat("------\nNo random effects\n")
 
     cat("------\n")
     cat("Fixed effects:\n")
-    print_fixef_w_se(object, se_method, digits)
+    FF <- print_fixef_w_se(object, se_method, digits)
 
-    invisible(NULL)
+    invisible(list(autoreg = AR, ranef = RE, fixef = FF))
 
 }
 
@@ -215,14 +216,14 @@ print_fixef_w_se <- function(object, se_method, digits) {
 
     print(fixef_df, digits = digits)
 
-    invisible(NULL)
+    return(fixef_df)
 }
 
 
 #
 # This is for use in the summary method.
 #
-print_sigma_betas <- function(object, digits) {
+print_sigma_betas <- function(object, se_method, digits) {
 
     if (!any(grepl("^sig_beta", names(object$stan)))) invisible(NULL)
 
@@ -230,15 +231,17 @@ print_sigma_betas <- function(object, digits) {
 
     sigmaB_df <- cbind(object$rnd_names[,c("Groups", "Name")],
                        data.frame(`Std.Dev.` = apply(B, 2, median)))
+    sigmaB_df$`Std.Dev.SE` <- bayesian_se(B, se_method)
     sigmaB_df <- sigmaB_df[order(sigmaB_df$Groups),]
     rownames(sigmaB_df) <- NULL
 
-    sigmaB_df$Groups[sigmaB_df$Groups ==
-                         c("", sigmaB_df$Groups[-nrow(sigmaB_df)])] <- ""
+    sigmaB_df2 <- sigmaB_df
+    sigmaB_df2$Groups[sigmaB_df2$Groups ==
+                         c("", sigmaB_df2$Groups[-nrow(sigmaB_df2)])] <- ""
 
-    print(sigmaB_df, row.names = FALSE, right = FALSE, digits = digits)
+    print(sigmaB_df2, row.names = FALSE, right = FALSE, digits = digits)
 
-    invisible(NULL)
+    return(sigmaB_df)
 }
 
 
