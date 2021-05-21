@@ -1,5 +1,5 @@
 
-# --------------------------------------
+
 
 #' Version of lapply that returns the list flattened to a vector or array.
 #'

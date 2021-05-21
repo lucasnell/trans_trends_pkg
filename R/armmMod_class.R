@@ -68,11 +68,17 @@ print.armmMod <- function(x, digits = max(3, getOption("digits") - 3), ...) {
                         warning = function(w) {
                             return(list(loo = suppressWarnings(loo(x)),
                                         warn = w))
+                        },
+                        error = function(e) {
+                            return(e)
                         })
     if (inherits(loo_obj, "list")) {
         loo_est <- loo_obj[["loo"]][["estimates"]]["looic","Estimate"]
         loo_warn <- paste0("** loo warning: ",
                            trimws(loo_obj[["warn"]][["message"]]), "\n")
+    } else if (inherits(loo_obj, "error")) {
+        loo_est <- NA_real_
+        loo_warn <- paste0("*** loo error: ", paste(loo_obj))
     } else {
         loo_est <- loo_obj[["estimates"]]["looic","Estimate"]
         loo_warn <- ""
@@ -82,12 +88,17 @@ print.armmMod <- function(x, digits = max(3, getOption("digits") - 3), ...) {
                          warning = function(w) {
                              return(list(waic = suppressWarnings(waic(x)),
                                          warn = w))
+                         },
+                         error = function(e) {
+                             return(e)
                          })
     if (inherits(waic_obj, "list")) {
         waic_est <- waic_obj[["waic"]][["estimates"]]["waic","Estimate"]
         waic_warn <- paste0("** waic warning: ",
                             trimws(waic_obj[["warn"]][["message"]]), "\n")
-
+    } else if (inherits(waic_obj, "error")) {
+        waic_est <- NA_real_
+        waic_warn <- paste0("*** waic error: ", paste(waic_obj))
     } else {
         waic_est <- waic_obj[["estimates"]]["waic","Estimate"]
         waic_warn <- ""
@@ -172,6 +183,11 @@ loo.armmMod <- function(x,
                         moment_match = FALSE,
                         k_threshold = 0.7,
                         ...) {
+    if (!is.null(x$options$rstan_control$iter) &&
+        x$options$rstan_control$iter < 3) {
+        stop("loo cannot be calculated when the number of iterations is < 3")
+    }
+
     .loo <- rstan::loo(x$stan, pars = "log_lik_sum",
                        save_psis = save_psis, cores = cores,
                        moment_match = moment_match,
@@ -192,6 +208,10 @@ loo.armmMod <- function(x,
 #' @seealso \code{\link[loo]{waic}}
 #' @export
 waic.armmMod <- function(x, ...) {
+    if (!is.null(x$options$rstan_control$iter) &&
+        x$options$rstan_control$iter < 3) {
+        stop("waic cannot be calculated when the number of iterations is < 3")
+    }
     ll_m <- loo::extract_log_lik(x$stan, parameter_name = "log_lik_sum")
     .waic <- loo::waic.matrix(ll_m)
     return(.waic)
