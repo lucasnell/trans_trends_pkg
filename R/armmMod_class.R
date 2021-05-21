@@ -188,7 +188,7 @@ loo.armmMod <- function(x,
         stop("loo cannot be calculated when the number of iterations is < 3")
     }
 
-    .loo <- rstan::loo(x$stan, pars = "log_lik_sum",
+    .loo <- rstan::loo(x$stan, pars = "log_lik",
                        save_psis = save_psis, cores = cores,
                        moment_match = moment_match,
                        k_threshold = k_threshold, ...)
@@ -212,7 +212,7 @@ waic.armmMod <- function(x, ...) {
         x$options$rstan_control$iter < 3) {
         stop("waic cannot be calculated when the number of iterations is < 3")
     }
-    ll_m <- loo::extract_log_lik(x$stan, parameter_name = "log_lik_sum")
+    ll_m <- loo::extract_log_lik(x$stan, parameter_name = "log_lik")
     .waic <- loo::waic.matrix(ll_m)
     return(.waic)
 }
