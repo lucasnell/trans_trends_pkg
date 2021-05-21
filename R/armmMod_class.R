@@ -149,7 +149,7 @@ summary.armmMod <- function(object,
     RE <- NULL
     if (any(grepl("^sig_beta", names(object$stan)))) {
         cat("------\n")
-        cat("Random effects:\n")
+        cat("Random effects (Standard deviation):\n")
         RE <- print_sigma_betas(object, se_method, digits)
     } else cat("------\nNo random effects\n")
 
@@ -250,8 +250,8 @@ print_sigma_betas <- function(object, se_method, digits) {
     B <- rstan::extract(object$stan, "sig_beta")[[1]]
 
     sigmaB_df <- cbind(object$rnd_names[,c("Groups", "Name")],
-                       data.frame(`Std.Dev.` = apply(B, 2, median)))
-    sigmaB_df$`Std.Dev.SE` <- bayesian_se(B, se_method)
+                       data.frame(Median = apply(B, 2, median)))
+    sigmaB_df$`Std.Error` <- bayesian_se(B, se_method)
     sigmaB_df <- sigmaB_df[order(sigmaB_df$Groups),]
     rownames(sigmaB_df) <- NULL
 
