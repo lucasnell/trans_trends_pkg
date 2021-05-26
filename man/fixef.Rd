@@ -7,15 +7,19 @@
 \alias{fixed.effects}
 \title{Extract fixed-effects estimates from an \code{armmMod} object}
 \usage{
-\method{fixef}{armmMod}(object, ...)
+\method{fixef}{armmMod}(object, se_method = c("quantile", "hpdi"), ...)
 }
 \arguments{
-\item{object}{A fitted model with class \code{armmMod}.}
+\item{object}{an object of class \code{armmMod}, a result of a call to \code{armm}.}
 
-\item{...}{Ignored.}
+\item{se_method}{A single string, for either using quantiles (\code{"quantile"})
+or HPDI (\code{"hpdi"}) to compute the standard errors.
+Defaults to \code{"quantile"}.}
+
+\item{...}{Not used.}
 }
 \value{
-A vector of fixed-effects estimates.
+A data frame of fixed-effects estimates and standard errors.
 }
 \description{
 Extract fixed-effects estimates from an \code{armmMod} object

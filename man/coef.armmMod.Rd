@@ -4,19 +4,20 @@
 \alias{coef.armmMod}
 \title{Coefficients from an \code{armmMod} object}
 \usage{
-\method{coef}{armmMod}(object, ...)
+\method{coef}{armmMod}(object, se_method = c("quantile", "hpdi"), ...)
 }
 \arguments{
-\item{object}{An object of class \code{armmMod}.}
+\item{object}{an object of class \code{armmMod}, a result of a call to \code{armm}.}
 
-\item{...}{Ignored.}
+\item{se_method}{A single string, for either using quantiles (\code{"quantile"})
+or HPDI (\code{"hpdi"}) to compute the standard errors.
+Defaults to \code{"quantile"}.}
+
+\item{...}{Not used.}
 }
 \value{
-If random variables present, a list of data frames (1 for each
-random-effect grouping variable).
-Each data frame contains coefficients for each level of the variable.
-If the model doesn't contain random variables, then it returns a
-vector of coefficients.
+A data frame of fixed and (if present) random effects estimates
+with standard errors.
 }
 \description{
 Coefficients from an \code{armmMod} object

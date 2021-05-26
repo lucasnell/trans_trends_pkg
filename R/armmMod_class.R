@@ -1,6 +1,5 @@
 
 
-
 new_armmMod <- function(.stan, .call, .options, .x_means_sds, .y_means_sds,
                         .stan_data, .orig_data) {
 
@@ -134,8 +133,6 @@ summary.armmMod <- function(object,
 
 
     print(object, digits = digits)
-
-    se_method <- match.arg(tolower(se_method), c("quantile", "hpdi"))
 
     cat("------\n")
 
@@ -271,6 +268,7 @@ print_sigma_betas <- function(object, se_method, digits) {
 # This CI can be calculated using quantiles or HPDI
 # Used multiple times below.
 bayesian_se <- function(x, se_method) {
+    se_method <- match.arg(tolower(se_method), c("quantile", "hpdi"))
     if (!isTRUE(length(dim(x)) == 2)) {
         stop("\n`x` arg to `bayesian_se` should be 2-dimensional.")
     }
@@ -298,12 +296,14 @@ bayesian_se <- function(x, se_method) {
 #' @aliases ranef random.effects ranef.armmMod
 #' @docType methods
 #' @inheritParams fixef
-#' @return A list of random-effects estimates.
+#' @return A data frame of random-effects estimates and standard errors.
 #' @importFrom lme4 ranef
 #' @export ranef
 #' @method ranef armmMod
 #' @export
-ranef.armmMod <- function(object, ...) {
+ranef.armmMod <- function(object,
+                          se_method = c("quantile", "hpdi"),
+                          ...) {
 
     if (sum(object$stan_data$g_per_ff) == 0) return(NULL)
     sigma_names <- names(object$stan)[grepl("^sig_beta\\[", names(object$stan))]
@@ -317,35 +317,17 @@ ranef.armmMod <- function(object, ...) {
                 })
     S <- do.call(cbind, S)
     Z <- do.call(cbind, rstan::extract(object$stan, z_names))
+    Z <- S * Z
 
-    ests <- unname(apply(S * Z, 2, median))
+    ests <- unname(apply(Z, 2, median))
+    ses <- bayesian_se(Z, se_method)
 
-    ranef_df <- cbind(object$rnd_lvl_names, data.frame(Estimate = ests),
+    ranef_df <- cbind(object$rnd_lvl_names,
+                      data.frame(Median = ests,
+                                 `Std.Error` = ses),
                       stringsAsFactors = FALSE)
 
-    ranef_list <- lapply(split(ranef_df, ranef_df$Groups),
-                         function(x) {
-                             x <- x[,c("Name", "Level", "Estimate")]
-                             xdf <- lapply(split(x, x$Name), function(y) {
-                                 ydf <- data.frame(y$Estimate)
-                                 colnames(ydf) <- y$Name[1]
-                                 rownames(ydf) <- y$Level
-                                 return(ydf)
-                             })
-                             # Make sure all rownames are in same order
-                             if (length(xdf) > 1) {
-                                 rnames <- rownames(xdf[[1]])
-                                 for (i in 2:length(xdf)) {
-                                     if (!all(rownames(xdf[[i]]) == rnames)) {
-                                         xdf[[i]] <- xdf[[i]][rnames,,drop=F]
-                                     }
-                                 }
-                             }
-                             xdf <- do.call(cbind, xdf)
-                             return(xdf)
-                         })
-
-    return(ranef_list)
+    return(ranef_df)
 
 }
 
@@ -375,7 +357,6 @@ autoreg.armmMod <- function(object,
 
     if (is.null(eval(object$call$ar_form))) return(NULL)
 
-    se_method <- match.arg(tolower(se_method), c("quantile", "hpdi"))
     phis <- rstan::extract(object$stan, "phi")[[1]]
 
     SEs <- bayesian_se(phis, se_method)
@@ -394,18 +375,22 @@ autoreg.armmMod <- function(object,
 #' @title Extract fixed-effects estimates from an `armmMod` object
 #' @aliases fixef fixed.effects fixef.armmMod
 #' @docType methods
-#' @param object A fitted model with class `armmMod`.
-#' @param ... Ignored.
-#' @return A vector of fixed-effects estimates.
+#' @inheritParams summary.armmMod
+#' @return A data frame of fixed-effects estimates and standard errors.
 #' @importFrom lme4 fixef
 #' @export fixef
 #' @method fixef armmMod
 #' @export
-fixef.armmMod <- function(object, ...) {
+fixef.armmMod <- function(object,
+                          se_method = c("quantile", "hpdi"),
+                          ...) {
 
-    A <- apply(rstan::extract(object$stan, "alpha")[[1]], 2, median)
+    fef <- rstan::extract(object$stan, "alpha")[[1]]
 
-    names(A) <- colnames(object$stan_data$x)
+    A <- data.frame(Median = apply(fef, 2, median),
+                    `Std.Error` = bayesian_se(fef, se_method))
+
+    rownames(A) <- colnames(object$stan_data$x)
 
     return(A)
 }
@@ -414,36 +399,70 @@ fixef.armmMod <- function(object, ...) {
 
 
 
+
 #' Coefficients from an `armmMod` object
 #'
-#' @param object An object of class `armmMod`.
-#' @param ... Ignored.
+#' @inheritParams summary.armmMod
 #' @method coef armmMod
 #'
-#' @return If random variables present, a list of data frames (1 for each
-#'     random-effect grouping variable).
-#'     Each data frame contains coefficients for each level of the variable.
-#'     If the model doesn't contain random variables, then it returns a
-#'     vector of coefficients.
+#' @return A data frame of fixed and (if present) random effects estimates
+#'     with standard errors.
 #'
 #' @export
-coef.armmMod <- function(object, ...) {
+coef.armmMod <- function(object,
+                         se_method = c("quantile", "hpdi"),
+                         ...) {
 
-    fixed <- fixef(object)
-    random <- ranef(object)
-    if (is.null(random)) return(fixed)
+    if (sum(object$stan_data$g_per_ff) == 0) return(fixef(object, se_method))
 
-    coef_obj <- lapply(random,
-                       function(x) {
-                           m <- matrix(fixed, nrow(x), length(fixed),
-                                       byrow = TRUE)
-                           colnames(m) <- names(fixed)
-                           rownames(m) <- rownames(x)
-                           for (n in colnames(x)) m[,n] <- m[,n] + x[,n]
-                           return(m)
-                       })
+    fef <- rstan::extract(object$stan, "alpha")[[1]]
+    colnames(fef) <- colnames(object$stan_data$x)
 
-    return(coef_obj)
+
+    sigma_names <- names(object$stan)[grepl("^sig_beta\\[", names(object$stan))]
+    z_names <- names(object$stan)[grepl("^z\\[", names(object$stan))]
+
+    S <- rstan::extract(object$stan, sigma_names)
+    S <- lapply(1:length(S),
+                function(i) {
+                    matrix(as.numeric(S[[i]]), length(S[[i]]),
+                           object$stan_data$lev_per_g[i])
+                })
+    S <- do.call(cbind, S)
+    Z <- do.call(cbind, rstan::extract(object$stan, z_names))
+    R <- S * Z
+
+
+    # Combining random and fixed effects:
+
+    coefs <- cbind(object$rnd_lvl_names,
+                   data.frame(Median = NA_real_,
+                              `Std.Error` = NA_real_),
+                   stringsAsFactors = FALSE)
+    if (!all(coefs$Name %in% colnames(fef))) {
+        stop(paste("\nINTERNAL ERROR: Not all coefficient names from",
+                   "`object$rnd_lvl_names$Name` are present in",
+                   "`colnames(object$stan_data$x)`.",
+                   "Make sure you don't edit `stan_data` or `rnd_lvl_names`",
+                   "fields manually."))
+    }
+    if (nrow(coefs) != ncol(R)) {
+        stop(paste("\nINTERNAL ERROR: `nrow(object$rnd_lvl_names) !=",
+                   "names(object$stan)[grepl(\"^z\\[\", names(object$stan))]`.",
+                   "Make sure you don't edit `stan` or `rnd_lvl_names`",
+                   "fields manually."))
+    }
+    E <- R
+    for (i in 1:nrow(coefs)) {
+        .f <- fef[,coefs$Name[i]]
+        E[,i] <- E[,i] + .f
+    }
+
+    coefs$Median <- unname(apply(E, 2, median))
+    coefs$`Std.Error` <- bayesian_se(E, se_method)
+
+
+    return(coefs)
 
 }
 
