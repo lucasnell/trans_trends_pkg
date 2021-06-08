@@ -141,6 +141,7 @@ summary.armmMod <- function(object,
         cat("Autoregressive parameters:\n")
         rownames(AR) <- paste0(" ", rownames(AR))
         print(AR, digits = digits)
+        rownames(AR) <- substring(rownames(AR), 2)
     } else cat("No autoregressive parameters\n")
 
     RE <- NULL
@@ -230,8 +231,9 @@ print_fixef_w_se <- function(object, se_method, digits) {
                            `Std.Error` = SEs)
 
     rownames(fixef_df) <- paste0(" ", colnames(object$stan_data$x))
-
     print(fixef_df, digits = digits)
+
+    rownames(fixef_df) <- substring(rownames(fixef_df), 2)
 
     return(fixef_df)
 }
