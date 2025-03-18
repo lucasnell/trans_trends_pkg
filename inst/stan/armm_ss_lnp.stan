@@ -8,12 +8,14 @@ data {
     int lev_per_g[sum(g_per_ff)];       // # levels per group (repeated by fixed effect)
     int b_groups[n_ts, sum(g_per_ff)];  // grouping structure for betas
     int p_groups[n_ts];                 // grouping structure for phis
-    int<lower=0, upper=1> change;       // logical for parameterization (0 = predict mean; 1 = predict change);
+    int<lower=0, upper=1> change;       // logical for parameterization
+                                        // (0 = predict mean; 1 = predict change);
     // data
-    real y[n_obs];                      // response variables
+    int y[n_obs];                      // response variables
     real x[n_obs, n_coef];              // predictor variables
     real<lower=0> time[n_obs];          // response variable times
     real<lower=0> p_bound;              // upper bound for phis
+    real offset[n_obs];                 // offsets
 }
 parameters {
     real alpha[n_coef];                         // fixed effects and intercepts
@@ -21,11 +23,14 @@ parameters {
     // real<lower=0, upper=p_bound> phi[max(p_groups)];  // autoregressive parameter for each
     real<lower=0, upper=1> phi[max(p_groups)];  // autoregressive parameter for each
     real<lower=0> sig_beta[sum(g_per_ff)];      // group standard deviations
-    real<lower=0> sig_res;                      // residual standard deviation
+    real ze[n_obs - n_ts];                      // random deviates for proc. error
+    real<lower=0> sig_proc;                     // process error standard deviation
+    real<lower=0> sig_obs;                      // observation error standard deviation
+    real<lower=0> y_pred[n_obs];                 // predicted value with observation error
 }
 transformed parameters {
     real beta[n_ts,n_coef]; // coefficients
-    real y_pred[n_obs];     // predicted values
+    real ly_pred[n_obs];     // predicted values
     {
         int xy_pos = 1;         // position in x and y vectors
         // loop over time series:
@@ -50,15 +55,21 @@ transformed parameters {
             } // c
             // predicted values:
             if (change == 1) {
-                y_pred[xy_pos] = dot_product(beta[ts,], x[xy_pos,]);
-                    for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
-                        y_pred[t] = dot_product(beta[ts,], x[t,]) + phi[p_groups[ts]]^(time[t] - time[t-1]) * y[t-1];
+                ly_pred[xy_pos] = dot_product(beta[ts,], x[xy_pos,]);
+                for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
+                    ly_pred[t] = dot_product(beta[ts,], x[t,]) +
+                        phi[p_groups[ts]]^(time[t] - time[t-1]) * ly_pred[t-1]+
+                        offset[t] +
+                        sig_proc * ze[t - ts];
                 } // t
             } else {
-                y_pred[xy_pos] = dot_product(beta[ts,], x[xy_pos,]);
-                    for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
-                        y_pred[t] = dot_product(beta[ts,], x[t,]) +
-                            phi[p_groups[ts]]^(time[t] - time[t-1]) * (y[t-1] - dot_product(beta[ts,], x[t-1,]));
+                ly_pred[xy_pos] = dot_product(beta[ts,], x[xy_pos,]);
+                for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
+                    ly_pred[t] = dot_product(beta[ts,], x[t,]) +
+                        phi[p_groups[ts]]^(time[t] - time[t-1]) *
+                        (ly_pred[t-1] - dot_product(beta[ts,], x[t-1,]))+
+                        offset[t] +
+                        sig_proc * ze[t - ts];
                 } // t
             }
            xy_pos += obs_per[ts];
@@ -67,7 +78,7 @@ transformed parameters {
 }
 model {
     // priors:
-    alpha ~ normal(0, 1);
+    alpha ~ normal(0, 5);
     z ~ normal(0, 1);
     for (i in 1:sum(g_per_ff)){
         sig_beta[i] ~ gamma(1.5, 3);
@@ -76,15 +87,19 @@ model {
         // phi[i] ~ normal(0, 0.5) T[0, p_bound];
         phi[i] ~ beta(2, 2);
     }
-    sig_res ~ gamma(1.5, 3);
-    // observations:
-    y ~ normal(y_pred, sig_res);
+    ze ~ normal(0, 1);
+    sig_obs ~ gamma(1.5, 3);
+    sig_proc ~ gamma(1.5, 3);
+    // likelihood:
+    y_pred ~ lognormal(ly_pred, sig_obs);
+    y ~ poisson(y_pred);
 }
 generated quantities {
   real log_lik[n_obs];
   real log_lik_sum;
   for(i in 1:n_obs){
-    log_lik[i] = normal_lpdf(y[i] | y_pred[i], sig_res);
+    log_lik[i] = poisson_lpmf(y[i] | y_pred[i]) +
+                  lognormal_lpdf(y_pred[i] | ly_pred[i], sig_obs);
   }
   log_lik_sum = sum(log_lik);
 }

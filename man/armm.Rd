@@ -137,28 +137,42 @@ pass \emph{all} priors to replace these defaults.
 }
 
 \examples{
-formula <- y ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2)
+form_norm <- y_norm ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2)
+form_poiss <- y_poiss ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2) +
+              offset(log(effort))
 time_form <- ~ t | tg + g1
 ar_form <- ~ g1
 y_scale <- ~ g1
 
 set.seed(1)
+b0 <- -4
 x1_coef <- 1.5
 x2_coefs <- runif(10, 1, 5)
 data <- data.frame(g1 = factor(rep(1:5, each = 20)),
                    g2 = factor(rep(2:1, each = 50)),
-                   y = rnorm(100),
+                   y = numeric(100),
                    x1 = runif(100),
                    x2 = rnorm(100),
                    x3 = factor(rep(1:4, 25)),
                    t = rep(1:10, 10),
-                   tg = factor(rep(1:10, each = 10)))
-data$y <- data$y + data$x1 * x1_coef
-data$y <- data$y + data$x2 *
-    sapply(as.integer(interaction(data$g1, data$g2)),
-           function(i) x2_coefs[i])
+                   tg = factor(rep(1:10, each = 10)),
+                   effort = exp(rnorm(100, 4)))
+data$y <- b0 +
+    data$x1 * x1_coef +
+    data$x2 * sapply(as.integer(interaction(data$g1, data$g2)),
+                     function(i) x2_coefs[i])
+data$y_norm <- data$y + rnorm(100)
+data$y_poiss <- rpois(100, exp(data$y) * data$effort) +
+    round(rnorm(100, sd = 5)) |>
+    (\(x) ifelse(x < 0, 0, x))()
 
-mod <- armm(formula, time_form, ar_form, y_scale, data,
-              rstan_control = list(chains = 1, iter = 100))
+mod_norm <- armm(form_norm, time_form, ar_form, y_scale, data,
+                 rstan_control = list(chains = 1, iter = 100))
+mod_poiss <- armm(form_poiss, time_form, ar_form, y_scale, data,
+                  distr = "lnorm_poiss", obs_error = TRUE,
+                  rstan_control = list(chains = 1, iter = 100))
+
+
+
 
 }

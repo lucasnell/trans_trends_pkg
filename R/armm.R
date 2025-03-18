@@ -194,6 +194,33 @@ get_ts_info <- function(x, start_end_mat, err_msg_arg) {
 
 
 
+#' Extract values of offset parameter from a formula if present.
+#'
+#' @noRd
+#'
+extract_offset <- function(formula, data) {
+
+    if (sum(all.names(formula) == "offset") == 0) {
+        n <- length(eval(formula[[2]], envir = data))
+        return(rep(0, n))
+    }
+    if (sum(all.names(formula) == "offset") > 1) {
+        stop("\nMultiple offsets are not allowed in formulas.", call. = FALSE)
+    }
+
+    form_terms <- terms(formula)
+    # Extract offset variable name:
+    off_i <- attr(form_terms, "offset")
+    offset_var <- gsub("offset\\(|\\)$", "",
+                       as.character(attr(form_terms, "variables"))[-1L][off_i])
+    offset_vals <- eval(parse(text = offset_var), data)
+
+    return(offset_vals)
+
+}
+
+
+
 #' Make information list when formula has random effects.
 #'
 #'
@@ -811,29 +838,43 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per,
 #' @importFrom rstan optimizing
 #'
 #' @examples
-#' formula <- y ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2)
+#' form_norm <- y_norm ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2)
+#' form_poiss <- y_poiss ~ x1 * x2 + x3 + (x1 * x2 | g1 + g2) + (x3 | g1) + (1 | g2) +
+#'               offset(log(effort))
 #' time_form <- ~ t | tg + g1
 #' ar_form <- ~ g1
 #' y_scale <- ~ g1
 #'
 #' set.seed(1)
+#' b0 <- -4
 #' x1_coef <- 1.5
 #' x2_coefs <- runif(10, 1, 5)
 #' data <- data.frame(g1 = factor(rep(1:5, each = 20)),
 #'                    g2 = factor(rep(2:1, each = 50)),
-#'                    y = rnorm(100),
+#'                    y = numeric(100),
 #'                    x1 = runif(100),
 #'                    x2 = rnorm(100),
 #'                    x3 = factor(rep(1:4, 25)),
 #'                    t = rep(1:10, 10),
-#'                    tg = factor(rep(1:10, each = 10)))
-#' data$y <- data$y + data$x1 * x1_coef
-#' data$y <- data$y + data$x2 *
-#'     sapply(as.integer(interaction(data$g1, data$g2)),
-#'            function(i) x2_coefs[i])
+#'                    tg = factor(rep(1:10, each = 10)),
+#'                    effort = exp(rnorm(100, 4)))
+#' data$y <- b0 +
+#'     data$x1 * x1_coef +
+#'     data$x2 * sapply(as.integer(interaction(data$g1, data$g2)),
+#'                      function(i) x2_coefs[i])
+#' data$y_norm <- data$y + rnorm(100)
+#' data$y_poiss <- rpois(100, exp(data$y) * data$effort) +
+#'     round(rnorm(100, sd = 5)) |>
+#'     (\(x) ifelse(x < 0, 0, x))()
 #'
-#' mod <- armm(formula, time_form, ar_form, y_scale, data,
-#'               rstan_control = list(chains = 1, iter = 100))
+#' mod_norm <- armm(form_norm, time_form, ar_form, y_scale, data,
+#'                  rstan_control = list(chains = 1, iter = 100))
+#' mod_poiss <- armm(form_poiss, time_form, ar_form, y_scale, data,
+#'                   distr = "lnorm_poiss", obs_error = TRUE,
+#'                   rstan_control = list(chains = 1, iter = 100))
+#'
+#'
+#'
 #'
 armm <- function(formula,
                     time_form,
@@ -889,6 +930,9 @@ armm <- function(formula,
 
     distr <- match.arg(tolower(distr), c("normal", "lnorm_poisson"))
     if (distr != "normal") y_scale <- NULL # never scale if distr isn't normal
+    if (sum(all.names(formula) == "offset") > 0 && distr != "lnorm_poisson") {
+        stop("\nOffsets only allowed when distr == 'lnorm_poisson'", call. = FALSE)
+    }
 
     # Checks for variables being same length and reorders by time if necessary
     obs_per <- check_len_sort_data(formula, time_form, ar_form, data)
@@ -907,12 +951,15 @@ armm <- function(formula,
     stan_data$rnd_names <- NULL
     stan_data$rnd_lvl_names <- NULL
 
-    # Checks for integers if using lnorm_poisson
+    # If using lnorm_poisson...
+    # (1) Check for integers
+    # (2) Add offset if it exists
     if (distr == "lnorm_poisson") {
         if (any(stan_data$y != round(stan_data$y))) {
             stop("\nIn `armm`, if using a lognormal Poisson distribution, the ",
                  "response variable must be integers.")
         }
+        stan_data$offset <- extract_offset(formula, data)
     }
 
     # Deal with potential scaling of x variables that may or may not have been done

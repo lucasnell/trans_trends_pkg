@@ -7,9 +7,9 @@
 \method{nobs}{armmMod}(object, ...)
 }
 \arguments{
-\item{object}{A fitted model object.}
+\item{object}{a fitted model object.}
 
-\item{...}{Further arguments to be passed to methods.}
+\item{...}{further arguments to be passed to methods.}
 }
 \description{
 Number of observations in an \code{armmMod} object

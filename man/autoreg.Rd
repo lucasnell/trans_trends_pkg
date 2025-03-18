@@ -26,6 +26,6 @@ Extract autoregressive parameters
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{armmMod}: Autoregressive parameters for an \code{armmMod} object
-}}
+\item \code{autoreg(armmMod)}: Autoregressive parameters for an \code{armmMod} object
 
+}}

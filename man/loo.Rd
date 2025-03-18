@@ -28,7 +28,10 @@
   has been set.}
 
 \item{moment_match}{Logical; Whether to use the moment matching algorithm for
-  observations with high Pareto k values to improve accuracy.}
+  observations with high Pareto k values to improve accuracy. Note:
+  because the moment matching algorithm relies on the \code{unconstrain_pars}
+  method in RStan it is only available if run in the same R session as fitting the
+  model.}
 
 \item{k_threshold}{Threshold value for Pareto k values above which
   the moment matching algorithm is used. If \code{moment_match} is \code{FALSE},

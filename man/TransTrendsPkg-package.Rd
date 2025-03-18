@@ -2,12 +2,19 @@
 % Please edit documentation in R/TransTrendsPkg-package.R
 \docType{package}
 \name{TransTrendsPkg-package}
-\alias{TransTrendsPkg-package}
 \alias{TransTrendsPkg}
-\title{The 'TransTrendsPkg' package.}
+\alias{TransTrendsPkg-package}
+\title{TransTrendsPkg: Fit models for trans_trends}
 \description{
-A DESCRIPTION OF THE PACKAGE
+Some day, more details about what the package does will go here.
 }
-\references{
-Stan Development Team (2018). RStan: the R interface to Stan. R package version 2.17.3. http://mc-stan.org
+\author{
+\strong{Maintainer}: Lucas A Nell \email{lucas@lucasnell.com}
+
+Authors:
+\itemize{
+  \item Joseph S Phillips \email{jsphillips2@wisc.edu}
 }
+
+}
+\keyword{internal}

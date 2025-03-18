@@ -1,17 +1,13 @@
-#' The 'TransTrendsPkg' package.
-#'
-#' @description A DESCRIPTION OF THE PACKAGE
-#'
-#' @docType package
-#' @name TransTrendsPkg-package
-#' @aliases TransTrendsPkg
+#' @keywords internal
+"_PACKAGE"
+
+## usethis namespace: start
 #' @useDynLib TransTrendsPkg, .registration = TRUE
 #' @import methods
 #' @import Rcpp
-#' @import rstantools
+#' @importFrom rstan sampling
+#' @importFrom rstantools rstan_config
+#' @importFrom RcppParallel RcppParallelLibs
 #' @import stats
-#'
-#' @references
-#' Stan Development Team (2018). RStan: the R interface to Stan. R package version 2.17.3. http://mc-stan.org
-#'
+## usethis namespace: end
 NULL
