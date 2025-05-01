@@ -474,7 +474,10 @@ coef.armmMod <- function(object,
 #' Getting different types of residuals for `armmMod` objects.
 #'
 #' @param object A fitted model with class `armmMod`.
-#' @param type Type of residuals, currently only `"response"` is programmed.
+#' @param type Type of residuals, currently only `"response"`,
+#'     `"deviance"`, and `"pearson"` are programmed.
+#'     Type `"deviance"` only works when `family(object) == "lnorm_poiss"`.
+#'     Defaults to `"response"`.
 #' @param \dots Additional arguments, ignored for method compatibility.
 #' @return A vector of residuals.
 #'
@@ -482,16 +485,29 @@ coef.armmMod <- function(object,
 #'
 #' @export
 residuals.armmMod <- function(object,
-                              type = "response",
+                              type = c("response", "deviance", "pearson"),
                               ...) {
-    if (family(object) == "normal"){
-        y <- object$stan_data$y
-        mu <- fitted(object)
-        res <- y - mu
-        return(res)
+
+    type <- match.arg(type, c("response", "deviance", "pearson"))
+
+    y <- object$stan_data$y
+    mu <- fitted(object)
+
+    if (type == "response"){
+        dev_resid <- y - mu
+    } else if (type == "pearson") {
+        dev_resid <- (y - mu) / sqrt(mu)
+    } else {
+        if (family(object) != "lnorm_poiss") {
+            stop("deviance residuals only programmed for lnorm_poiss family.")
+        }
+        yp <- y > 0
+        dev_resid <- mu
+        dev_resid[yp] <- (y * log(y / mu) - (y - mu))[yp]
+        dev_resid <- sign(y - mu) * sqrt(2 * dev_resid)
     }
 
-    stop("\nresiduals only for normal so far.")
+    return(dev_resid)
 }
 
 
@@ -505,7 +521,7 @@ residuals.armmMod <- function(object,
 #' @export
 fitted.armmMod <- function(object, ...) {
     if (!object$options$hmc) {
-        stop("\n`fitted.armmMod` method not yet implemented for direct ",
+        stop("\n`fitted.armmMod` method not implemented for direct ",
              "optimization", call. = FALSE)
     }
     apply(rstan::extract(object$stan, "y_pred")[[1]], 2, median)
@@ -541,9 +557,9 @@ nobs.armmMod <- function(object, ...) {
 #'
 #' @export
 family.armmMod <- function(object, ...) {
-    fam <- if (is.null(object$call$family)) {
-        formals(armm)[["family"]]
-    } else object$call$family
+    fam <- if (is.null(object$call$distr)) {
+        formals(armm)[["distr"]]
+    } else object$call$distr
     return(fam)
 }
 
@@ -563,6 +579,9 @@ family.armmMod <- function(object, ...) {
 #' @seealso \code{\link[bayesplot]{ppc_dens_overlay}}
 #' @export
 pp_check.armmMod <- function(object, ...) {
+
+    if (family(object) != "normal")
+        stop("pp_check currently only works when family(object) == \"normal\"")
 
     yrep <- rstan::extract(object$stan, "y_pred")[[1]]
     y <- object$stan_data$y
@@ -586,8 +605,8 @@ pp_check.armmMod <- function(object, ...) {
 #' @export
 #'
 posterior_mode <- function (x, adjust = 0.1, ...) {
-    if (is.numeric(x) == FALSE & !is.null(dim(x))) {
-        warning("posterior_mode expects a numeric vector")
+    if (!is.numeric(x) || !is.null(dim(x))) {
+        stop("posterior_mode expects a numeric vector")
     }
     dx <- density(x, adjust = adjust, ...)
     .mode <- dx$x[which.max(dx$y)]

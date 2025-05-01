@@ -4,12 +4,15 @@
 \alias{residuals.armmMod}
 \title{Residuals of \code{armmMod} objects}
 \usage{
-\method{residuals}{armmMod}(object, type = "response", ...)
+\method{residuals}{armmMod}(object, type = c("response", "deviance", "pearson"), ...)
 }
 \arguments{
 \item{object}{A fitted model with class \code{armmMod}.}
 
-\item{type}{Type of residuals, currently only \code{"response"} is programmed.}
+\item{type}{Type of residuals, currently only \code{"response"},
+\code{"deviance"}, and \code{"pearson"} are programmed.
+Type \code{"deviance"} only works when \code{family(object) == "lnorm_poiss"}.
+Defaults to \code{"response"}.}
 
 \item{\dots}{Additional arguments, ignored for method compatibility.}
 }
