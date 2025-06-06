@@ -691,7 +691,7 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per,
         out$p_groups <- get_ts_info(out$p_groups, start_end_mat,
                                     "Autoregressive term-grouping variables")
         out$ar_names <- colnames(model.matrix(reformulate(
-            all.vars(ar_form), "y", intercept = FALSE), data))
+            all.vars(ar_form), paste(formula[[2]]), intercept = FALSE), data))
     }
 
     # Adding other info:
