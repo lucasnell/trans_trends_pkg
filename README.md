@@ -1,4 +1,4 @@
-[![R build status](https://github.com/lucasnell/trans_trends_pkg/workflows/R-CMD-check/badge.svg)](https://github.com/lucasnell/trans_trends_pkg/actions)
+[![R build status](https://github.com/lucasnell/trans_trends_pkg/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lucasnell/trans_trends_pkg/actions/workflows/R-CMD-check.yaml)
 
 [![DOI](https://zenodo.org/badge/314584876.svg)](https://zenodo.org/badge/latestdoi/314584876)
 
