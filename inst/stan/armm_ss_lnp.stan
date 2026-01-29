@@ -15,7 +15,8 @@ data {
     real x[n_obs, n_coef];              // predictor variables
     real<lower=0> time[n_obs];          // response variable times
     real<lower=0> p_bound;              // upper bound for phis
-    real offset[n_obs];                 // offsets
+    // real offset[n_obs];                 // offsets
+    vector[n_obs] offset;                 // offsets
 }
 parameters {
     real alpha[n_coef];                         // fixed effects and intercepts
@@ -30,7 +31,8 @@ parameters {
 }
 transformed parameters {
     real beta[n_ts,n_coef]; // coefficients
-    real ly_pred[n_obs];     // predicted values
+    // real ly_pred[n_obs];     // predicted values
+    vector[n_obs] ly_pred;     // predicted values
     {
         int xy_pos = 1;         // position in x and y vectors
         // loop over time series:
@@ -59,7 +61,7 @@ transformed parameters {
                 for (t in (xy_pos + 1):(xy_pos + obs_per[ts] - 1)) {
                     ly_pred[t] = dot_product(beta[ts,], x[t,]) +
                         phi[p_groups[ts]]^(time[t] - time[t-1]) * ly_pred[t-1]+
-                        offset[t] +
+                        // offset[t] +
                         sig_proc * ze[t - ts];
                 } // t
             } else {
@@ -68,7 +70,7 @@ transformed parameters {
                     ly_pred[t] = dot_product(beta[ts,], x[t,]) +
                         phi[p_groups[ts]]^(time[t] - time[t-1]) *
                         (ly_pred[t-1] - dot_product(beta[ts,], x[t-1,]))+
-                        offset[t] +
+                        // offset[t] +
                         sig_proc * ze[t - ts];
                 } // t
             }
@@ -91,7 +93,8 @@ model {
     sig_obs ~ gamma(1.5, 3);
     sig_proc ~ gamma(1.5, 3);
     // likelihood:
-    y_pred ~ lognormal(ly_pred, sig_obs);
+    // y_pred ~ lognormal(ly_pred, sig_obs);
+    y_pred ~ lognormal(ly_pred + offset, sig_obs);
     y ~ poisson(y_pred);
 }
 generated quantities {
