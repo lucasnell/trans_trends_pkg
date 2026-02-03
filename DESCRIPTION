@@ -1,7 +1,7 @@
 Package: TransTrendsPkg
 Type: Package
 Title: Fit models for trans_trends
-Version: 1.0.2
+Version: 1.0.3
 Date: 2018-02-26
 Authors@R: as.person(c(
     "Joseph S Phillips <jsphillips2@wisc.edu> [aut]", 
@@ -39,7 +39,7 @@ Suggests:
     testthat,
     rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 URL: https://github.com/lucasnell/trans_trends_pkg
 BugReports: https://github.com/lucasnell/trans_trends_pkg/issues
 RemoteType: github

@@ -6,7 +6,15 @@
 \alias{TransTrendsPkg-package}
 \title{TransTrendsPkg: Fit models for trans_trends}
 \description{
-Some day, more details about what the package does will go here.
+This package fits autoregressive, state-space models with random effects.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/lucasnell/trans_trends_pkg}
+  \item Report bugs at \url{https://github.com/lucasnell/trans_trends_pkg/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Lucas A Nell \email{lucas@lucasnell.com}

@@ -29,68 +29,68 @@ using namespace stan::math;
 stan::math::profile_map profiles__;
 static constexpr std::array<const char*, 98> locations_array__ =
   {" (found before start of program)",
-  " (in 'armm_ss_lnp', line 21, column 4 to column 23)",
-  " (in 'armm_ss_lnp', line 22, column 4 to column 27)",
-  " (in 'armm_ss_lnp', line 24, column 4 to column 46)",
-  " (in 'armm_ss_lnp', line 25, column 4 to column 42)",
-  " (in 'armm_ss_lnp', line 26, column 4 to column 26)",
-  " (in 'armm_ss_lnp', line 27, column 4 to column 27)",
-  " (in 'armm_ss_lnp', line 28, column 4 to column 26)",
-  " (in 'armm_ss_lnp', line 29, column 4 to column 32)",
-  " (in 'armm_ss_lnp', line 32, column 4 to column 27)",
-  " (in 'armm_ss_lnp', line 33, column 4 to column 24)",
-  " (in 'armm_ss_lnp', line 98, column 2 to column 22)",
-  " (in 'armm_ss_lnp', line 99, column 2 to column 19)",
-  " (in 'armm_ss_lnp', line 35, column 8 to column 23)",
-  " (in 'armm_ss_lnp', line 38, column 12 to column 29)",
-  " (in 'armm_ss_lnp', line 44, column 30 to column 41)",
-  " (in 'armm_ss_lnp', line 44, column 20 to column 43)",
-  " (in 'armm_ss_lnp', line 45, column 28 to column 39)",
-  " (in 'armm_ss_lnp', line 45, column 20 to column 41)",
-  " (in 'armm_ss_lnp', line 48, column 24 to column 61)",
-  " (in 'armm_ss_lnp', line 49, column 24 to column 66)",
-  " (in 'armm_ss_lnp', line 47, column 67 to line 50, column 21)",
-  " (in 'armm_ss_lnp', line 47, column 20 to line 50, column 21)",
-  " (in 'armm_ss_lnp', line 52, column 20 to column 66)",
-  " (in 'armm_ss_lnp', line 53, column 20 to column 44)",
-  " (in 'armm_ss_lnp', line 43, column 23 to line 54, column 17)",
-  " (in 'armm_ss_lnp', line 42, column 20 to column 42)",
-  " (in 'armm_ss_lnp', line 41, column 35 to line 43, column 17)",
-  " (in 'armm_ss_lnp', line 41, column 16 to line 54, column 17)",
-  " (in 'armm_ss_lnp', line 40, column 31 to line 55, column 13)",
-  " (in 'armm_ss_lnp', line 40, column 12 to line 55, column 13)",
-  " (in 'armm_ss_lnp', line 66, column 16 to column 69)",
-  " (in 'armm_ss_lnp', line 68, column 20 to line 72, column 46)",
-  " (in 'armm_ss_lnp', line 67, column 67 to line 73, column 17)",
-  " (in 'armm_ss_lnp', line 67, column 16 to line 73, column 17)",
-  " (in 'armm_ss_lnp', line 65, column 19 to line 74, column 13)",
-  " (in 'armm_ss_lnp', line 58, column 16 to column 69)",
-  " (in 'armm_ss_lnp', line 60, column 20 to line 63, column 46)",
-  " (in 'armm_ss_lnp', line 59, column 67 to line 64, column 17)",
-  " (in 'armm_ss_lnp', line 59, column 16 to line 64, column 17)",
-  " (in 'armm_ss_lnp', line 57, column 29 to line 65, column 13)",
-  " (in 'armm_ss_lnp', line 57, column 12 to line 74, column 13)",
-  " (in 'armm_ss_lnp', line 75, column 11 to column 33)",
-  " (in 'armm_ss_lnp', line 37, column 26 to line 76, column 9)",
-  " (in 'armm_ss_lnp', line 37, column 8 to line 76, column 9)",
-  " (in 'armm_ss_lnp', line 34, column 4 to line 77, column 5)",
-  " (in 'armm_ss_lnp', line 101, column 4 to line 102, column 66)",
-  " (in 'armm_ss_lnp', line 100, column 19 to line 103, column 3)",
-  " (in 'armm_ss_lnp', line 100, column 2 to line 103, column 3)",
-  " (in 'armm_ss_lnp', line 104, column 2 to column 29)",
-  " (in 'armm_ss_lnp', line 81, column 4 to column 25)",
-  " (in 'armm_ss_lnp', line 82, column 4 to column 21)",
-  " (in 'armm_ss_lnp', line 84, column 8 to column 36)",
-  " (in 'armm_ss_lnp', line 83, column 30 to line 85, column 5)",
-  " (in 'armm_ss_lnp', line 83, column 4 to line 85, column 5)",
-  " (in 'armm_ss_lnp', line 88, column 8 to column 28)",
-  " (in 'armm_ss_lnp', line 86, column 30 to line 89, column 5)",
-  " (in 'armm_ss_lnp', line 86, column 4 to line 89, column 5)",
-  " (in 'armm_ss_lnp', line 90, column 4 to column 22)",
-  " (in 'armm_ss_lnp', line 91, column 4 to column 28)",
-  " (in 'armm_ss_lnp', line 92, column 4 to column 29)",
-  " (in 'armm_ss_lnp', line 94, column 4 to column 41)",
-  " (in 'armm_ss_lnp', line 95, column 4 to column 24)",
+  " (in 'armm_ss_lnp', line 22, column 4 to column 23)",
+  " (in 'armm_ss_lnp', line 23, column 4 to column 27)",
+  " (in 'armm_ss_lnp', line 25, column 4 to column 46)",
+  " (in 'armm_ss_lnp', line 26, column 4 to column 42)",
+  " (in 'armm_ss_lnp', line 27, column 4 to column 26)",
+  " (in 'armm_ss_lnp', line 28, column 4 to column 27)",
+  " (in 'armm_ss_lnp', line 29, column 4 to column 26)",
+  " (in 'armm_ss_lnp', line 30, column 4 to column 32)",
+  " (in 'armm_ss_lnp', line 33, column 4 to column 27)",
+  " (in 'armm_ss_lnp', line 35, column 4 to column 26)",
+  " (in 'armm_ss_lnp', line 101, column 2 to column 22)",
+  " (in 'armm_ss_lnp', line 102, column 2 to column 19)",
+  " (in 'armm_ss_lnp', line 37, column 8 to column 23)",
+  " (in 'armm_ss_lnp', line 40, column 12 to column 29)",
+  " (in 'armm_ss_lnp', line 46, column 30 to column 41)",
+  " (in 'armm_ss_lnp', line 46, column 20 to column 43)",
+  " (in 'armm_ss_lnp', line 47, column 28 to column 39)",
+  " (in 'armm_ss_lnp', line 47, column 20 to column 41)",
+  " (in 'armm_ss_lnp', line 50, column 24 to column 61)",
+  " (in 'armm_ss_lnp', line 51, column 24 to column 66)",
+  " (in 'armm_ss_lnp', line 49, column 67 to line 52, column 21)",
+  " (in 'armm_ss_lnp', line 49, column 20 to line 52, column 21)",
+  " (in 'armm_ss_lnp', line 54, column 20 to column 66)",
+  " (in 'armm_ss_lnp', line 55, column 20 to column 44)",
+  " (in 'armm_ss_lnp', line 45, column 23 to line 56, column 17)",
+  " (in 'armm_ss_lnp', line 44, column 20 to column 42)",
+  " (in 'armm_ss_lnp', line 43, column 35 to line 45, column 17)",
+  " (in 'armm_ss_lnp', line 43, column 16 to line 56, column 17)",
+  " (in 'armm_ss_lnp', line 42, column 31 to line 57, column 13)",
+  " (in 'armm_ss_lnp', line 42, column 12 to line 57, column 13)",
+  " (in 'armm_ss_lnp', line 68, column 16 to column 69)",
+  " (in 'armm_ss_lnp', line 70, column 20 to line 74, column 46)",
+  " (in 'armm_ss_lnp', line 69, column 67 to line 75, column 17)",
+  " (in 'armm_ss_lnp', line 69, column 16 to line 75, column 17)",
+  " (in 'armm_ss_lnp', line 67, column 19 to line 76, column 13)",
+  " (in 'armm_ss_lnp', line 60, column 16 to column 69)",
+  " (in 'armm_ss_lnp', line 62, column 20 to line 65, column 46)",
+  " (in 'armm_ss_lnp', line 61, column 67 to line 66, column 17)",
+  " (in 'armm_ss_lnp', line 61, column 16 to line 66, column 17)",
+  " (in 'armm_ss_lnp', line 59, column 29 to line 67, column 13)",
+  " (in 'armm_ss_lnp', line 59, column 12 to line 76, column 13)",
+  " (in 'armm_ss_lnp', line 77, column 11 to column 33)",
+  " (in 'armm_ss_lnp', line 39, column 26 to line 78, column 9)",
+  " (in 'armm_ss_lnp', line 39, column 8 to line 78, column 9)",
+  " (in 'armm_ss_lnp', line 36, column 4 to line 79, column 5)",
+  " (in 'armm_ss_lnp', line 104, column 4 to line 105, column 66)",
+  " (in 'armm_ss_lnp', line 103, column 19 to line 106, column 3)",
+  " (in 'armm_ss_lnp', line 103, column 2 to line 106, column 3)",
+  " (in 'armm_ss_lnp', line 107, column 2 to column 29)",
+  " (in 'armm_ss_lnp', line 83, column 4 to column 25)",
+  " (in 'armm_ss_lnp', line 84, column 4 to column 21)",
+  " (in 'armm_ss_lnp', line 86, column 8 to column 36)",
+  " (in 'armm_ss_lnp', line 85, column 30 to line 87, column 5)",
+  " (in 'armm_ss_lnp', line 85, column 4 to line 87, column 5)",
+  " (in 'armm_ss_lnp', line 90, column 8 to column 28)",
+  " (in 'armm_ss_lnp', line 88, column 30 to line 91, column 5)",
+  " (in 'armm_ss_lnp', line 88, column 4 to line 91, column 5)",
+  " (in 'armm_ss_lnp', line 92, column 4 to column 22)",
+  " (in 'armm_ss_lnp', line 93, column 4 to column 28)",
+  " (in 'armm_ss_lnp', line 94, column 4 to column 29)",
+  " (in 'armm_ss_lnp', line 97, column 4 to column 50)",
+  " (in 'armm_ss_lnp', line 98, column 4 to column 24)",
   " (in 'armm_ss_lnp', line 3, column 4 to column 14)",
   " (in 'armm_ss_lnp', line 4, column 4 to column 13)",
   " (in 'armm_ss_lnp', line 5, column 16 to column 20)",
@@ -114,18 +114,18 @@ static constexpr std::array<const char*, 98> locations_array__ =
   " (in 'armm_ss_lnp', line 16, column 23 to column 28)",
   " (in 'armm_ss_lnp', line 16, column 4 to column 30)",
   " (in 'armm_ss_lnp', line 17, column 4 to column 26)",
-  " (in 'armm_ss_lnp', line 18, column 16 to column 21)",
-  " (in 'armm_ss_lnp', line 18, column 4 to column 23)",
-  " (in 'armm_ss_lnp', line 21, column 15 to column 21)",
-  " (in 'armm_ss_lnp', line 22, column 11 to column 25)",
-  " (in 'armm_ss_lnp', line 24, column 31 to column 44)",
-  " (in 'armm_ss_lnp', line 25, column 27 to column 40)",
-  " (in 'armm_ss_lnp', line 26, column 12 to column 24)",
-  " (in 'armm_ss_lnp', line 29, column 25 to column 30)",
-  " (in 'armm_ss_lnp', line 32, column 14 to column 18)",
-  " (in 'armm_ss_lnp', line 32, column 19 to column 25)",
-  " (in 'armm_ss_lnp', line 33, column 17 to column 22)",
-  " (in 'armm_ss_lnp', line 98, column 15 to column 20)"};
+  " (in 'armm_ss_lnp', line 19, column 11 to column 16)",
+  " (in 'armm_ss_lnp', line 19, column 4 to column 25)",
+  " (in 'armm_ss_lnp', line 22, column 15 to column 21)",
+  " (in 'armm_ss_lnp', line 23, column 11 to column 25)",
+  " (in 'armm_ss_lnp', line 25, column 31 to column 44)",
+  " (in 'armm_ss_lnp', line 26, column 27 to column 40)",
+  " (in 'armm_ss_lnp', line 27, column 12 to column 24)",
+  " (in 'armm_ss_lnp', line 30, column 25 to column 30)",
+  " (in 'armm_ss_lnp', line 33, column 14 to column 18)",
+  " (in 'armm_ss_lnp', line 33, column 19 to column 25)",
+  " (in 'armm_ss_lnp', line 35, column 11 to column 16)",
+  " (in 'armm_ss_lnp', line 101, column 15 to column 20)"};
 #include <stan_meta_header.hpp>
 class model_armm_ss_lnp final : public model_base_crtp<model_armm_ss_lnp> {
 private:
@@ -142,11 +142,12 @@ private:
   std::vector<std::vector<double>> x;
   std::vector<double> time;
   double p_bound;
-  std::vector<double> offset;
+  Eigen::Matrix<double,-1,1> offset_data__;
   int z_1dim__;
   int phi_1dim__;
   int sig_beta_1dim__;
   int ze_1dim__;
+  Eigen::Map<Eigen::Matrix<double,-1,1>> offset{nullptr, 0};
 public:
   ~model_armm_ss_lnp() {}
   model_armm_ss_lnp(stan::io::var_context& context__, unsigned int
@@ -323,10 +324,25 @@ public:
       current_statement__ = 87;
       context__.validate_dims("data initialization", "offset", "double",
         std::vector<size_t>{static_cast<size_t>(n_obs)});
-      offset = std::vector<double>(n_obs,
-                 std::numeric_limits<double>::quiet_NaN());
-      current_statement__ = 87;
-      offset = context__.vals_r("offset");
+      offset_data__ = Eigen::Matrix<double,-1,1>::Constant(n_obs,
+                        std::numeric_limits<double>::quiet_NaN());
+      new (&offset)
+        Eigen::Map<Eigen::Matrix<double,-1,1>>(offset_data__.data(), n_obs);
+      {
+        std::vector<local_scalar_t__> offset_flat__;
+        current_statement__ = 87;
+        offset_flat__ = context__.vals_r("offset");
+        current_statement__ = 87;
+        pos__ = 1;
+        current_statement__ = 87;
+        for (int sym1__ = 1; sym1__ <= n_obs; ++sym1__) {
+          current_statement__ = 87;
+          stan::model::assign(offset, offset_flat__[(pos__ - 1)],
+            "assigning variable offset", stan::model::index_uni(sym1__));
+          current_statement__ = 87;
+          pos__ = (pos__ + 1);
+        }
+      }
       current_statement__ = 88;
       stan::math::validate_non_negative_index("alpha", "n_coef", n_coef);
       current_statement__ = 89;
@@ -437,8 +453,8 @@ public:
       std::vector<std::vector<local_scalar_t__>> beta =
         std::vector<std::vector<local_scalar_t__>>(n_ts,
           std::vector<local_scalar_t__>(n_coef, DUMMY_VAR__));
-      std::vector<local_scalar_t__> ly_pred =
-        std::vector<local_scalar_t__>(n_obs, DUMMY_VAR__);
+      Eigen::Matrix<local_scalar_t__,-1,1> ly_pred =
+        Eigen::Matrix<local_scalar_t__,-1,1>::Constant(n_obs, DUMMY_VAR__);
       {
         int xy_pos = std::numeric_limits<int>::min();
         current_statement__ = 13;
@@ -525,11 +541,11 @@ public:
                    stan::model::index_uni(ts))) - 1); ++t) {
               current_statement__ = 37;
               stan::model::assign(ly_pred,
-                (((stan::math::dot_product(
-                     stan::model::rvalue(beta, "beta",
-                       stan::model::index_uni(ts), stan::model::index_omni()),
-                     stan::model::rvalue(x, "x", stan::model::index_uni(t),
-                       stan::model::index_omni())) +
+                ((stan::math::dot_product(
+                    stan::model::rvalue(beta, "beta",
+                      stan::model::index_uni(ts), stan::model::index_omni()),
+                    stan::model::rvalue(x, "x", stan::model::index_uni(t),
+                      stan::model::index_omni())) +
                 (stan::math::pow(
                    stan::model::rvalue(phi, "phi",
                      stan::model::index_uni(
@@ -540,9 +556,7 @@ public:
                    stan::model::rvalue(time, "time",
                      stan::model::index_uni((t - 1))))) *
                 stan::model::rvalue(ly_pred, "ly_pred",
-                  stan::model::index_uni((t - 1))))) +
-                stan::model::rvalue(offset, "offset",
-                  stan::model::index_uni(t))) + (sig_proc *
+                  stan::model::index_uni((t - 1))))) + (sig_proc *
                 stan::model::rvalue(ze, "ze",
                   stan::model::index_uni((t - ts))))),
                 "assigning variable ly_pred", stan::model::index_uni(t));
@@ -562,11 +576,11 @@ public:
                    stan::model::index_uni(ts))) - 1); ++t) {
               current_statement__ = 32;
               stan::model::assign(ly_pred,
-                (((stan::math::dot_product(
-                     stan::model::rvalue(beta, "beta",
-                       stan::model::index_uni(ts), stan::model::index_omni()),
-                     stan::model::rvalue(x, "x", stan::model::index_uni(t),
-                       stan::model::index_omni())) +
+                ((stan::math::dot_product(
+                    stan::model::rvalue(beta, "beta",
+                      stan::model::index_uni(ts), stan::model::index_omni()),
+                    stan::model::rvalue(x, "x", stan::model::index_uni(t),
+                      stan::model::index_omni())) +
                 (stan::math::pow(
                    stan::model::rvalue(phi, "phi",
                      stan::model::index_uni(
@@ -583,9 +597,7 @@ public:
                     stan::model::index_uni(ts), stan::model::index_omni()),
                   stan::model::rvalue(x, "x",
                     stan::model::index_uni((t - 1)),
-                    stan::model::index_omni()))))) +
-                stan::model::rvalue(offset, "offset",
-                  stan::model::index_uni(t))) + (sig_proc *
+                    stan::model::index_omni()))))) + (sig_proc *
                 stan::model::rvalue(ze, "ze",
                   stan::model::index_uni((t - ts))))),
                 "assigning variable ly_pred", stan::model::index_uni(t));
@@ -623,8 +635,8 @@ public:
         current_statement__ = 60;
         lp_accum__.add(stan::math::gamma_lpdf<propto__>(sig_proc, 1.5, 3));
         current_statement__ = 61;
-        lp_accum__.add(stan::math::lognormal_lpdf<propto__>(y_pred, ly_pred,
-                         sig_obs));
+        lp_accum__.add(stan::math::lognormal_lpdf<propto__>(y_pred,
+                         stan::math::add(ly_pred, offset), sig_obs));
         current_statement__ = 62;
         lp_accum__.add(stan::math::poisson_lpmf<propto__>(y, y_pred));
       }
@@ -709,8 +721,9 @@ public:
         std::vector<std::vector<double>>(n_ts,
           std::vector<double>(n_coef,
             std::numeric_limits<double>::quiet_NaN()));
-      std::vector<double> ly_pred =
-        std::vector<double>(n_obs, std::numeric_limits<double>::quiet_NaN());
+      Eigen::Matrix<double,-1,1> ly_pred =
+        Eigen::Matrix<double,-1,1>::Constant(n_obs,
+          std::numeric_limits<double>::quiet_NaN());
       out__.write(alpha);
       out__.write(z);
       out__.write(phi);
@@ -808,11 +821,11 @@ public:
                    stan::model::index_uni(ts))) - 1); ++t) {
               current_statement__ = 37;
               stan::model::assign(ly_pred,
-                (((stan::math::dot_product(
-                     stan::model::rvalue(beta, "beta",
-                       stan::model::index_uni(ts), stan::model::index_omni()),
-                     stan::model::rvalue(x, "x", stan::model::index_uni(t),
-                       stan::model::index_omni())) +
+                ((stan::math::dot_product(
+                    stan::model::rvalue(beta, "beta",
+                      stan::model::index_uni(ts), stan::model::index_omni()),
+                    stan::model::rvalue(x, "x", stan::model::index_uni(t),
+                      stan::model::index_omni())) +
                 (stan::math::pow(
                    stan::model::rvalue(phi, "phi",
                      stan::model::index_uni(
@@ -823,9 +836,7 @@ public:
                    stan::model::rvalue(time, "time",
                      stan::model::index_uni((t - 1))))) *
                 stan::model::rvalue(ly_pred, "ly_pred",
-                  stan::model::index_uni((t - 1))))) +
-                stan::model::rvalue(offset, "offset",
-                  stan::model::index_uni(t))) + (sig_proc *
+                  stan::model::index_uni((t - 1))))) + (sig_proc *
                 stan::model::rvalue(ze, "ze",
                   stan::model::index_uni((t - ts))))),
                 "assigning variable ly_pred", stan::model::index_uni(t));
@@ -845,11 +856,11 @@ public:
                    stan::model::index_uni(ts))) - 1); ++t) {
               current_statement__ = 32;
               stan::model::assign(ly_pred,
-                (((stan::math::dot_product(
-                     stan::model::rvalue(beta, "beta",
-                       stan::model::index_uni(ts), stan::model::index_omni()),
-                     stan::model::rvalue(x, "x", stan::model::index_uni(t),
-                       stan::model::index_omni())) +
+                ((stan::math::dot_product(
+                    stan::model::rvalue(beta, "beta",
+                      stan::model::index_uni(ts), stan::model::index_omni()),
+                    stan::model::rvalue(x, "x", stan::model::index_uni(t),
+                      stan::model::index_omni())) +
                 (stan::math::pow(
                    stan::model::rvalue(phi, "phi",
                      stan::model::index_uni(
@@ -866,9 +877,7 @@ public:
                     stan::model::index_uni(ts), stan::model::index_omni()),
                   stan::model::rvalue(x, "x",
                     stan::model::index_uni((t - 1)),
-                    stan::model::index_omni()))))) +
-                stan::model::rvalue(offset, "offset",
-                  stan::model::index_uni(t))) + (sig_proc *
+                    stan::model::index_omni()))))) + (sig_proc *
                 stan::model::rvalue(ze, "ze",
                   stan::model::index_uni((t - ts))))),
                 "assigning variable ly_pred", stan::model::index_uni(t));
@@ -1212,10 +1221,10 @@ public:
     }
   }
   inline std::string get_constrained_sizedtypes() const {
-    return std::string("[{\"name\":\"alpha\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_coef) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"z\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(z_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"phi\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(phi_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"sig_beta\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(sig_beta_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"ze\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(ze_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"sig_proc\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sig_obs\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"y_pred\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"beta\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_ts) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(n_coef) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"ly_pred\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"transformed_parameters\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"},{\"name\":\"log_lik_sum\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"}]");
+    return std::string("[{\"name\":\"alpha\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_coef) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"z\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(z_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"phi\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(phi_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"sig_beta\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(sig_beta_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"ze\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(ze_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"sig_proc\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sig_obs\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"y_pred\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"beta\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_ts) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(n_coef) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"ly_pred\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(n_obs) + "},\"block\":\"transformed_parameters\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"},{\"name\":\"log_lik_sum\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"}]");
   }
   inline std::string get_unconstrained_sizedtypes() const {
-    return std::string("[{\"name\":\"alpha\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_coef) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"z\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(z_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"phi\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(phi_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"sig_beta\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(sig_beta_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"ze\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(ze_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"sig_proc\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sig_obs\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"y_pred\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"beta\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_ts) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(n_coef) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"ly_pred\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"transformed_parameters\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"},{\"name\":\"log_lik_sum\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"}]");
+    return std::string("[{\"name\":\"alpha\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_coef) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"z\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(z_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"phi\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(phi_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"sig_beta\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(sig_beta_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"ze\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(ze_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"sig_proc\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sig_obs\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"y_pred\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"beta\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_ts) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(n_coef) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"ly_pred\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(n_obs) + "},\"block\":\"transformed_parameters\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(n_obs) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"},{\"name\":\"log_lik_sum\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"}]");
   }
   // Begin method overload boilerplate
   template <typename RNG> inline void
