@@ -5,7 +5,7 @@ Version: 1.0.3
 Date: 2018-02-26
 Authors@R: as.person(c(
     "Joseph S Phillips <jsphillips2@wisc.edu> [aut]", 
-    "Lucas A Nell <lucas@lucasnell.com> [aut, cre]"
+    "Lucas A Nell <lucnell@gmail.com> [aut, cre]"
   ))
 Description: This package fits autoregressive, state-space models with random effects.
 License: GPL-3
