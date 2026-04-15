@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Lucas A Nell \email{lucas@lucasnell.com}
+\strong{Maintainer}: Lucas A Nell \email{lucnell@gmail.com}
 
 Authors:
 \itemize{

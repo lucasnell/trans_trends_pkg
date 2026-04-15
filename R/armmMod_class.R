@@ -136,7 +136,7 @@ summary.armmMod <- function(object,
 
     cat("------\n")
 
-    AR <- autoreg(object)
+    AR <- autoreg(object, se_method)
     if (!is.null(AR)) {
         cat("Autoregressive parameters:\n")
         rownames(AR) <- paste0(" ", rownames(AR))
@@ -155,7 +155,15 @@ summary.armmMod <- function(object,
     cat("Fixed effects:\n")
     FF <- print_fixef_w_se(object, se_method, digits)
 
-    invisible(list(autoreg = AR, ranef = RE, fixef = FF))
+
+    cat("------\n")
+    cat("Error standard deviations:\n")
+    EE <- errors(object, se_method)
+    rownames(EE) <- paste0(" ", rownames(EE))
+    print(EE, digits = digits)
+    rownames(EE) <- substring(rownames(EE), 2)
+
+    invisible(list(autoreg = AR, ranef = RE, fixef = FF, errors = EE))
 
 }
 
@@ -367,6 +375,39 @@ autoreg.armmMod <- function(object,
                              `Std.Error` = SEs)
     rownames(autoreg_df) <- object$ar_names
     return(autoreg_df)
+}
+
+
+#' Extract error information
+#'
+#' @param object A fitted model with class `armmMod`
+#' @param \dots Additional arguments, ignored for method compatibility.
+#'
+#' @return Process and observation error standard deviations.
+#'
+#' @export
+errors <- function(object, ...) {
+    UseMethod("errors")
+}
+#' @export
+#' @inheritParams summary.armmMod
+#' @method errors armmMod
+#' @describeIn errors Process and observation error standard deviations for an `armmMod` object
+errors.armmMod <- function(object,
+                            se_method = c("quantile", "hpdi"),
+                            ...) {
+    if (object$call$obs_error) {
+        error_posts <- cbind(rstan::extract(object$stan, "sig_proc")[[1]],
+                             rstan::extract(object$stan, "sig_obs")[[1]])
+        row_names <- c("proc", "obs")
+    } else {
+        error_posts <- cbind(rstan::extract(object$stan, "sig_res")[[1]])
+        row_names <- "resid"
+    }
+    E <- data.frame(Median = apply(error_posts, 2, median),
+                    `Std.Error` = bayesian_se(error_posts, se_method))
+    rownames(E) <- row_names
+    return(E)
 }
 
 
