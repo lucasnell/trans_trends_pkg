@@ -17,11 +17,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Lucas A Nell \email{lucnell@gmail.com}
+\strong{Maintainer}: Lucas A. Nell \email{lucnell@gmail.com} (\href{https://orcid.org/0000-0003-3209-0517}{ORCID})
 
 Authors:
 \itemize{
-  \item Joseph S Phillips \email{jsphillips2@wisc.edu}
+  \item Joseph S. Phillips \email{JosephPhillips@creighton.edu} (\href{https://orcid.org/0000-0003-2016-1306}{ORCID})
 }
 
 }

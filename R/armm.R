@@ -864,8 +864,8 @@ make_coef_objects <- function(formula, time_form, ar_form, data, obs_per,
 #'                      function(i) x2_coefs[i])
 #' data$y_norm <- data$y + rnorm(100)
 #' data$y_poiss <- rpois(100, exp(data$y) * data$effort) +
-#'     round(rnorm(100, sd = 5)) |>
-#'     (\(x) ifelse(x < 0, 0, x))()
+#'     round(rnorm(100, sd = 5))
+#' data$y_poiss[data$y_poiss < 0] <- 0
 #'
 #' mod_norm <- armm(form_norm, time_form, ar_form, y_scale, data,
 #'                  rstan_control = list(chains = 1, iter = 100))

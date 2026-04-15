@@ -1,7 +1,7 @@
 Package: TransTrendsPkg
 Type: Package
 Title: Fit models for trans_trends
-Version: 1.0.4
+Version: 1.0.5
 Authors@R: c(
     person("Joseph S.", "Phillips", email = "JosephPhillips@creighton.edu", 
       role = "aut", comment = c(ORCID = "0000-0003-2016-1306")),
