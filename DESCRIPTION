@@ -2,11 +2,12 @@ Package: TransTrendsPkg
 Type: Package
 Title: Fit models for trans_trends
 Version: 1.0.4
-Date: 2018-02-26
-Authors@R: as.person(c(
-    "Joseph S Phillips <jsphillips2@wisc.edu> [aut]", 
-    "Lucas A Nell <lucnell@gmail.com> [aut, cre]"
-  ))
+Authors@R: c(
+    person("Joseph S.", "Phillips", email = "JosephPhillips@creighton.edu", 
+      role = "aut", comment = c(ORCID = "0000-0003-2016-1306")),
+    person("Lucas A.", "Nell", email = "lucnell@gmail.com", 
+      role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3209-0517"))
+  )
 Description: This package fits autoregressive, state-space models with random effects.
 License: GPL-3
 Encoding: UTF-8
